@@ -2,35 +2,537 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
-const allowedKeys = ["home", "about", "contact"] as const;
+import ContactCardEditor from "@/components/page-editor/ContactCardEditor";
+import HeroEditor from "@/components/page-editor/HeroEditor";
+import RichTextEditor from "@/components/page-editor/RichTextEditor";
+import ServicesEditor from "@/components/page-editor/ServicesEditor";
+import ValuesEditor from "@/components/page-editor/ValuesEditor";
+import {
+  defaultPageData,
+  defaultSection,
+  isPageKey,
+  validatePageData,
+  type PageData,
+  type PageKey,
+  type Section,
+} from "@/lib/pageSchema";
+import { formatSupabaseError } from "@/lib/supabase/formatError";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
-export default function PageEditorPlaceholder({
+type PagesRow = {
+  id: string;
+  site_id: string;
+  key: PageKey;
+  status: string;
+  data: unknown;
+  updated_at: string;
+  published_at: string | null;
+};
+
+const sectionOptions: Array<Section["type"]> = [
+  "hero",
+  "services",
+  "richtext",
+  "values",
+  "contact_card",
+];
+
+export default function PageEditorPage({
   params,
 }: {
   params: { siteId: string; key: string };
 }) {
   const { siteId, key } = params;
 
-  if (!allowedKeys.includes(key as (typeof allowedKeys)[number])) {
-    notFound();
+  if (!isPageKey(key)) notFound();
+  const pageKey = key;
+
+  const [pageRow, setPageRow] = useState<PagesRow | null>(null);
+  const [pageDraft, setPageDraft] = useState<PageData | null>(null);
+
+  const [tab, setTab] = useState<"form" | "raw">("form");
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [rawText, setRawText] = useState("");
+  const [rawError, setRawError] = useState<string | null>(null);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const [seedNotice, setSeedNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const supabase = supabaseBrowser();
+
+    async function load() {
+      setIsLoading(true);
+      setLoadError(null);
+      setSaveSuccess(false);
+      setSaveError(null);
+      setRawError(null);
+      setSeedNotice(null);
+
+      const { data, error } = await supabase
+        .from("pages")
+        .select("*")
+        .eq("site_id", siteId)
+        .eq("key", pageKey)
+        .single();
+
+      if (!isMounted) return;
+      setIsLoading(false);
+
+      if (error) {
+        setLoadError(formatSupabaseError(error));
+        return;
+      }
+
+      const row = data as PagesRow;
+      setPageRow(row);
+
+      const isEmptyObject =
+        row.data &&
+        typeof row.data === "object" &&
+        !Array.isArray(row.data) &&
+        Object.keys(row.data as Record<string, unknown>).length === 0;
+
+      if (!row.data || isEmptyObject) {
+        const seeded = defaultPageData(pageKey);
+        setPageDraft(seeded);
+        setRawText(JSON.stringify(seeded, null, 2));
+        setSeedNotice(
+          "This page had no content yet. Defaults were loaded into the editor (not saved until you click Save Draft).",
+        );
+        return;
+      }
+
+      const valid = validatePageData(row.data);
+      if (!valid.ok) {
+        const seeded = defaultPageData(pageKey);
+        setPageDraft(seeded);
+        setRawText(JSON.stringify(seeded, null, 2));
+        setSeedNotice(
+          `Stored JSON was invalid (${valid.error}). Defaults were loaded into the editor (not saved until you click Save Draft).`,
+        );
+        return;
+      }
+
+      setPageDraft(row.data as PageData);
+      setRawText(JSON.stringify(row.data, null, 2));
+    }
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [siteId, pageKey]);
+
+  const headerMeta = useMemo(() => {
+    if (!pageRow) return null;
+    return {
+      updatedAt: new Date(pageRow.updated_at).toLocaleString(),
+      publishedAt: pageRow.published_at
+        ? new Date(pageRow.published_at).toLocaleString()
+        : null,
+    };
+  }, [pageRow]);
+
+  function setSeo(patch: Partial<PageData["seo"]>) {
+    setPageDraft((prev) => {
+      if (!prev) return prev;
+      return { ...prev, seo: { ...prev.seo, ...patch } };
+    });
+  }
+
+  function updateSection(idx: number, next: Section) {
+    setPageDraft((prev) => {
+      if (!prev) return prev;
+      const sections = prev.sections.map((s, i) => (i === idx ? next : s));
+      return { ...prev, sections };
+    });
+  }
+
+  function addSection(type: Section["type"]) {
+    setPageDraft((prev) => {
+      if (!prev) return prev;
+      return { ...prev, sections: [...prev.sections, defaultSection(type)] };
+    });
+  }
+
+  function removeSection(idx: number) {
+    setPageDraft((prev) => {
+      if (!prev) return prev;
+      return { ...prev, sections: prev.sections.filter((_, i) => i !== idx) };
+    });
+  }
+
+  function moveSection(idx: number, dir: -1 | 1) {
+    setPageDraft((prev) => {
+      if (!prev) return prev;
+      const next = [...prev.sections];
+      const j = idx + dir;
+      if (j < 0 || j >= next.length) return prev;
+      const tmp = next[idx];
+      next[idx] = next[j];
+      next[j] = tmp;
+      return { ...prev, sections: next };
+    });
+  }
+
+  function syncRawFromDraft(nextDraft: PageData) {
+    setRawText(JSON.stringify(nextDraft, null, 2));
+    setRawError(null);
+  }
+
+  useEffect(() => {
+    // Keep raw JSON view aligned when editing via form (unless user has invalid raw edits)
+    if (!pageDraft) return;
+    if (tab !== "raw") return;
+    if (rawError) return;
+    setRawText(JSON.stringify(pageDraft, null, 2));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageDraft, tab]);
+
+  function onRawChange(nextText: string) {
+    setRawText(nextText);
+    setSaveSuccess(false);
+    setSaveError(null);
+
+    try {
+      const parsed = JSON.parse(nextText) as unknown;
+      const valid = validatePageData(parsed);
+      if (!valid.ok) {
+        setRawError(valid.error ?? "Invalid JSON structure.");
+        return;
+      }
+      setRawError(null);
+      setPageDraft(parsed as PageData);
+    } catch {
+      setRawError("Invalid JSON (must be valid JSON with { seo: object, sections: array }).");
+    }
+  }
+
+  async function onSaveDraft() {
+    setSaveSuccess(false);
+    setSaveError(null);
+
+    if (!pageRow || !pageDraft) return;
+
+    if (rawError) {
+      setSaveError("Cannot save while Raw JSON is invalid.");
+      return;
+    }
+
+    const valid = validatePageData(pageDraft);
+    if (!valid.ok) {
+      setSaveError(valid.error ?? "Invalid JSON structure.");
+      return;
+    }
+
+    setIsSaving(true);
+    const supabase = supabaseBrowser();
+
+    const { error } = await supabase
+      .from("pages")
+      .update({ data: pageDraft, status: "draft" })
+      .eq("id", pageRow.id);
+
+    setIsSaving(false);
+
+    if (error) {
+      setSaveError(formatSupabaseError(error));
+      return;
+    }
+
+    setSaveSuccess(true);
+    setSeedNotice(null);
+  }
+
+  function onResetDefaults() {
+    if (!window.confirm("Reset this page to default sections?")) return;
+    const next = defaultPageData(pageKey);
+    setPageDraft(next);
+    syncRawFromDraft(next);
+    setSaveSuccess(false);
+    setSaveError(null);
+    setSeedNotice("Defaults loaded. Click Save Draft to persist.");
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Edit page: {key}</h1>
-        <Link
-          href={`/admin/sites/${siteId}`}
-          className="rounded bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50"
-        >
-          Back to overview
-        </Link>
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold">
+            Edit page: <span className="font-mono">{pageKey}</span>
+          </h1>
+          <div className="mt-2 text-sm text-gray-700">
+            <div>
+              <span className="font-medium">Site:</span>{" "}
+              <span className="font-mono">{siteId}</span>
+            </div>
+            {pageRow && headerMeta ? (
+              <div className="mt-1 space-y-0.5">
+                <div>
+                  <span className="font-medium">Status:</span> {pageRow.status}
+                </div>
+                <div>
+                  <span className="font-medium">Updated:</span>{" "}
+                  {headerMeta.updatedAt}
+                </div>
+                {headerMeta.publishedAt ? (
+                  <div>
+                    <span className="font-medium">Published:</span>{" "}
+                    {headerMeta.publishedAt}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end gap-2">
+          <Link
+            href={`/admin/sites/${siteId}`}
+            className="rounded bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50"
+          >
+            Back to site overview
+          </Link>
+          <button
+            type="button"
+            onClick={onResetDefaults}
+            className="rounded bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50"
+          >
+            Reset to defaults
+          </button>
+        </div>
       </div>
 
-      <p className="text-sm text-gray-700">
-        Coming in Phase 4 (JSON editor + save draft + publish).
-      </p>
+      {isLoading ? (
+        <div className="text-sm text-gray-600">Loading…</div>
+      ) : loadError ? (
+        <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {loadError}
+        </div>
+      ) : null}
+
+      {seedNotice ? (
+        <div className="rounded border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {seedNotice}
+        </div>
+      ) : null}
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setTab("form")}
+          className={`rounded px-3 py-2 text-sm font-medium ring-1 ${
+            tab === "form"
+              ? "bg-black text-white ring-black"
+              : "bg-white text-gray-900 ring-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          Form Editor
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("raw")}
+          className={`rounded px-3 py-2 text-sm font-medium ring-1 ${
+            tab === "raw"
+              ? "bg-black text-white ring-black"
+              : "bg-white text-gray-900 ring-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          Raw JSON
+        </button>
+      </div>
+
+      {/* Content */}
+      {pageDraft ? (
+        <div className="rounded-lg bg-white p-6 ring-1 ring-gray-200">
+          {tab === "form" ? (
+            <div className="space-y-6">
+              {/* SEO */}
+              <div>
+                <h2 className="text-lg font-semibold">SEO</h2>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-800">
+                      Title
+                    </span>
+                    <input
+                      value={pageDraft.seo.title}
+                      onChange={(e) => setSeo({ title: e.target.value })}
+                      className="mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-800">
+                      Description
+                    </span>
+                    <input
+                      value={pageDraft.seo.description}
+                      onChange={(e) => setSeo({ description: e.target.value })}
+                      className="mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Sections */}
+              <div className="space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <h2 className="text-lg font-semibold">Sections</h2>
+                  <div className="flex items-center gap-2">
+                    <select
+                      defaultValue=""
+                      onChange={(e) => {
+                        const t = e.target.value as Section["type"];
+                        if (!t) return;
+                        addSection(t);
+                        e.target.value = "";
+                      }}
+                      className="rounded border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    >
+                      <option value="" disabled>
+                        Add section…
+                      </option>
+                      {sectionOptions.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {pageDraft.sections.length === 0 ? (
+                  <div className="text-sm text-gray-600">No sections.</div>
+                ) : (
+                  <div className="space-y-4">
+                    {pageDraft.sections.map((section, idx) => (
+                      <div
+                        key={`${section.type}-${idx}`}
+                        className="rounded border border-gray-200 bg-gray-50 p-4"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {idx + 1}. {section.type}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => moveSection(idx, -1)}
+                              disabled={idx === 0}
+                              className="rounded bg-white px-2 py-1 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              Up
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveSection(idx, 1)}
+                              disabled={idx === pageDraft.sections.length - 1}
+                              className="rounded bg-white px-2 py-1 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              Down
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeSection(idx)}
+                              className="text-sm font-medium text-red-700 hover:underline"
+                            >
+                              Remove section
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mt-4">
+                          {section.type === "hero" ? (
+                            <HeroEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : section.type === "services" ? (
+                            <ServicesEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : section.type === "richtext" ? (
+                            <RichTextEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : section.type === "values" ? (
+                            <ValuesEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : (
+                            <ContactCardEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-gray-700">
+                Edit the JSON directly. Must be valid JSON with{" "}
+                <span className="font-mono">{"{ seo: object, sections: array }"}</span>.
+              </p>
+              <textarea
+                value={rawText}
+                onChange={(e) => onRawChange(e.target.value)}
+                rows={18}
+                className="w-full resize-y rounded border border-gray-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-black"
+              />
+              {rawError ? (
+                <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {rawError}
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {/* Save */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          {saveError ? (
+            <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {saveError}
+            </div>
+          ) : null}
+          {saveSuccess ? (
+            <div className="rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+              Draft saved.
+            </div>
+          ) : null}
+        </div>
+
+        <button
+          type="button"
+          onClick={onSaveDraft}
+          disabled={isSaving || !!rawError || !pageDraft}
+          className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+        >
+          {isSaving ? "Saving…" : "Save Draft"}
+        </button>
+      </div>
     </div>
   );
 }
