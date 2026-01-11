@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { addDomain, normalizeHostname, setDomainStatus, type DomainStatus } from "@/lib/domains";
+import { getPublicAssetUrl, uploadLogo } from "@/lib/assets";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { publishSite, unpublishSite } from "@/lib/publishing";
 import { supabaseBrowser } from "@/lib/supabase/browser";
@@ -24,12 +26,28 @@ type ProfileRow = {
   email: string | null;
   whatsapp: string | null;
   socials: Record<string, unknown> | null;
+  logo_asset_id: string | null;
 };
 
 type PageRow = {
   id: string;
   key: "home" | "about" | "contact";
   status: string;
+};
+
+type DomainRow = {
+  id: string;
+  hostname: string;
+  status: DomainStatus;
+  created_at: string;
+};
+
+type AssetRow = {
+  id: string;
+  path: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+  created_at: string;
 };
 
 type SocialInputs = {
@@ -55,6 +73,9 @@ export default function SiteOverviewPage({
   const [site, setSite] = useState<SiteRow | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [pages, setPages] = useState<PageRow[]>([]);
+  const [domains, setDomains] = useState<DomainRow[]>([]);
+  const [logoAsset, setLogoAsset] = useState<AssetRow | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -66,6 +87,19 @@ export default function SiteOverviewPage({
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
+
+  const [domainHostname, setDomainHostname] = useState("");
+  const [isDomainSaving, setIsDomainSaving] = useState(false);
+  const [domainError, setDomainError] = useState<string | null>(null);
+
+  const [domainActionLoadingId, setDomainActionLoadingId] = useState<string | null>(
+    null,
+  );
+
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isLogoUploading, setIsLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [logoSuccess, setLogoSuccess] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     business_name: "",
@@ -91,8 +125,11 @@ export default function SiteOverviewPage({
     async function load() {
       setIsLoading(true);
       setLoadError(null);
+      setDomainError(null);
+      setLogoError(null);
+      setLogoSuccess(null);
 
-      const [siteRes, profileRes, pagesRes] = await Promise.all([
+      const [siteRes, profileRes, pagesRes, domainsRes] = await Promise.all([
         supabase
           .from("sites")
           .select("id, slug, template_key, status")
@@ -101,7 +138,7 @@ export default function SiteOverviewPage({
         supabase
           .from("business_profiles")
           .select(
-            "site_id, business_name, tagline, description, address, phone, email, whatsapp, socials",
+            "site_id, business_name, tagline, description, address, phone, email, whatsapp, socials, logo_asset_id",
           )
           .eq("site_id", siteId)
           .single(),
@@ -109,12 +146,18 @@ export default function SiteOverviewPage({
           .from("pages")
           .select("id, key, status")
           .eq("site_id", siteId),
+        supabase
+          .from("domains")
+          .select("id, hostname, status, created_at")
+          .eq("site_id", siteId)
+          .order("created_at", { ascending: false }),
       ]);
 
       if (!isMounted) return;
       setIsLoading(false);
 
-      const err = siteRes.error || profileRes.error || pagesRes.error;
+      const err =
+        siteRes.error || profileRes.error || pagesRes.error || domainsRes.error;
       if (err) {
         setLoadError(formatSupabaseError(err));
         return;
@@ -123,10 +166,12 @@ export default function SiteOverviewPage({
       const loadedSite = siteRes.data as SiteRow;
       const loadedProfile = profileRes.data as ProfileRow;
       const loadedPages = (pagesRes.data ?? []) as PageRow[];
+      const loadedDomains = (domainsRes.data ?? []) as DomainRow[];
 
       setSite(loadedSite);
       setProfile(loadedProfile);
       setPages(loadedPages);
+      setDomains(loadedDomains);
 
       setForm({
         business_name: loadedProfile.business_name ?? "",
@@ -145,6 +190,28 @@ export default function SiteOverviewPage({
         twitter: typeof s.twitter === "string" ? s.twitter : "",
         tiktok: typeof s.tiktok === "string" ? s.tiktok : "",
       });
+
+      if (loadedProfile.logo_asset_id) {
+        const { data: asset, error: assetError } = await supabase
+          .from("assets")
+          .select("id, path, mime_type, size_bytes, created_at")
+          .eq("id", loadedProfile.logo_asset_id)
+          .single();
+
+        if (!isMounted) return;
+
+        if (assetError) {
+          setLogoError(formatSupabaseError(assetError));
+          setLogoAsset(null);
+          setLogoUrl(null);
+        } else {
+          setLogoAsset(asset as AssetRow);
+          setLogoUrl(getPublicAssetUrl((asset as AssetRow).path));
+        }
+      } else {
+        setLogoAsset(null);
+        setLogoUrl(null);
+      }
     }
 
     load();
@@ -157,6 +224,10 @@ export default function SiteOverviewPage({
   const sortedPages = useMemo(() => {
     return [...pages].sort((a, b) => pageOrder[a.key] - pageOrder[b.key]);
   }, [pages]);
+
+  const activeDomain = useMemo(() => {
+    return domains.find((d) => d.status === "active") ?? null;
+  }, [domains]);
 
   async function onSaveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -194,6 +265,98 @@ export default function SiteOverviewPage({
     }
 
     setSaveSuccess(true);
+  }
+
+  async function onAddDomain(e: React.FormEvent) {
+    e.preventDefault();
+    setDomainError(null);
+
+    const normalized = normalizeHostname(domainHostname);
+    if (!normalized) {
+      setDomainError("Please enter a hostname.");
+      return;
+    }
+
+    setIsDomainSaving(true);
+    try {
+      const created = await addDomain(siteId, normalized);
+      setDomains((prev) => [created, ...prev]);
+      setDomainHostname("");
+    } catch (err: unknown) {
+      const anyErr = err as { code?: string; message?: string };
+      if (anyErr?.code === "23505") {
+        setDomainError("Domain already exists.");
+      } else {
+        setDomainError(formatSupabaseError(err));
+      }
+    } finally {
+      setIsDomainSaving(false);
+    }
+  }
+
+  async function onSetDomainStatus(domainId: string, status: DomainStatus) {
+    setDomainError(null);
+    setDomainActionLoadingId(domainId);
+    try {
+      const updated = await setDomainStatus(domainId, status);
+      setDomains((prev) =>
+        prev.map((d) => (d.id === domainId ? { ...d, status: updated.status } : d)),
+      );
+    } catch (err) {
+      setDomainError(formatSupabaseError(err));
+    } finally {
+      setDomainActionLoadingId(null);
+    }
+  }
+
+  async function onUploadLogo() {
+    setLogoError(null);
+    setLogoSuccess(null);
+
+    if (!logoFile) {
+      setLogoError("Please choose a file first.");
+      return;
+    }
+
+    setIsLogoUploading(true);
+    try {
+      const asset = await uploadLogo(siteId, logoFile);
+      setLogoAsset(asset);
+      setLogoUrl(getPublicAssetUrl(asset.path));
+      setLogoSuccess("Logo uploaded.");
+      setLogoFile(null);
+      setProfile((prev) => (prev ? { ...prev, logo_asset_id: asset.id } : prev));
+    } catch (err) {
+      setLogoError(formatSupabaseError(err));
+    } finally {
+      setIsLogoUploading(false);
+    }
+  }
+
+  async function onRemoveLogo() {
+    if (!window.confirm("Remove logo from this site?")) return;
+    setLogoError(null);
+    setLogoSuccess(null);
+    setIsLogoUploading(true);
+
+    try {
+      const supabase = supabaseBrowser();
+      const { error } = await supabase
+        .from("business_profiles")
+        .update({ logo_asset_id: null })
+        .eq("site_id", siteId);
+      if (error) throw error;
+
+      setProfile((prev) => (prev ? { ...prev, logo_asset_id: null } : prev));
+      setLogoAsset(null);
+      setLogoUrl(null);
+      // MVP: do NOT delete the storage file to avoid breaking references.
+      setLogoSuccess("Logo removed.");
+    } catch (err) {
+      setLogoError(formatSupabaseError(err));
+    } finally {
+      setIsLogoUploading(false);
+    }
   }
 
   async function onPublishSite() {
@@ -295,6 +458,12 @@ export default function SiteOverviewPage({
             </dd>
           </div>
           <div>
+            <dt className="text-xs font-medium text-gray-600">Custom domain</dt>
+            <dd className="mt-1 font-mono text-sm">
+              {activeDomain ? `https://${activeDomain.hostname}` : "—"}
+            </dd>
+          </div>
+          <div>
             <dt className="text-xs font-medium text-gray-600">Template</dt>
             <dd className="mt-1 text-sm text-gray-900">{site.template_key}</dd>
           </div>
@@ -336,6 +505,168 @@ export default function SiteOverviewPage({
             {publishSuccess}
           </div>
         ) : null}
+      </section>
+
+      {/* A2) Domains */}
+      <section className="rounded-lg bg-white p-6 ring-1 ring-gray-200">
+        <h2 className="text-lg font-semibold">Domains</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          After DNS points to our frontend, mark active.
+        </p>
+
+        <form onSubmit={onAddDomain} className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            value={domainHostname}
+            onChange={(e) => setDomainHostname(e.target.value)}
+            placeholder="kingsbakery.com"
+            className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+          />
+          <button
+            type="submit"
+            disabled={isDomainSaving}
+            className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          >
+            {isDomainSaving ? "Adding…" : "Add domain"}
+          </button>
+        </form>
+
+        {domainError ? (
+          <div className="mt-3 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {domainError}
+          </div>
+        ) : null}
+
+        <div className="mt-4 overflow-hidden rounded-lg ring-1 ring-gray-200">
+          <table className="w-full table-auto">
+            <thead className="bg-gray-50 text-left text-xs font-semibold text-gray-700">
+              <tr>
+                <th className="px-4 py-3">Hostname</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Created</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 text-sm">
+              {domains.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-4 text-gray-600" colSpan={4}>
+                    No domains yet.
+                  </td>
+                </tr>
+              ) : (
+                domains.map((d) => (
+                  <tr key={d.id}>
+                    <td className="px-4 py-3 font-mono">{d.hostname}</td>
+                    <td className="px-4 py-3">{d.status}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {new Date(d.created_at).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {d.status !== "active" ? (
+                          <button
+                            type="button"
+                            onClick={() => onSetDomainStatus(d.id, "active")}
+                            disabled={domainActionLoadingId === d.id}
+                            className="rounded bg-white px-3 py-1.5 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-60"
+                          >
+                            {domainActionLoadingId === d.id ? "Working…" : "Mark Active"}
+                          </button>
+                        ) : null}
+                        {d.status !== "blocked" ? (
+                          <button
+                            type="button"
+                            onClick={() => onSetDomainStatus(d.id, "blocked")}
+                            disabled={domainActionLoadingId === d.id}
+                            className="rounded bg-white px-3 py-1.5 text-sm font-medium text-red-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-60"
+                          >
+                            {domainActionLoadingId === d.id ? "Working…" : "Block"}
+                          </button>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* A3) Logo */}
+      <section className="rounded-lg bg-white p-6 ring-1 ring-gray-200">
+        <h2 className="text-lg font-semibold">Logo</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Upload a logo (stored in Supabase Storage: bucket <span className="font-mono">site-assets</span>).
+        </p>
+
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
+              className="block text-sm"
+            />
+            <button
+              type="button"
+              onClick={onUploadLogo}
+              disabled={isLogoUploading}
+              className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+            >
+              {isLogoUploading ? "Uploading…" : "Upload logo"}
+            </button>
+          </div>
+
+          {logoUrl ? (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onRemoveLogo}
+                disabled={isLogoUploading}
+                className="rounded bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-60"
+              >
+                Remove logo
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        {logoError ? (
+          <div className="mt-3 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {logoError}
+          </div>
+        ) : null}
+        {logoSuccess ? (
+          <div className="mt-3 rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+            {logoSuccess}
+          </div>
+        ) : null}
+
+        <div className="mt-4">
+          {logoUrl ? (
+            <div className="flex items-center gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logoUrl}
+                alt="Site logo"
+                className="h-16 w-16 rounded bg-white object-contain ring-1 ring-gray-200"
+              />
+              <div className="text-xs text-gray-600">
+                <div>
+                  <span className="font-medium">Asset ID:</span>{" "}
+                  <span className="font-mono">{logoAsset?.id ?? "—"}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Path:</span>{" "}
+                  <span className="font-mono">{logoAsset?.path ?? "—"}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-600">No logo uploaded.</div>
+          )}
+        </div>
       </section>
 
       {/* B) Business Profile Editor */}

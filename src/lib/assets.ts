@@ -1,0 +1,66 @@
+import { supabaseBrowser } from "@/lib/supabase/browser";
+
+/**
+ * Storage bucket setup (Supabase Dashboard):
+ * - Create a PUBLIC bucket named: `site-assets`
+ * - Public read is allowed (logos/images are public for brochure sites).
+ *
+ * This MVP uses public URLs via:
+ *   supabase.storage.from('site-assets').getPublicUrl(path)
+ */
+
+export function safeFilename(filename: string) {
+  const base = filename.trim().toLowerCase();
+  const cleaned = base.replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-");
+  return cleaned || "file";
+}
+
+export function getPublicAssetUrl(path: string) {
+  const supabase = supabaseBrowser();
+  return supabase.storage.from("site-assets").getPublicUrl(path).data.publicUrl;
+}
+
+export async function uploadLogo(siteId: string, file: File) {
+  if (!file) throw new Error("File is required.");
+
+  const supabase = supabaseBrowser();
+  const path = `${siteId}/logo/${Date.now()}-${safeFilename(file.name)}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("site-assets")
+    .upload(path, file, { contentType: file.type, upsert: false });
+
+  if (uploadError) throw uploadError;
+
+  const { data: asset, error: assetError } = await supabase
+    .from("assets")
+    .insert({
+      site_id: siteId,
+      path,
+      mime_type: file.type || null,
+      size_bytes: file.size || null,
+      meta: { originalFilename: file.name },
+    })
+    .select("id, site_id, path, mime_type, size_bytes, meta, created_at")
+    .single();
+
+  if (assetError) throw assetError;
+
+  const { error: profileError } = await supabase
+    .from("business_profiles")
+    .update({ logo_asset_id: asset.id })
+    .eq("site_id", siteId);
+
+  if (profileError) throw profileError;
+
+  return asset as {
+    id: string;
+    site_id: string;
+    path: string;
+    mime_type: string | null;
+    size_bytes: number | null;
+    meta: Record<string, unknown>;
+    created_at: string;
+  };
+}
+
