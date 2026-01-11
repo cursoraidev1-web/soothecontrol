@@ -18,6 +18,7 @@ import {
   type PageKey,
   type Section,
 } from "@/lib/pageSchema";
+import { publishPage, unpublishPage } from "@/lib/publishing";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
@@ -63,6 +64,8 @@ export default function PageEditorPage({
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [publishSuccess, setPublishSuccess] = useState(false);
+  const [unpublishSuccess, setUnpublishSuccess] = useState(false);
 
   const [seedNotice, setSeedNotice] = useState<string | null>(null);
 
@@ -74,6 +77,8 @@ export default function PageEditorPage({
       setIsLoading(true);
       setLoadError(null);
       setSaveSuccess(false);
+      setPublishSuccess(false);
+      setUnpublishSuccess(false);
       setSaveError(null);
       setRawError(null);
       setSeedNotice(null);
@@ -221,6 +226,8 @@ export default function PageEditorPage({
 
   async function onSaveDraft() {
     setSaveSuccess(false);
+    setPublishSuccess(false);
+    setUnpublishSuccess(false);
     setSaveError(null);
 
     if (!pageRow || !pageDraft) return;
@@ -255,12 +262,85 @@ export default function PageEditorPage({
     setSeedNotice(null);
   }
 
+  async function onPublishPage() {
+    setSaveSuccess(false);
+    setPublishSuccess(false);
+    setUnpublishSuccess(false);
+    setSaveError(null);
+
+    if (!pageRow || !pageDraft) return;
+
+    if (rawError) {
+      setSaveError("Cannot publish while Raw JSON is invalid.");
+      return;
+    }
+
+    const valid = validatePageData(pageDraft);
+    if (!valid.ok) {
+      setSaveError(valid.error ?? "Invalid JSON structure.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const updated = await publishPage(pageRow.id, pageDraft);
+      setPageRow((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: updated.status,
+              published_at: updated.published_at,
+              updated_at: updated.updated_at,
+            }
+          : prev,
+      );
+      setPublishSuccess(true);
+      setSeedNotice(null);
+    } catch (err) {
+      setSaveError(formatSupabaseError(err));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function onUnpublishPage() {
+    setSaveSuccess(false);
+    setPublishSuccess(false);
+    setUnpublishSuccess(false);
+    setSaveError(null);
+
+    if (!pageRow) return;
+    if (!window.confirm("Unpublish this page?")) return;
+
+    setIsSaving(true);
+    try {
+      const updated = await unpublishPage(pageRow.id);
+      setPageRow((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: updated.status,
+              published_at: updated.published_at,
+              updated_at: updated.updated_at,
+            }
+          : prev,
+      );
+      setUnpublishSuccess(true);
+    } catch (err) {
+      setSaveError(formatSupabaseError(err));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   function onResetDefaults() {
     if (!window.confirm("Reset this page to default sections?")) return;
     const next = defaultPageData(pageKey);
     setPageDraft(next);
     syncRawFromDraft(next);
     setSaveSuccess(false);
+    setPublishSuccess(false);
+    setUnpublishSuccess(false);
     setSaveError(null);
     setSeedNotice("Defaults loaded. Click Save Draft to persist.");
   }
@@ -522,16 +602,48 @@ export default function PageEditorPage({
               Draft saved.
             </div>
           ) : null}
+          {publishSuccess ? (
+            <div className="rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+              Page published.
+            </div>
+          ) : null}
+          {unpublishSuccess ? (
+            <div className="rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+              Page unpublished.
+            </div>
+          ) : null}
         </div>
 
-        <button
-          type="button"
-          onClick={onSaveDraft}
-          disabled={isSaving || !!rawError || !pageDraft}
-          className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-        >
-          {isSaving ? "Saving…" : "Save Draft"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {pageRow?.status === "published" ? (
+            <button
+              type="button"
+              onClick={onUnpublishPage}
+              disabled={isSaving}
+              className="rounded bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-60"
+            >
+              {isSaving ? "Working…" : "Unpublish Page"}
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={onSaveDraft}
+            disabled={isSaving || !!rawError || !pageDraft}
+            className="rounded bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-60"
+          >
+            {isSaving ? "Saving…" : "Save Draft"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onPublishPage}
+            disabled={isSaving || !!rawError || !pageDraft}
+            className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          >
+            {isSaving ? "Publishing…" : "Publish Page"}
+          </button>
+        </div>
       </div>
     </div>
   );

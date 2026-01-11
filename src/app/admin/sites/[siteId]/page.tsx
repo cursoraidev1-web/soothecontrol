@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { formatSupabaseError } from "@/lib/supabase/formatError";
+import { publishSite, unpublishSite } from "@/lib/publishing";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
 type SiteRow = {
@@ -61,6 +62,10 @@ export default function SiteOverviewPage({
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     business_name: "",
@@ -191,6 +196,54 @@ export default function SiteOverviewPage({
     setSaveSuccess(true);
   }
 
+  async function onPublishSite() {
+    if (!window.confirm("Publish this site and all 3 pages?")) return;
+
+    setPublishSuccess(null);
+    setPublishError(null);
+    setIsPublishing(true);
+
+    try {
+      const res = await publishSite(siteId);
+      setSite((prev) => (prev ? { ...prev, status: res.site.status } : prev));
+      setPages((prev) =>
+        prev.map((p) => {
+          const updated = res.pages.find((x) => x.id === p.id);
+          return updated ? { ...p, status: updated.status } : p;
+        }),
+      );
+      setPublishSuccess("Site published.");
+    } catch (err) {
+      setPublishError(formatSupabaseError(err));
+    } finally {
+      setIsPublishing(false);
+    }
+  }
+
+  async function onUnpublishSite() {
+    if (!window.confirm("Unpublish this site and set all pages back to draft?")) return;
+
+    setPublishSuccess(null);
+    setPublishError(null);
+    setIsPublishing(true);
+
+    try {
+      const res = await unpublishSite(siteId);
+      setSite((prev) => (prev ? { ...prev, status: res.site.status } : prev));
+      setPages((prev) =>
+        prev.map((p) => {
+          const updated = res.pages.find((x) => x.id === p.id);
+          return updated ? { ...p, status: updated.status } : p;
+        }),
+      );
+      setPublishSuccess("Site unpublished.");
+    } catch (err) {
+      setPublishError(formatSupabaseError(err));
+    } finally {
+      setIsPublishing(false);
+    }
+  }
+
   if (isLoading) {
     return <div className="text-sm text-gray-600">Loading…</div>;
   }
@@ -250,6 +303,39 @@ export default function SiteOverviewPage({
             <dd className="mt-1 text-sm text-gray-900">{site.status}</dd>
           </div>
         </dl>
+
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          {site.status === "published" ? (
+            <button
+              type="button"
+              onClick={onUnpublishSite}
+              disabled={isPublishing}
+              className="rounded bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-60"
+            >
+              {isPublishing ? "Working…" : "Unpublish Site"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onPublishSite}
+              disabled={isPublishing}
+              className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+            >
+              {isPublishing ? "Publishing…" : "Publish Site"}
+            </button>
+          )}
+        </div>
+
+        {publishError ? (
+          <div className="mt-3 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {publishError}
+          </div>
+        ) : null}
+        {publishSuccess ? (
+          <div className="mt-3 rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+            {publishSuccess}
+          </div>
+        ) : null}
       </section>
 
       {/* B) Business Profile Editor */}
