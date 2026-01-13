@@ -7,6 +7,7 @@ import ValuesSection from "../components/ValuesSection";
 import GallerySection from "../components/GallerySection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import FAQSection from "../components/FAQSection";
+import TeamSection from "../components/TeamSection";
 
 interface AboutUsPageProps {
   pageData: PageData;
@@ -29,7 +30,12 @@ export default function AboutUsPage({ pageData, profile }: AboutUsPageProps) {
           case "hero":
             return <HeroSection key={`${section.type}-${index}`} section={section} />;
           case "richtext":
-            return <RichTextSection key={`${section.type}-${index}`} section={section} />;
+            return (
+                <>
+                    <RichTextSection key={`${section.type}-${index}`} section={section} />
+                    <TeamSection />
+                </>
+            );
           case "values":
             return <ValuesSection key={`${section.type}-${index}`} section={section} />;
           case "gallery":

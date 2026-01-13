@@ -54,3 +54,25 @@ export function getLoremValueTitle(): string {
 export function getLoremValueDesc(): string {
   return "We are committed to delivering the highest standards in everything we do, ensuring excellence and reliability.";
 }
+
+export function getLoremName(): string {
+  const names = [
+    "Alex Johnson",
+    "Sarah Williams",
+    "Michael Brown",
+    "Emily Davis",
+    "James Wilson",
+  ];
+  return names[Math.floor(Math.random() * names.length)];
+}
+
+export function getLoremRole(): string {
+  const roles = [
+    "CEO & Founder",
+    "Chief Technology Officer",
+    "Head of Design",
+    "Marketing Director",
+    "Lead Developer",
+  ];
+  return roles[Math.floor(Math.random() * roles.length)];
+}
