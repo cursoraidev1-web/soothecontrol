@@ -1,8 +1,8 @@
 {
-  "name": "yourfree-admin",
+  "name": "soothecontrols",
   "version": "0.1.0",
   "private": true,
-  "description": "YourFree Admin (Next.js + Supabase)",
+  "description": "soothecontrols (Next.js + Supabase)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

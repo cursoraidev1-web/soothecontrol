@@ -20,7 +20,7 @@ export async function generateMetadata({
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
-    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
+    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
   const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
 
   if (!isPageKey(params.pageKey)) {
@@ -107,7 +107,7 @@ export default async function PublicSitePagePage({
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
-    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
+    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
   const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
 
   if (!isPageKey(params.pageKey)) {

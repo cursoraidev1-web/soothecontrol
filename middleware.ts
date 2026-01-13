@@ -29,7 +29,7 @@ export function middleware(req: NextRequest) {
   if (isBypassPath(pathname)) return NextResponse.next();
 
   const platformDomain = (
-    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site"
+    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site"
   )
     .trim()
     .toLowerCase();

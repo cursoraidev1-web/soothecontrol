@@ -101,7 +101,7 @@ export default function NewSitePage() {
           <p className="mt-1 text-xs text-gray-600">
             Preview URL:{" "}
             <span className="font-mono">
-              https://{slugify(slug) || "your-slug"}.yourfree.site
+              https://{slugify(slug) || "your-slug"}.soothecontrols.site
             </span>
           </p>
         </label>

@@ -18,7 +18,7 @@ export async function generateMetadata({
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
-    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
+    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
   const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
 
   const siteData = await resolveSiteBySlug(params.slug);
@@ -95,7 +95,7 @@ export default async function PublicSitePage({
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
-    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
+    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
   const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
 
   const siteData = await resolveSiteBySlug(params.slug);

@@ -480,7 +480,7 @@ export default function SiteOverviewPage({
           <div>
             <dt className="text-xs font-medium text-gray-600">Preview URL</dt>
             <dd className="mt-1 font-mono text-sm">
-              https://{site.slug}.yourfree.site
+              https://{site.slug}.soothecontrols.site
             </dd>
           </div>
           <div>

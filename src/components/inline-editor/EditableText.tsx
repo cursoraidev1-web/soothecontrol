@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type React from "react";
 import { useInlineEditor } from "./InlineEditorContext";
 
@@ -49,15 +49,9 @@ export default function EditableText({
   const editor = useInlineEditor();
   const enabled = !!editor?.enabled;
   const [isFocused, setIsFocused] = useState(false);
-  const [draft, setDraft] = useState(value || "");
+  const [draft, setDraft] = useState("");
 
   const display = useMemo(() => value || "", [value]);
-
-  // Keep draft in sync if value changes externally.
-  useEffect(() => {
-    if (isFocused) return;
-    setDraft(display || "");
-  }, [display, isFocused]);
 
   const Tag: EditableTag = as ?? "span";
 
@@ -72,11 +66,14 @@ export default function EditableText({
       suppressContentEditableWarning
       spellCheck
       data-inline-edit="true"
-      onFocus={() => setIsFocused(true)}
+      onFocus={() => {
+        setIsFocused(true);
+        setDraft(display || "");
+      }}
       onBlur={(e) => {
         setIsFocused(false);
         const next = cleanText((e.currentTarget as HTMLElement).innerText, multiline);
-        setDraft(next);
+        setDraft("");
         if (onCommit) {
           onCommit(next);
           return;
@@ -104,7 +101,7 @@ export default function EditableText({
       }}
       aria-label="Editable text"
     >
-      {draft || placeholder || ""}
+      {(isFocused ? draft : display) || placeholder || ""}
     </Tag>
   );
 }

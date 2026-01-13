@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { PageKey } from "@/lib/pageSchema";
 
 interface T2HeaderProps {
@@ -18,35 +18,6 @@ export default function T2Header({
   baseUrl,
 }: T2HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // #region agent log
-  useEffect(() => {
-    // Check if Tailwind classes are applied
-    const header = document.querySelector('header');
-    const computedStyles = header ? window.getComputedStyle(header) : null;
-    const hasTailwindStyles = computedStyles && (
-      computedStyles.position === 'sticky' ||
-      computedStyles.backdropFilter !== 'none' ||
-      computedStyles.backgroundColor !== 'rgba(0, 0, 0, 0)'
-    );
-    
-    // Check if CSS file is loaded
-    const stylesheets = Array.from(document.styleSheets);
-    const hasTailwindCSS = stylesheets.some(sheet => {
-      try {
-        const rules = Array.from(sheet.cssRules || []);
-        return rules.some(rule => {
-          const cssText = rule.cssText || '';
-          return cssText.includes('.bg-white') || cssText.includes('.sticky') || cssText.includes('tailwind');
-        });
-      } catch (e) {
-        return false;
-      }
-    });
-
-    fetch('http://127.0.0.1:7242/ingest/964fc30c-b698-4731-8f08-53848077e169',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'T2Header.tsx:30',message:'Checking Tailwind CSS application',data:{hasTailwindStyles,hasTailwindCSS,stylesheetsCount:stylesheets.length,headerClasses:'sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/80 backdrop-blur-md transition-all'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-  }, []);
-  // #endregion
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/80 backdrop-blur-md transition-all">
