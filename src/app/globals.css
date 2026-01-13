@@ -7,3 +7,13 @@ body {
 }
 
 /* Public pages should be styled by templates/layouts (admin sets its own bg). */
+body {
+  background-color: #f9fafb;
+}
+
+/* #region agent log - Tailwind CSS test class */
+.test-tailwind-loaded {
+  /* This comment helps verify CSS is being processed */
+  display: block;
+}
+/* #endregion */
