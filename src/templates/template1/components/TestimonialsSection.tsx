@@ -1,92 +1,199 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import type { TestimonialsSection as TestimonialsSectionType } from "@/lib/pageSchema";
-import { getLoremHeadline, getLoremParagraph, getLoremSentence } from "@/lib/loremIpsum";
+import { getLoremHeadline, getLoremParagraph } from "@/lib/loremIpsum";
+import Icon from "@/lib/icons";
 
 interface TestimonialsSectionProps {
   section: TestimonialsSectionType;
 }
 
-export default function TestimonialsSection({ section }: TestimonialsSectionProps) {
-  const title = section.title || getLoremHeadline();
-  
-  // Ensure at least 3 testimonials for display
-  const testimonials = section.items && section.items.length > 0
-    ? section.items
-    : [
-        {
-          name: "John Doe",
-          role: "CEO",
-          quote: getLoremParagraph(),
-          company: "Company Inc.",
-        },
-        {
-          name: "Jane Smith",
-          role: "Director",
-          quote: getLoremParagraph(),
-          company: "Business Corp.",
-        },
-        {
-          name: "Mike Johnson",
-          role: "Founder",
-          quote: getLoremParagraph(),
-          company: "Startup Ltd.",
-        },
-      ];
+// Default testimonials with avatars and ratings
+const defaultTestimonials = [
+  {
+    name: "Sarah Mitchell",
+    role: "CEO",
+    quote: "Absolutely incredible service! They exceeded all our expectations and delivered results that transformed our business. Highly recommend to anyone looking for excellence.",
+    company: "TechVentures Inc.",
+    avatar: "",
+    rating: 5,
+  },
+  {
+    name: "David Chen",
+    role: "Marketing Director",
+    quote: "Working with this team has been a game-changer. Their attention to detail and creative solutions helped us achieve our goals faster than we imagined.",
+    company: "Global Solutions",
+    avatar: "",
+    rating: 5,
+  },
+  {
+    name: "Emily Rodriguez",
+    role: "Founder",
+    quote: "Professional, responsive, and incredibly talented. They took our vision and brought it to life in ways we never thought possible. A truly exceptional experience.",
+    company: "StartupHub",
+    avatar: "",
+    rating: 5,
+  },
+];
 
-  // Fill empty testimonials with lorem ipsum
-  const filledTestimonials = testimonials.map((testimonial) => ({
-    name: testimonial.name || "Customer Name",
-    role: testimonial.role || "Role",
-    quote: testimonial.quote || getLoremSentence(),
-    company: testimonial.company || "Company",
-  }));
+// Generate avatar color from name
+function getAvatarColor(name: string): string {
+  const colors = [
+    "linear-gradient(135deg, #667EEA 0%, #764BA2 100%)",
+    "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+    "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+  ];
+  const index = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[index % colors.length];
+}
+
+// Get initials from name
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+// Star rating component
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="t1-testimonial-stars">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <svg
+          key={star}
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill={star <= rating ? "currentColor" : "none"}
+          stroke="currentColor"
+          strokeWidth="2"
+          className={star <= rating ? "t1-star-filled" : "t1-star-empty"}
+        >
+          <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+function TestimonialCard({
+  testimonial,
+  index,
+  isVisible,
+}: {
+  testimonial: typeof defaultTestimonials[0];
+  index: number;
+  isVisible: boolean;
+}) {
+  return (
+    <div
+      className="t1-testimonial-card"
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? "translateY(0)" : "translateY(30px)",
+        transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.15}s`,
+      }}
+    >
+      {/* Quote Icon */}
+      <div className="t1-testimonial-quote-icon">
+        <Icon name="quote" size={24} />
+      </div>
+
+      {/* Rating */}
+      <StarRating rating={testimonial.rating || 5} />
+
+      {/* Quote */}
+      <p className="t1-testimonial-text">"{testimonial.quote}"</p>
+
+      {/* Author */}
+      <div className="t1-testimonial-author">
+        {/* Avatar */}
+        <div className="t1-testimonial-avatar-wrapper">
+          {testimonial.avatar ? (
+            <img
+              src={testimonial.avatar}
+              alt={testimonial.name}
+              className="t1-testimonial-avatar"
+            />
+          ) : (
+            <div
+              className="t1-testimonial-avatar t1-testimonial-avatar-placeholder"
+              style={{ background: getAvatarColor(testimonial.name) }}
+            >
+              {getInitials(testimonial.name)}
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="t1-testimonial-author-info">
+          <div className="t1-testimonial-name">{testimonial.name}</div>
+          <div className="t1-testimonial-role">
+            {testimonial.role}
+            {testimonial.company && <span> at {testimonial.company}</span>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function TestimonialsSection({ section }: TestimonialsSectionProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const title = section.title || getLoremHeadline();
+  const subtitle = section.subtitle || "What our clients say";
+
+  const testimonials =
+    section.items && section.items.length > 0 && section.items[0].name
+      ? section.items.map((t) => ({
+          ...t,
+          quote: t.quote || getLoremParagraph(),
+          rating: t.rating || 5,
+        }))
+      : defaultTestimonials;
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section className="t1-section" style={{ backgroundColor: "var(--color-bg-light)" }}>
+    <section ref={sectionRef} className="t1-section t1-testimonials-section">
       <div className="t1-container">
-        <span className="t1-label" style={{ display: "block", textAlign: "center", marginBottom: "var(--spacing-sm)" }}>
-          Testimonials
-        </span>
-        <h2 className="t1-section-title" style={{ textAlign: "center", marginBottom: "var(--spacing-2xl)" }}>
-          {title}
-        </h2>
+        <div className="t1-testimonials-header">
+          <span className="t1-label">{subtitle}</span>
+          <h2 className="t1-section-title">{title}</h2>
+        </div>
+
         <div className="t1-testimonials-grid">
-          {filledTestimonials.map((testimonial, index) => (
-            <div key={index} className="t1-testimonial-card">
-              <div className="t1-testimonial-quote">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ marginBottom: "var(--spacing-md)", opacity: 0.3 }}
-                >
-                  <path
-                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.151c-2.433.917-3.995 3.638-3.995 5.849h4v10h-9.984zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.995 3.638-3.995 5.849h3.983v10h-9.984z"
-                    fill="currentColor"
-                  />
-                </svg>
-                <p style={{ 
-                  fontSize: "var(--font-size-base)", 
-                  lineHeight: 1.7,
-                  color: "var(--color-text-primary)",
-                  marginBottom: "var(--spacing-md)",
-                  fontStyle: "italic"
-                }}>
-                  "{testimonial.quote}"
-                </p>
-              </div>
-              <div className="t1-testimonial-author">
-                <div style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>
-                  {testimonial.name}
-                </div>
-                <div style={{ fontSize: "var(--font-size-sm)", color: "var(--color-text-secondary)" }}>
-                  {testimonial.role}
-                  {testimonial.company && `, ${testimonial.company}`}
-                </div>
-              </div>
-            </div>
+          {testimonials.map((testimonial, index) => (
+            <TestimonialCard
+              key={index}
+              testimonial={testimonial}
+              index={index}
+              isVisible={isVisible}
+            />
           ))}
         </div>
       </div>
