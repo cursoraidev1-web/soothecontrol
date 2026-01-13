@@ -180,7 +180,7 @@ export default function AdminUsersPage() {
           </div>
         ) : null}
         <p className="mt-1 text-sm text-gray-600">
-          Enter the user's UUID from Supabase Auth to grant admin access.
+          Enter the user&apos;s UUID from Supabase Auth to grant admin access.
         </p>
 
         <form onSubmit={onAddByUuid} className="mt-4 space-y-4">

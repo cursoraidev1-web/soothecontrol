@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
+import Template3 from "@/templates/template3/Template3";
 import { resolveSiteBySlug } from "@/lib/siteResolver";
 import { isPageKey } from "@/lib/pageSchema";
 import type { PageKey } from "@/lib/pageSchema";
@@ -16,7 +17,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string; pageKey: string };
 }): Promise<Metadata> {
-  const hostHeader = headers().get("host") || "";
+  const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
@@ -103,7 +104,7 @@ export default async function PublicSitePagePage({
 }: {
   params: { slug: string; pageKey: string };
 }) {
-  const hostHeader = headers().get("host") || "";
+  const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
@@ -123,6 +124,7 @@ export default async function PublicSitePagePage({
   const logoUrl = siteData.profile.logo_path
     ? getPublicAssetUrl(siteData.profile.logo_path)
     : undefined;
+  const pageData = siteData.pages[pageKey];
 
   // JSON-LD Structured Data based on page type
   let structuredData;
@@ -190,6 +192,27 @@ export default async function PublicSitePagePage({
           }}
         />
         <Template2
+          site={siteData.site}
+          profile={siteData.profile}
+          pages={siteData.pages}
+          currentPage={pageKey}
+          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+        />
+      </>
+    );
+  }
+
+  if (siteData.site.template_key === "t3") {
+    return (
+      <>
+        <Script
+          id={`${pageKey}-schema`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData),
+          }}
+        />
+        <Template3
           site={siteData.site}
           profile={siteData.profile}
           pages={siteData.pages}

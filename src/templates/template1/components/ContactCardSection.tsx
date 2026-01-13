@@ -40,7 +40,7 @@ export default function ContactCardSection({
           <div className="t1-contact-card">
             <h2 className="t1-section-subheading">Get in Touch</h2>
             <p style={{ marginBottom: "var(--spacing-lg)", color: "var(--color-text-secondary)" }}>
-              We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
             </p>
             <div className="t1-contact-info-item">
               <svg
@@ -225,7 +225,7 @@ export default function ContactCardSection({
             background: "var(--color-bg-light)",
           }}
         >
-          <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9" as any }}>
+          <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9" }}>
             <iframe
               title="Map"
               src={mapEmbedUrl}

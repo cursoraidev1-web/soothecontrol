@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 
 import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
+import Template3 from "@/templates/template3/Template3";
 import ColorPaletteSidebar from "@/components/admin/ColorPaletteSidebar";
 import { InlineEditorProvider } from "@/components/inline-editor/InlineEditorContext";
 import { resolveSiteById } from "@/lib/siteResolver";
@@ -304,12 +305,12 @@ export default function SitePreviewPage() {
               };
             });
           },
-          updateSectionField: (sectionIndex: number, field: any, value: any) => {
+          updateSectionField: (sectionIndex: number, field: string, value: unknown) => {
             setSiteData((prev) => {
               if (!prev) return prev;
               const page = prev.pages[currentPage];
-              const section = page.sections[sectionIndex] as any;
-              const nextSection = { ...section, [field]: value } as Section;
+              const section = page.sections[sectionIndex] as Record<string, unknown>;
+              const nextSection = { ...(section as object), [field]: value } as unknown as Section;
               const sections = page.sections.map((s, i) => (i === sectionIndex ? nextSection : s));
               return {
                 ...prev,
@@ -346,15 +347,24 @@ export default function SitePreviewPage() {
             baseUrl=""
           />
         )}
+        {siteData.site.template_key === "t3" && (
+          <Template3
+            site={siteData.site}
+            profile={siteData.profile}
+            pages={siteData.pages}
+            currentPage={currentPage}
+            baseUrl=""
+          />
+        )}
       </InlineEditorProvider>
-      {!["t1", "t2"].includes(siteData.site.template_key) && (
+      {!["t1", "t2", "t3"].includes(siteData.site.template_key) && (
         <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
           <div style={{ textAlign: "center" }}>
             <p style={{ fontSize: "18px", fontWeight: "600", color: "#1F2937" }}>
               Template {siteData.site.template_key.toUpperCase()} not yet implemented
             </p>
             <p style={{ marginTop: "8px", fontSize: "14px", color: "#6B7280" }}>
-              Only Template1 (t1) and Template2 (t2) are currently available.
+              Only Template1 (t1), Template2 (t2), and Template3 (t3) are currently available.
             </p>
           </div>
         </div>

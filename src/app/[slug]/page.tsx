@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
+import Template3 from "@/templates/template3/Template3";
 import { resolveSiteBySlug } from "@/lib/siteResolver";
 import Script from "next/script";
 import { headers } from "next/headers";
@@ -14,7 +15,7 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const hostHeader = headers().get("host") || "";
+  const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
@@ -91,7 +92,7 @@ export default async function PublicSitePage({
 }: {
   params: { slug: string };
 }) {
-  const hostHeader = headers().get("host") || "";
+  const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
@@ -168,6 +169,27 @@ export default async function PublicSitePage({
           }}
         />
         <Template2
+          site={siteData.site}
+          profile={siteData.profile}
+          pages={siteData.pages}
+          currentPage="home"
+          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+        />
+      </>
+    );
+  }
+
+  if (siteData.site.template_key === "t3") {
+    return (
+      <>
+        <Script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
+        <Template3
           site={siteData.site}
           profile={siteData.profile}
           pages={siteData.pages}

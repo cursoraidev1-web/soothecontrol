@@ -5,6 +5,7 @@ import Script from "next/script";
 
 import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
+import Template3 from "@/templates/template3/Template3";
 import { resolveSiteByHostname } from "@/lib/siteResolver";
 import { getPublicAssetUrl } from "@/lib/assets";
 import { normalizeHostname } from "@/lib/domains";
@@ -14,7 +15,7 @@ export async function generateMetadata({
 }: {
   params: { hostname: string };
 }): Promise<Metadata> {
-  const hostHeader = headers().get("host") || "";
+  const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
 
   const siteData = await resolveSiteByHostname(params.hostname);
@@ -55,7 +56,7 @@ export default async function CustomDomainHome({
 }: {
   params: { hostname: string };
 }) {
-  const hostHeader = headers().get("host") || "";
+  const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
 
   const siteData = await resolveSiteByHostname(params.hostname);
@@ -118,6 +119,25 @@ export default async function CustomDomainHome({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <Template2
+          site={siteData.site}
+          profile={siteData.profile}
+          pages={siteData.pages}
+          currentPage="home"
+          baseUrl=""
+        />
+      </>
+    );
+  }
+
+  if (siteData.site.template_key === "t3") {
+    return (
+      <>
+        <Script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <Template3
           site={siteData.site}
           profile={siteData.profile}
           pages={siteData.pages}

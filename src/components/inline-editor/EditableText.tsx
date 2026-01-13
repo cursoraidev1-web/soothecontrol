@@ -1,10 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type React from "react";
 import { useInlineEditor } from "./InlineEditorContext";
 
+type EditableTag =
+  | "span"
+  | "p"
+  | "div"
+  | "h1"
+  | "h2"
+  | "h3"
+  | "h4"
+  | "h5"
+  | "h6"
+  | "blockquote";
+
 type EditableTextProps = {
-  as?: keyof JSX.IntrinsicElements;
+  as?: EditableTag;
   value: string;
   placeholder?: string;
   sectionIndex?: number;
@@ -35,20 +48,18 @@ export default function EditableText({
 }: EditableTextProps) {
   const editor = useInlineEditor();
   const enabled = !!editor?.enabled;
-  const ref = useRef<HTMLSpanElement | null>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [draft, setDraft] = useState(value || "");
 
   const display = useMemo(() => value || "", [value]);
 
-  // Keep DOM in sync if value changes externally.
+  // Keep draft in sync if value changes externally.
   useEffect(() => {
-    if (!ref.current) return;
     if (isFocused) return;
-    const next = display || "";
-    if (ref.current.innerText !== next) ref.current.innerText = next;
+    setDraft(display || "");
   }, [display, isFocused]);
 
-  const Tag = (as ?? "span") as any;
+  const Tag: EditableTag = as ?? "span";
 
   if (!enabled) {
     return <Tag className={className}>{display}</Tag>;
@@ -56,7 +67,6 @@ export default function EditableText({
 
   return (
     <Tag
-      ref={ref as any}
       className={className}
       contentEditable
       suppressContentEditableWarning
@@ -65,19 +75,23 @@ export default function EditableText({
       onFocus={() => setIsFocused(true)}
       onBlur={(e) => {
         setIsFocused(false);
-        const next = cleanText(e.currentTarget.innerText, multiline);
+        const next = cleanText((e.currentTarget as HTMLElement).innerText, multiline);
+        setDraft(next);
         if (onCommit) {
           onCommit(next);
           return;
         }
         if (sectionIndex == null || !field) return;
-        editor?.updateSectionField(sectionIndex, field as any, next as any);
+        editor?.updateSectionField(sectionIndex, field, next);
       }}
       onKeyDown={(e) => {
         if (e.key === "Enter" && !multiline) {
           e.preventDefault();
           (e.currentTarget as HTMLElement).blur();
         }
+      }}
+      onInput={(e) => {
+        setDraft(cleanText((e.currentTarget as HTMLElement).innerText, multiline));
       }}
       style={{
         ...(style ?? {}),
@@ -90,7 +104,7 @@ export default function EditableText({
       }}
       aria-label="Editable text"
     >
-      {display || placeholder || ""}
+      {draft || placeholder || ""}
     </Tag>
   );
 }

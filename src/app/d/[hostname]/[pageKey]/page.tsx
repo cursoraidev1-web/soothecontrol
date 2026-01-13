@@ -5,6 +5,7 @@ import Script from "next/script";
 
 import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
+import Template3 from "@/templates/template3/Template3";
 import { resolveSiteByHostname } from "@/lib/siteResolver";
 import { isPageKey, type PageKey } from "@/lib/pageSchema";
 import { getPublicAssetUrl } from "@/lib/assets";
@@ -17,7 +18,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   if (!isPageKey(params.pageKey)) return { title: "Page Not Found" };
 
-  const hostHeader = headers().get("host") || "";
+  const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
 
   const pageKey = params.pageKey as PageKey;
@@ -82,7 +83,7 @@ export default async function CustomDomainPage({
   if (!isPageKey(params.pageKey)) notFound();
   const pageKey = params.pageKey as PageKey;
 
-  const hostHeader = headers().get("host") || "";
+  const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
 
   const siteData = await resolveSiteByHostname(params.hostname);
@@ -153,6 +154,25 @@ export default async function CustomDomainPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <Template2
+          site={siteData.site}
+          profile={siteData.profile}
+          pages={siteData.pages}
+          currentPage={pageKey}
+          baseUrl=""
+        />
+      </>
+    );
+  }
+
+  if (siteData.site.template_key === "t3") {
+    return (
+      <>
+        <Script
+          id={`${pageKey}-schema`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        <Template3
           site={siteData.site}
           profile={siteData.profile}
           pages={siteData.pages}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
 import { slugify } from "@/lib/slugify";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
@@ -21,12 +21,6 @@ export default function NewSitePage() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const suggestedSlug = useMemo(() => slugify(businessName), [businessName]);
-
-  useEffect(() => {
-    if (!slugTouched) setSlug(suggestedSlug);
-  }, [suggestedSlug, slugTouched]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -81,7 +75,11 @@ export default function NewSitePage() {
           <span className="text-sm font-medium text-gray-800">Business name</span>
           <input
             value={businessName}
-            onChange={(e) => setBusinessName(e.target.value)}
+            onChange={(e) => {
+              const nextName = e.target.value;
+              setBusinessName(nextName);
+              if (!slugTouched) setSlug(slugify(nextName));
+            }}
             placeholder="Kings Bakery"
             className="mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
             required

@@ -21,21 +21,17 @@ export default function ColorPaletteSidebar({
   isOpen,
   onClose,
 }: ColorPaletteSidebarProps) {
-  const [colors, setColors] = useState(DEFAULT_COLORS);
-
-  useEffect(() => {
-    // Load saved colors from localStorage
+  const [colors, setColors] = useState(() => {
+    // Load once on first render (client-only component).
     const saved = localStorage.getItem("template1-colors");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setColors({ ...DEFAULT_COLORS, ...parsed });
-        applyColors({ ...DEFAULT_COLORS, ...parsed });
-      } catch (e) {
-        // Ignore parse errors
-      }
+    if (!saved) return DEFAULT_COLORS;
+    try {
+      const parsed = JSON.parse(saved) as Partial<typeof DEFAULT_COLORS>;
+      return { ...DEFAULT_COLORS, ...parsed };
+    } catch {
+      return DEFAULT_COLORS;
     }
-  }, []);
+  });
 
   const applyColors = (newColors: typeof DEFAULT_COLORS) => {
     const root = document.documentElement;
@@ -47,6 +43,12 @@ export default function ColorPaletteSidebar({
     root.style.setProperty("--color-bg-main", newColors.bgMain);
     root.style.setProperty("--color-bg-light", newColors.bgLight);
   };
+
+  useEffect(() => {
+    // Apply once on mount for initial state.
+    applyColors(colors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleColorChange = (key: keyof typeof DEFAULT_COLORS, value: string) => {
     const newColors = { ...colors, [key]: value };

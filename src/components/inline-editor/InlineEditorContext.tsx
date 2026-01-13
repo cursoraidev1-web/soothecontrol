@@ -8,11 +8,7 @@ export type InlineEditorState = {
   pageKey: PageKey;
   pageData: PageData;
   updateSection: (sectionIndex: number, next: Section) => void;
-  updateSectionField: <K extends keyof Section>(
-    sectionIndex: number,
-    field: K,
-    value: Section[K],
-  ) => void;
+  updateSectionField: (sectionIndex: number, field: string, value: unknown) => void;
 };
 
 const InlineEditorContext = createContext<InlineEditorState | null>(null);

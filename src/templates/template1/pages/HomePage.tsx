@@ -127,7 +127,7 @@ export default function HomePage({ pageData, profile }: HomePageProps) {
         <div className="t1-container">
           <h2 className="t1-cta-heading">Ready to Get Started?</h2>
           <p className="t1-cta-subtext">
-            Let's work together to achieve your goals. Contact us today to learn more about our services.
+            Let&apos;s work together to achieve your goals. Contact us today to learn more about our services.
           </p>
           <a href="#contact" className="t1-cta-button">
             Contact Us Now

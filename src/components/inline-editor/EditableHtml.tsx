@@ -58,7 +58,7 @@ export default function EditableHtml({
           return;
         }
         if (sectionIndex == null || !field) return;
-        editor?.updateSectionField(sectionIndex, field as any, next as any);
+        editor?.updateSectionField(sectionIndex, field, next);
       }}
       style={{
         outline: "none",

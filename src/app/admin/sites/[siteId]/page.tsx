@@ -448,7 +448,7 @@ export default function SiteOverviewPage({
   if (!site || !profile) {
     return (
       <div className="text-sm text-gray-700">
-        Site not found (or you don’t have access).
+        Site not found (or you don&apos;t have access).
       </div>
     );
   }
