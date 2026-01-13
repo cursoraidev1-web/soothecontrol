@@ -7,6 +7,9 @@ import RichTextSection from "../components/RichTextSection";
 import GallerySection from "../components/GallerySection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import FAQSection from "../components/FAQSection";
+import ContactBannerSection from "../components/ContactBannerSection";
+import MapSection from "../components/MapSection";
+import HoursSection from "../components/HoursSection";
 
 interface ContactUsPageProps {
   pageData: PageData;
@@ -47,6 +50,12 @@ export default function ContactUsPage({ pageData, profile }: ContactUsPageProps)
             return <TestimonialsSection key={`${section.type}-${index}`} section={section} />;
           case "faq":
             return <FAQSection key={`${section.type}-${index}`} section={section} />;
+          case "contact_banner":
+            return <ContactBannerSection key={`${section.type}-${index}`} section={section} />;
+          case "map":
+            return <MapSection key={`${section.type}-${index}`} section={section} address={profile.address} />;
+          case "hours":
+            return <HoursSection key={`${section.type}-${index}`} section={section} />;
           default:
             return null;
         }

@@ -7,6 +7,11 @@ import ValuesSection from "../components/ValuesSection";
 import GallerySection from "../components/GallerySection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import FAQSection from "../components/FAQSection";
+import StatsSection from "../components/StatsSection";
+import TeamSection from "../components/TeamSection";
+import TimelineSection from "../components/TimelineSection";
+import CTABannerSection from "../components/CTABannerSection";
+import FeaturesSection from "../components/FeaturesSection";
 
 interface AboutUsPageProps {
   pageData: PageData;
@@ -38,6 +43,16 @@ export default function AboutUsPage({ pageData, profile }: AboutUsPageProps) {
             return <TestimonialsSection key={`${section.type}-${index}`} section={section} />;
           case "faq":
             return <FAQSection key={`${section.type}-${index}`} section={section} />;
+          case "stats":
+            return <StatsSection key={`${section.type}-${index}`} section={section} />;
+          case "team":
+            return <TeamSection key={`${section.type}-${index}`} section={section} />;
+          case "timeline":
+            return <TimelineSection key={`${section.type}-${index}`} section={section} />;
+          case "cta_banner":
+            return <CTABannerSection key={`${section.type}-${index}`} section={section} />;
+          case "features":
+            return <FeaturesSection key={`${section.type}-${index}`} section={section} />;
           default:
             return null;
         }

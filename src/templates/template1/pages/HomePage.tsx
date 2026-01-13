@@ -11,6 +11,11 @@ import UseCasesSection from "../components/UseCasesSection";
 import GallerySection from "../components/GallerySection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import FAQSection from "../components/FAQSection";
+import StatsSection from "../components/StatsSection";
+import ProcessSection from "../components/ProcessSection";
+import FeaturesSection from "../components/FeaturesSection";
+import CTABannerSection from "../components/CTABannerSection";
+import LogoCloudSection from "../components/LogoCloudSection";
 
 interface HomePageProps {
   pageData: PageData;
@@ -62,23 +67,20 @@ export default function HomePage({ pageData, profile }: HomePageProps) {
             return <TestimonialsSection key={`${section.type}-${index}`} section={section} />;
           case "faq":
             return <FAQSection key={`${section.type}-${index}`} section={section} />;
+          case "stats":
+            return <StatsSection key={`${section.type}-${index}`} section={section} />;
+          case "process":
+            return <ProcessSection key={`${section.type}-${index}`} section={section} />;
+          case "features":
+            return <FeaturesSection key={`${section.type}-${index}`} section={section} />;
+          case "cta_banner":
+            return <CTABannerSection key={`${section.type}-${index}`} section={section} />;
+          case "logo_cloud":
+            return <LogoCloudSection key={`${section.type}-${index}`} section={section} />;
           default:
             return null;
         }
       })}
-      
-      {/* Final CTA Section */}
-      <section className="t1-cta-section">
-        <div className="t1-container">
-          <h2 className="t1-cta-heading">Ready to Get Started?</h2>
-          <p className="t1-cta-subtext">
-            Let's work together to achieve your goals. Contact us today to learn more about our services.
-          </p>
-          <a href="#contact" className="t1-cta-button">
-            Contact Us Now
-          </a>
-        </div>
-      </section>
     </main>
   );
 }
