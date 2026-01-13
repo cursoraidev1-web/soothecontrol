@@ -6,6 +6,7 @@ import Script from "next/script";
 import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
 import Template3 from "@/templates/template3/Template3";
+import Template4 from "@/templates/template4/Template4";
 import { resolveSiteByHostname } from "@/lib/siteResolver";
 import { getPublicAssetUrl } from "@/lib/assets";
 import { normalizeHostname } from "@/lib/domains";
@@ -138,6 +139,25 @@ export default async function CustomDomainHome({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <Template3
+          site={siteData.site}
+          profile={siteData.profile}
+          pages={siteData.pages}
+          currentPage="home"
+          baseUrl=""
+        />
+      </>
+    );
+  }
+
+  if (siteData.site.template_key === "t4") {
+    return (
+      <>
+        <Script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <Template4
           site={siteData.site}
           profile={siteData.profile}
           pages={siteData.pages}
