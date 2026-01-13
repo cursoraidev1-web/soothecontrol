@@ -220,10 +220,14 @@ export function defaultPageData(key: PageKey): PageData {
       seo,
       sections: [
         defaultSection("hero"),
-        defaultSection("richtext"),
         defaultSection("services"),
+        defaultSection("values"),
         defaultSection("backed_by"),
         defaultSection("use_cases"),
+        defaultSection("testimonials"),
+        defaultSection("gallery"),
+        defaultSection("faq"),
+        defaultSection("contact_card"),
       ],
     };
   }
@@ -235,13 +239,22 @@ export function defaultPageData(key: PageKey): PageData {
         defaultSection("hero"),
         defaultSection("richtext"),
         defaultSection("values"),
+        defaultSection("testimonials"),
+        defaultSection("gallery"),
+        defaultSection("faq"),
+        defaultSection("contact_card"),
       ],
     };
   }
 
   return {
     seo,
-    sections: [defaultSection("contact_card"), defaultSection("richtext")],
+    sections: [
+      defaultSection("hero"),
+      defaultSection("contact_card"),
+      defaultSection("faq"),
+      defaultSection("richtext"),
+    ],
   };
 }
 
