@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 
 import Template1 from "@/templates/template1/Template1";
@@ -15,6 +15,17 @@ import type { SiteData } from "@/lib/siteResolver";
 import { validatePageData, type PageKey, type Section } from "@/lib/pageSchema";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { getPublicAssetUrl } from "@/lib/assets";
+import { extractLogoColors, type ExtractedLogoColors } from "@/lib/logoColors";
+
+function hexToRgba(hex: string, alpha: number) {
+  const m = hex.trim().replace("#", "");
+  if (m.length !== 6) return `rgba(0,0,0,${alpha})`;
+  const r = parseInt(m.slice(0, 2), 16);
+  const g = parseInt(m.slice(2, 4), 16);
+  const b = parseInt(m.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 export default function SitePreviewPage() {
   const params = useParams();
@@ -29,6 +40,16 @@ export default function SitePreviewPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const [isApplyingBrand, setIsApplyingBrand] = useState(false);
+  const [brandError, setBrandError] = useState<string | null>(null);
+  const [brandColors, setBrandColors] = useState<ExtractedLogoColors | null>(null);
+  const previewWrapRef = useRef<HTMLDivElement | null>(null);
+
+  const logoUrl = useMemo(() => {
+    const path = siteData?.profile?.logo_path;
+    return path ? getPublicAssetUrl(path) : null;
+  }, [siteData?.profile?.logo_path]);
 
   useEffect(() => {
     if (!siteId) {
@@ -191,6 +212,129 @@ export default function SitePreviewPage() {
           {editMode ? "Editing" : "Edit"}
         </button>
 
+        <button
+          onClick={async () => {
+            if (!siteData) return;
+            setBrandError(null);
+
+            if (!logoUrl) {
+              setBrandError("Upload a logo first to extract brand colors.");
+              return;
+            }
+
+            setIsApplyingBrand(true);
+            try {
+              const colors = await extractLogoColors(logoUrl);
+              setBrandColors(colors);
+
+              const wrap = previewWrapRef.current;
+              const tk = siteData.site.template_key;
+              const root =
+                (tk === "t1"
+                  ? wrap?.querySelector(".template1-container")
+                  : tk === "t3"
+                    ? wrap?.querySelector(".template3")
+                    : tk === "t4"
+                      ? wrap?.querySelector(".template4")
+                      : null) ?? wrap;
+
+              if (!root) throw new Error("Preview not ready.");
+
+              if (tk === "t1") {
+                root.style.setProperty("--color-primary", colors.dominant);
+                root.style.setProperty("--color-accent", colors.accent);
+                root.style.setProperty("--shadow-glow", `0 0 20px ${hexToRgba(colors.dominant, 0.30)}`);
+                root.style.setProperty("--shadow-glow-lg", `0 0 40px ${hexToRgba(colors.dominant, 0.40)}`);
+              }
+              if (tk === "t3") {
+                root.style.setProperty("--t3-accent", colors.dominant);
+                root.style.setProperty("--t3-accent2", colors.accent);
+                root.style.setProperty("--t3-ring", hexToRgba(colors.dominant, 0.18));
+              }
+              if (tk === "t4") {
+                root.style.setProperty("--t4-accent", colors.dominant);
+                root.style.setProperty("--t4-accent2", colors.accent);
+                root.style.setProperty("--t4-ring", hexToRgba(colors.dominant, 0.22));
+              }
+            } catch (err) {
+              setBrandError(formatSupabaseError(err));
+            } finally {
+              setIsApplyingBrand(false);
+            }
+          }}
+          disabled={isApplyingBrand}
+          style={{
+            padding: "8px 12px",
+            borderRadius: "6px",
+            border: "1px solid #E5E7EB",
+            background: "#FFFFFF",
+            color: "#111827",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: 700,
+            opacity: isApplyingBrand ? 0.7 : 1,
+          }}
+          title={logoUrl ? "Extract dominant + accent colors from the uploaded logo" : "Upload a logo first"}
+        >
+          {isApplyingBrand ? "Applying…" : "Apply logo colors"}
+        </button>
+
+        {brandColors ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 2 }}>
+            <div style={{ width: 12, height: 12, borderRadius: 3, background: brandColors.dominant, border: "1px solid rgba(0,0,0,0.10)" }} />
+            <div style={{ width: 12, height: 12, borderRadius: 3, background: brandColors.accent, border: "1px solid rgba(0,0,0,0.10)" }} />
+            <button
+              onClick={() => {
+                if (!siteData) return;
+                setBrandError(null);
+                setBrandColors(null);
+
+                const wrap = previewWrapRef.current;
+                const tk = siteData.site.template_key;
+                const root =
+                  (tk === "t1"
+                    ? wrap?.querySelector(".template1-container")
+                    : tk === "t3"
+                      ? wrap?.querySelector(".template3")
+                      : tk === "t4"
+                        ? wrap?.querySelector(".template4")
+                        : null) ?? wrap;
+
+                if (!root) return;
+
+                if (tk === "t1") {
+                  root.style.removeProperty("--color-primary");
+                  root.style.removeProperty("--color-accent");
+                  root.style.removeProperty("--shadow-glow");
+                  root.style.removeProperty("--shadow-glow-lg");
+                }
+                if (tk === "t3") {
+                  root.style.removeProperty("--t3-accent");
+                  root.style.removeProperty("--t3-accent2");
+                  root.style.removeProperty("--t3-ring");
+                }
+                if (tk === "t4") {
+                  root.style.removeProperty("--t4-accent");
+                  root.style.removeProperty("--t4-accent2");
+                  root.style.removeProperty("--t4-ring");
+                }
+              }}
+              style={{
+                padding: "6px 8px",
+                borderRadius: "6px",
+                border: "1px solid #E5E7EB",
+                background: "transparent",
+                color: "#6B7280",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              Reset
+            </button>
+          </div>
+        ) : null}
+
         {editMode && (
           <>
             <button
@@ -285,88 +429,110 @@ export default function SitePreviewPage() {
           Draft saved.
         </div>
       ) : null}
+      {brandError ? (
+        <div
+          style={{
+            position: "fixed",
+            top: 88,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 999,
+            borderRadius: 10,
+            border: "1px solid #FCA5A5",
+            backgroundColor: "#FEF2F2",
+            padding: "10px 12px",
+            fontSize: 13,
+            color: "#B91C1C",
+            maxWidth: 720,
+          }}
+        >
+          {brandError}
+        </div>
+      ) : null}
 
       {/* Template Preview - Full Screen */}
-      <InlineEditorProvider
-        value={{
-          enabled: editMode,
-          pageKey: currentPage,
-          pageData: siteData.pages[currentPage],
-          updateSection: (sectionIndex: number, next: Section) => {
-            setSiteData((prev) => {
-              if (!prev) return prev;
-              const page = prev.pages[currentPage];
-              const sections = page.sections.map((s, i) => (i === sectionIndex ? next : s));
-              return {
-                ...prev,
-                pages: {
-                  ...prev.pages,
-                  [currentPage]: { ...page, sections },
-                },
-              };
-            });
-          },
-          updateSectionField: (sectionIndex: number, field: string, value: unknown) => {
-            setSiteData((prev) => {
-              if (!prev) return prev;
-              const page = prev.pages[currentPage];
-              const section = page.sections[sectionIndex] as Record<string, unknown>;
-              const nextSection = { ...(section as object), [field]: value } as unknown as Section;
-              const sections = page.sections.map((s, i) => (i === sectionIndex ? nextSection : s));
-              return {
-                ...prev,
-                pages: {
-                  ...prev.pages,
-                  [currentPage]: { ...page, sections },
-                },
-              };
-            });
-          },
-        }}
-      >
-        {siteData.site.template_key === "t1" && (
-          <>
-            <Template1
+      <div ref={previewWrapRef}>
+        <InlineEditorProvider
+          value={{
+            enabled: editMode,
+            pageKey: currentPage,
+            pageData: siteData.pages[currentPage],
+            updateSection: (sectionIndex: number, next: Section) => {
+              setSiteData((prev) => {
+                if (!prev) return prev;
+                const page = prev.pages[currentPage];
+                const sections = page.sections.map((s, i) => (i === sectionIndex ? next : s));
+                return {
+                  ...prev,
+                  pages: {
+                    ...prev.pages,
+                    [currentPage]: { ...page, sections },
+                  },
+                };
+              });
+            },
+            updateSectionField: (sectionIndex: number, field: string, value: unknown) => {
+              setSiteData((prev) => {
+                if (!prev) return prev;
+                const page = prev.pages[currentPage];
+                const section = page.sections[sectionIndex] as Record<string, unknown>;
+                const nextSection = { ...(section as object), [field]: value } as unknown as Section;
+                const sections = page.sections.map((s, i) => (i === sectionIndex ? nextSection : s));
+                return {
+                  ...prev,
+                  pages: {
+                    ...prev.pages,
+                    [currentPage]: { ...page, sections },
+                  },
+                };
+              });
+            },
+          }}
+        >
+          {siteData.site.template_key === "t1" && (
+            <>
+              <Template1
+                site={siteData.site}
+                profile={siteData.profile}
+                pages={siteData.pages}
+                currentPage={currentPage}
+                baseUrl=""
+              />
+              <ColorPaletteSidebar
+                isOpen={colorPaletteOpen}
+                onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
+              />
+            </>
+          )}
+          {siteData.site.template_key === "t2" && (
+            <Template2
               site={siteData.site}
               profile={siteData.profile}
               pages={siteData.pages}
               currentPage={currentPage}
               baseUrl=""
             />
-            <ColorPaletteSidebar
-              isOpen={colorPaletteOpen}
-              onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
+          )}
+          {siteData.site.template_key === "t3" && (
+            <Template3
+              site={siteData.site}
+              profile={siteData.profile}
+              pages={siteData.pages}
+              currentPage={currentPage}
+              baseUrl=""
             />
-          </>
-        )}
-        {siteData.site.template_key === "t2" && (
-          <Template2
-            site={siteData.site}
-            profile={siteData.profile}
-            pages={siteData.pages}
-            currentPage={currentPage}
-            baseUrl=""
-          />
-        )}
-        {siteData.site.template_key === "t3" && (
-          <Template3
-            site={siteData.site}
-            profile={siteData.profile}
-            pages={siteData.pages}
-            currentPage={currentPage}
-            baseUrl=""
-          />
-        )}
-        {siteData.site.template_key === "t4" && (
-          <Template4
-            site={siteData.site}
-            profile={siteData.profile}
-            pages={siteData.pages}
-            currentPage={currentPage}
-            baseUrl=""
-          />
-        )}
-      </InlineEditorProvider>
+          )}
+          {siteData.site.template_key === "t4" && (
+            <Template4
+              site={siteData.site}
+              profile={siteData.profile}
+              pages={siteData.pages}
+              currentPage={currentPage}
+              baseUrl=""
+            />
+          )}
+        </InlineEditorProvider>
+      </div>
       {!["t1", "t2", "t3", "t4"].includes(siteData.site.template_key) && (
         <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
           <div style={{ textAlign: "center" }}>
