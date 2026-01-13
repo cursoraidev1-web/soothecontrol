@@ -41,6 +41,7 @@ export default function T2ContactPage({ pageData, profile }: T2ContactPageProps)
               <T2Hero
                 key={`${section.type}-${index}`}
                 section={section}
+                sectionIndex={index}
                 businessName={profile.business_name}
                 logoUrl={logoUrl}
                 isHomePage={false}
@@ -48,14 +49,28 @@ export default function T2ContactPage({ pageData, profile }: T2ContactPageProps)
               />
             );
           case "richtext":
-            return <T2RichText key={`${section.type}-${index}`} section={section} label="Contact" />;
+            return (
+              <T2RichText
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+                label="Contact"
+              />
+            );
           case "faq":
-            return <T2FAQ key={`${section.type}-${index}`} section={section} />;
+            return (
+              <T2FAQ
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "contact_card":
             return (
               <T2ContactCard
                 key={`${section.type}-${index}`}
                 section={section}
+                sectionIndex={index}
                 profile={{
                   business_name: profile.business_name,
                   address: profile.address,

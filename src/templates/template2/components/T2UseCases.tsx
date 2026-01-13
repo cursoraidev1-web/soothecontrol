@@ -2,12 +2,16 @@
 
 import type { UseCasesSection as UseCasesSectionType } from "@/lib/pageSchema";
 import { getLoremHeadline, getLoremParagraph, getLoremShortText } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2UseCasesProps {
   section: UseCasesSectionType;
+  sectionIndex?: number;
 }
 
-export default function T2UseCases({ section }: T2UseCasesProps) {
+export default function T2UseCases({ section, sectionIndex }: T2UseCasesProps) {
+  const editor = useInlineEditor();
   const title = section.title || "Use cases";
   const description = section.description || getLoremParagraph();
 
@@ -34,10 +38,27 @@ export default function T2UseCases({ section }: T2UseCasesProps) {
           <span className="inline-flex rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold tracking-wider text-gray-600 uppercase">
             Use cases
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            {title}
-          </h2>
-          <p className="mt-4 text-lg text-gray-600">{description}</p>
+          <EditableText
+            as="h2"
+            className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+            value={title}
+            placeholder="Use cases title"
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, title: next });
+            }}
+          />
+          <EditableText
+            as="p"
+            className="mt-4 text-lg text-gray-600"
+            value={description}
+            placeholder="Use cases description"
+            multiline
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, description: next });
+            }}
+          />
         </div>
 
         <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -49,17 +70,50 @@ export default function T2UseCases({ section }: T2UseCasesProps) {
               <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 blur-2xl opacity-60 transition-opacity group-hover:opacity-90" />
               <div className="relative">
                 <div className="flex items-center justify-between gap-4">
-                  <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
+                  <EditableText
+                    as="h3"
+                    className="text-xl font-semibold text-gray-900"
+                    value={item.title}
+                    placeholder="Use case title"
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      const nextItems = filled.map((x) => ({ ...x }));
+                      nextItems[idx] = { ...nextItems[idx], title: next };
+                      editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                    }}
+                  />
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-sm font-semibold text-gray-900">
                     {idx + 1}
                   </span>
                 </div>
-                <p className="mt-3 text-gray-600 leading-relaxed">{item.description}</p>
+                <EditableText
+                  as="p"
+                  className="mt-3 text-gray-600 leading-relaxed"
+                  value={item.description}
+                  placeholder="Use case description"
+                  multiline
+                  onCommit={(next) => {
+                    if (!editor || sectionIndex == null) return;
+                    const nextItems = filled.map((x) => ({ ...x }));
+                    nextItems[idx] = { ...nextItems[idx], description: next };
+                    editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                  }}
+                />
                 <a
                   href={item.linkHref}
                   className="mt-6 inline-flex items-center text-sm font-semibold text-gray-900 transition-colors hover:text-gray-700"
                 >
-                  {item.linkText}
+                  <EditableText
+                    as="span"
+                    value={item.linkText}
+                    placeholder="Link text"
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      const nextItems = filled.map((x) => ({ ...x }));
+                      nextItems[idx] = { ...nextItems[idx], linkText: next };
+                      editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                    }}
+                  />
                   <svg
                     className="ml-2 h-4 w-4"
                     fill="none"

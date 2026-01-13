@@ -3,12 +3,16 @@
 import { useState } from "react";
 import type { FAQSection as FAQSectionType } from "@/lib/pageSchema";
 import { getLoremHeadline, getLoremParagraph, getLoremSentence } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2FAQProps {
   section: FAQSectionType;
+  sectionIndex?: number;
 }
 
-export default function T2FAQ({ section }: T2FAQProps) {
+export default function T2FAQ({ section, sectionIndex }: T2FAQProps) {
+  const editor = useInlineEditor();
   const [open, setOpen] = useState<number | null>(0);
   const title = section.title || getLoremHeadline();
 
@@ -32,9 +36,16 @@ export default function T2FAQ({ section }: T2FAQProps) {
           <span className="inline-flex rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold tracking-wider text-gray-600 uppercase">
             FAQ
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            {title}
-          </h2>
+          <EditableText
+            as="h2"
+            className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+            value={title}
+            placeholder="FAQ title"
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, title: next });
+            }}
+          />
           <p className="mt-4 text-lg text-gray-600">
             Quick answers to common questions.
           </p>
@@ -55,7 +66,17 @@ export default function T2FAQ({ section }: T2FAQProps) {
                   aria-expanded={isOpen}
                 >
                   <span className="text-base font-semibold text-gray-900">
-                    {item.question}
+                    <EditableText
+                      as="span"
+                      value={item.question}
+                      placeholder="Question"
+                      onCommit={(next) => {
+                        if (!editor || sectionIndex == null) return;
+                        const nextItems = filled.map((x) => ({ ...x }));
+                        nextItems[idx] = { ...nextItems[idx], question: next };
+                        editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                      }}
+                    />
                   </span>
                   <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full border border-gray-200 bg-white text-gray-900">
                     <svg
@@ -70,7 +91,19 @@ export default function T2FAQ({ section }: T2FAQProps) {
                   </span>
                 </button>
                 <div className={`${isOpen ? "block" : "hidden"} px-6 pb-6`}>
-                  <p className="text-gray-600 leading-relaxed">{item.answer}</p>
+                  <EditableText
+                    as="p"
+                    className="text-gray-600 leading-relaxed"
+                    value={item.answer}
+                    placeholder="Answer"
+                    multiline
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      const nextItems = filled.map((x) => ({ ...x }));
+                      nextItems[idx] = { ...nextItems[idx], answer: next };
+                      editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                    }}
+                  />
                 </div>
               </div>
             );

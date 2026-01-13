@@ -5,12 +5,16 @@ import {
   getLoremServiceTitle,
   getLoremServiceDesc,
 } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2ServicesProps {
   section: ServicesSectionType;
+  sectionIndex?: number;
 }
 
-export default function T2Services({ section }: T2ServicesProps) {
+export default function T2Services({ section, sectionIndex }: T2ServicesProps) {
+  const editor = useInlineEditor();
   const services = section.items && section.items.length > 0
     ? section.items
     : [
@@ -56,10 +60,31 @@ export default function T2Services({ section }: T2ServicesProps) {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                {service.title}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">{service.desc}</p>
+              <EditableText
+                as="h3"
+                className="text-xl font-semibold text-gray-900 mb-3"
+                value={service.title}
+                placeholder="Service title"
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextItems = [...services].map((it) => ({ ...it }));
+                  nextItems[index] = { ...nextItems[index], title: next };
+                  editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                }}
+              />
+              <EditableText
+                as="p"
+                className="text-gray-600 leading-relaxed"
+                value={service.desc}
+                placeholder="Service description"
+                multiline
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextItems = [...services].map((it) => ({ ...it }));
+                  nextItems[index] = { ...nextItems[index], desc: next };
+                  editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                }}
+              />
               <a
                 href="#"
                 className="mt-6 inline-flex items-center text-sm font-semibold text-gray-900 hover:text-gray-700 transition-colors"

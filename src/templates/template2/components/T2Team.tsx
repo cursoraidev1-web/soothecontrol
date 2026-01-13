@@ -2,9 +2,12 @@
 
 import type { TeamSection as TeamSectionType } from "@/lib/pageSchema";
 import { getLoremParagraph } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2TeamProps {
   section: TeamSectionType;
+  sectionIndex?: number;
 }
 
 function initials(name: string) {
@@ -14,7 +17,8 @@ function initials(name: string) {
   return `${first}${last}`.toUpperCase();
 }
 
-export default function T2Team({ section }: T2TeamProps) {
+export default function T2Team({ section, sectionIndex }: T2TeamProps) {
+  const editor = useInlineEditor();
   const title = section.title || "Meet the team";
   const subtitle =
     section.subtitle ||
@@ -54,10 +58,27 @@ export default function T2Team({ section }: T2TeamProps) {
           <span className="inline-flex rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold tracking-wider text-gray-600 uppercase">
             Team
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            {title}
-          </h2>
-          <p className="mt-4 text-lg text-gray-600">{subtitle}</p>
+          <EditableText
+            as="h2"
+            className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+            value={title}
+            placeholder="Team title"
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, title: next });
+            }}
+          />
+          <EditableText
+            as="p"
+            className="mt-4 text-lg text-gray-600"
+            value={subtitle}
+            placeholder="Team subtitle"
+            multiline
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, subtitle: next });
+            }}
+          />
         </div>
 
         <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -79,9 +100,30 @@ export default function T2Team({ section }: T2TeamProps) {
                   </div>
                 )}
                 <div className="min-w-0">
-                  <div className="font-semibold text-gray-900">{m.name || "Team Member"}</div>
+                  <EditableText
+                    as="div"
+                    className="font-semibold text-gray-900"
+                    value={m.name || "Team Member"}
+                    placeholder="Name"
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      const nextMembers = members.map((x) => ({ ...x }));
+                      nextMembers[idx] = { ...nextMembers[idx], name: next };
+                      editor.updateSection(sectionIndex, { ...section, members: nextMembers });
+                    }}
+                  />
                   <div className="text-sm text-gray-600">
-                    {m.role || "Role"}
+                    <EditableText
+                      as="span"
+                      value={m.role || "Role"}
+                      placeholder="Role"
+                      onCommit={(next) => {
+                        if (!editor || sectionIndex == null) return;
+                        const nextMembers = members.map((x) => ({ ...x }));
+                        nextMembers[idx] = { ...nextMembers[idx], role: next };
+                        editor.updateSection(sectionIndex, { ...section, members: nextMembers });
+                      }}
+                    />
                     {m.linkedinUrl ? (
                       <>
                         {" · "}
@@ -98,9 +140,19 @@ export default function T2Team({ section }: T2TeamProps) {
                   </div>
                 </div>
               </div>
-              <p className="mt-6 text-gray-600 leading-relaxed">
-                {m.bio || getLoremParagraph()}
-              </p>
+              <EditableText
+                as="p"
+                className="mt-6 text-gray-600 leading-relaxed"
+                value={m.bio || getLoremParagraph()}
+                placeholder="Bio"
+                multiline
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextMembers = members.map((x) => ({ ...x }));
+                  nextMembers[idx] = { ...nextMembers[idx], bio: next };
+                  editor.updateSection(sectionIndex, { ...section, members: nextMembers });
+                }}
+              />
             </div>
           ))}
         </div>

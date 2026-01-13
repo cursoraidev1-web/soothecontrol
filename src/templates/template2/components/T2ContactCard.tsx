@@ -5,6 +5,7 @@ import { buildEmailLink, buildTelLink, buildWhatsAppLink } from "../utils";
 
 interface T2ContactCardProps {
   section: ContactCardSectionType;
+  sectionIndex?: number;
   profile: {
     business_name: string;
     address: string | null;

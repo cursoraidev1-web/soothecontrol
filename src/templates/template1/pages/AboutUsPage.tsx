@@ -28,19 +28,61 @@ export default function AboutUsPage({ pageData, profile }: AboutUsPageProps) {
       {validSections.map((section, index) => {
         switch (section.type) {
           case "hero":
-            return <HeroSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <HeroSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "richtext":
-            return <RichTextSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <RichTextSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "team":
-            return <TeamSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <TeamSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "values":
-            return <ValuesSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <ValuesSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "gallery":
-            return <GallerySection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <GallerySection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "testimonials":
-            return <TestimonialsSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <TestimonialsSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "faq":
-            return <FAQSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <FAQSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           default:
             return null;
         }

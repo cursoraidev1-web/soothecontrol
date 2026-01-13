@@ -5,6 +5,7 @@ import { getLoremSentence } from "@/lib/loremIpsum";
 
 interface ContactCardSectionProps {
   section: ContactCardSectionType;
+  sectionIndex?: number;
   profile?: {
     business_name?: string;
     address?: string | null;
@@ -16,6 +17,7 @@ interface ContactCardSectionProps {
 
 export default function ContactCardSection({
   section,
+  sectionIndex: _sectionIndex,
   profile,
 }: ContactCardSectionProps) {
   const businessName = profile?.business_name || "Our Business";

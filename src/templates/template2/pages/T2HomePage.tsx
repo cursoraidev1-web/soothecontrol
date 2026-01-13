@@ -47,32 +47,77 @@ export default function T2HomePage({ pageData, profile }: T2HomePageProps) {
               <T2Hero
                 key={`${section.type}-${index}`}
                 section={section}
+                sectionIndex={index}
                 businessName={profile.business_name}
                 logoUrl={logoUrl}
                 isHomePage={true}
               />
             );
           case "services":
-            return <T2Services key={`${section.type}-${index}`} section={section} />;
+            return (
+              <T2Services
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "richtext":
-            return <T2RichText key={`${section.type}-${index}`} section={section} label="About" />;
+            return (
+              <T2RichText
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+                label="About"
+              />
+            );
           case "values":
-            return <T2Values key={`${section.type}-${index}`} section={section} />;
+            return (
+              <T2Values
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "backed_by":
-            return <T2BackedBy key={`${section.type}-${index}`} section={section} />;
+            return (
+              <T2BackedBy
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "use_cases":
-            return <T2UseCases key={`${section.type}-${index}`} section={section} />;
+            return (
+              <T2UseCases
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "gallery":
             return <T2Gallery key={`${section.type}-${index}`} section={section} />;
           case "testimonials":
-            return <T2Testimonials key={`${section.type}-${index}`} section={section} />;
+            return (
+              <T2Testimonials
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "faq":
-            return <T2FAQ key={`${section.type}-${index}`} section={section} />;
+            return (
+              <T2FAQ
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "contact_card":
             return (
               <T2ContactCard
                 key={`${section.type}-${index}`}
                 section={section}
+                sectionIndex={index}
                 profile={{
                   business_name: profile.business_name,
                   address: profile.address ?? null,

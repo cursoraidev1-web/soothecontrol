@@ -3,12 +3,16 @@
 import { useState } from "react";
 import type { FAQSection as FAQSectionType } from "@/lib/pageSchema";
 import { getLoremHeadline, getLoremParagraph, getLoremSentence } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface FAQSectionProps {
   section: FAQSectionType;
+  sectionIndex?: number;
 }
 
-export default function FAQSection({ section }: FAQSectionProps) {
+export default function FAQSection({ section, sectionIndex }: FAQSectionProps) {
+  const editor = useInlineEditor();
   const title = section.title || getLoremHeadline();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   
@@ -36,9 +40,17 @@ export default function FAQSection({ section }: FAQSectionProps) {
         <span className="t1-label" style={{ display: "block", textAlign: "center", marginBottom: "var(--spacing-sm)" }}>
           FAQ
         </span>
-        <h2 className="t1-section-title" style={{ textAlign: "center", marginBottom: "var(--spacing-2xl)" }}>
-          {title}
-        </h2>
+        <EditableText
+          as="h2"
+          className="t1-section-title"
+          value={title}
+          placeholder="FAQ title"
+          style={{ textAlign: "center", marginBottom: "var(--spacing-2xl)" }}
+          onCommit={(next) => {
+            if (!editor || sectionIndex == null) return;
+            editor.updateSection(sectionIndex, { ...section, title: next });
+          }}
+        />
         <div className="t1-faq-list">
           {filledFAQs.map((faq, index) => (
             <div
@@ -66,7 +78,17 @@ export default function FAQSection({ section }: FAQSectionProps) {
                   color: "var(--color-text-primary)",
                 }}
               >
-                <span>{faq.question}</span>
+                <EditableText
+                  as="span"
+                  value={faq.question}
+                  placeholder="Question"
+                  onCommit={(next) => {
+                    if (!editor || sectionIndex == null) return;
+                    const nextItems = filledFAQs.map((x) => ({ ...x }));
+                    nextItems[index] = { ...nextItems[index], question: next };
+                    editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                  }}
+                />
                 <svg
                   width="20"
                   height="20"
@@ -93,13 +115,23 @@ export default function FAQSection({ section }: FAQSectionProps) {
                   padding: openIndex === index ? "0 0 var(--spacing-md) 0" : "0",
                 }}
               >
-                <p style={{
-                  fontSize: "var(--font-size-base)",
-                  lineHeight: 1.7,
-                  color: "var(--color-text-secondary)",
-                }}>
-                  {faq.answer}
-                </p>
+                <EditableText
+                  as="p"
+                  value={faq.answer}
+                  placeholder="Answer"
+                  multiline
+                  style={{
+                    fontSize: "var(--font-size-base)",
+                    lineHeight: 1.7,
+                    color: "var(--color-text-secondary)",
+                  }}
+                  onCommit={(next) => {
+                    if (!editor || sectionIndex == null) return;
+                    const nextItems = filledFAQs.map((x) => ({ ...x }));
+                    nextItems[index] = { ...nextItems[index], answer: next };
+                    editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                  }}
+                />
               </div>
             </div>
           ))}

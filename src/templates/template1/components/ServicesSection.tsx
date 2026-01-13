@@ -5,12 +5,16 @@ import {
   getLoremServiceTitle,
   getLoremServiceDesc,
 } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface ServicesSectionProps {
   section: ServicesSectionType;
+  sectionIndex?: number;
 }
 
-export default function ServicesSection({ section }: ServicesSectionProps) {
+export default function ServicesSection({ section, sectionIndex }: ServicesSectionProps) {
+  const editor = useInlineEditor();
   // Ensure at least 3 services for display
   const services = section.items && section.items.length > 0
     ? section.items
@@ -54,8 +58,31 @@ export default function ServicesSection({ section }: ServicesSectionProps) {
                   {icons[index % icons.length]}
                 </svg>
               </div>
-              <h3 className="t1-service-title">{service.title}</h3>
-              <p className="t1-service-desc">{service.desc}</p>
+              <EditableText
+                as="h3"
+                className="t1-service-title"
+                value={service.title}
+                placeholder="Service title"
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextItems = [...services].map((it) => ({ ...it }));
+                  nextItems[index] = { ...nextItems[index], title: next };
+                  editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                }}
+              />
+              <EditableText
+                as="p"
+                className="t1-service-desc"
+                value={service.desc}
+                placeholder="Service description"
+                multiline
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextItems = [...services].map((it) => ({ ...it }));
+                  nextItems[index] = { ...nextItems[index], desc: next };
+                  editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                }}
+              />
             </div>
           ))}
         </div>

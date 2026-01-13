@@ -3,9 +3,12 @@
 import type { HeroSection as HeroSectionType } from "@/lib/pageSchema";
 import { getLoremHeadline, getLoremParagraph } from "@/lib/loremIpsum";
 import { getDefaultTrustHighlights } from "../utils";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2HeroProps {
   section: HeroSectionType;
+  sectionIndex?: number;
   businessName: string;
   logoUrl: string | null;
   isHomePage?: boolean;
@@ -14,11 +17,13 @@ interface T2HeroProps {
 
 export default function T2Hero({
   section,
+  sectionIndex,
   businessName,
   logoUrl,
   isHomePage = false,
   pageLabel,
 }: T2HeroProps) {
+  const editor = useInlineEditor();
   const headline = section.headline || getLoremHeadline();
   const subtext = section.subtext || getLoremParagraph();
   const ctaText = section.ctaText || "Get Started";
@@ -47,18 +52,41 @@ export default function T2Hero({
                   className="h-12 w-auto mb-6"
                 />
               )}
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl lg:text-6xl">
-                {headline}
-              </h1>
-              <p className="mt-6 text-lg leading-8 text-gray-600 max-w-xl">
-                {subtext}
-              </p>
+              <EditableText
+                as="h1"
+                className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl lg:text-6xl"
+                value={headline}
+                placeholder="Headline"
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  editor.updateSection(sectionIndex, { ...section, headline: next });
+                }}
+              />
+              <EditableText
+                as="p"
+                className="mt-6 text-lg leading-8 text-gray-600 max-w-xl"
+                value={subtext}
+                placeholder="Subtext"
+                multiline
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  editor.updateSection(sectionIndex, { ...section, subtext: next });
+                }}
+              />
               <div className="mt-10 flex items-center gap-4">
                 <a
                   href={ctaHref}
                   className="rounded-lg bg-gray-900 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-gray-800 hover:shadow-xl"
                 >
-                  {ctaText}
+                  <EditableText
+                    as="span"
+                    value={ctaText}
+                    placeholder="CTA"
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      editor.updateSection(sectionIndex, { ...section, ctaText: next });
+                    }}
+                  />
                 </a>
                 <a
                   href="#contact"
@@ -132,13 +160,28 @@ export default function T2Hero({
           <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 block">
             {pageLabel || ""}
           </span>
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            {headline || `About ${businessName}`}
-          </h1>
+          <EditableText
+            as="h1"
+            className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl"
+            value={headline || `About ${businessName}`}
+            placeholder="Page headline"
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, headline: next });
+            }}
+          />
           {subtext && (
-            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-              {subtext}
-            </p>
+            <EditableText
+              as="p"
+              className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto"
+              value={subtext}
+              placeholder="Page subtext"
+              multiline
+              onCommit={(next) => {
+                if (!editor || sectionIndex == null) return;
+                editor.updateSection(sectionIndex, { ...section, subtext: next });
+              }}
+            />
           )}
         </div>
       </div>

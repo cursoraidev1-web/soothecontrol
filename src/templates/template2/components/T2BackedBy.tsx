@@ -1,12 +1,16 @@
 "use client";
 
 import type { BackedBySection as BackedBySectionType } from "@/lib/pageSchema";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2BackedByProps {
   section: BackedBySectionType;
+  sectionIndex?: number;
 }
 
-export default function T2BackedBy({ section }: T2BackedByProps) {
+export default function T2BackedBy({ section, sectionIndex }: T2BackedByProps) {
+  const editor = useInlineEditor();
   const title =
     section.title || "Trusted by teams who care about quality";
 
@@ -29,9 +33,16 @@ export default function T2BackedBy({ section }: T2BackedByProps) {
           <p className="text-sm font-semibold tracking-wider text-gray-500 uppercase">
             Social proof
           </p>
-          <h2 className="mt-3 text-2xl font-semibold text-gray-900 sm:text-3xl">
-            {title}
-          </h2>
+          <EditableText
+            as="h2"
+            className="mt-3 text-2xl font-semibold text-gray-900 sm:text-3xl"
+            value={title}
+            placeholder="Trust title"
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, title: next });
+            }}
+          />
         </div>
 
         <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
@@ -48,7 +59,17 @@ export default function T2BackedBy({ section }: T2BackedByProps) {
                 />
               ) : (
                 <span className="text-sm font-semibold text-gray-700">
-                  {logo.name}
+                  <EditableText
+                    as="span"
+                    value={logo.name}
+                    placeholder="Logo name"
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      const nextLogos = logos.map((x) => ({ ...x }));
+                      nextLogos[idx] = { ...nextLogos[idx], name: next };
+                      editor.updateSection(sectionIndex, { ...section, logos: nextLogos });
+                    }}
+                  />
                 </span>
               )}
             </div>

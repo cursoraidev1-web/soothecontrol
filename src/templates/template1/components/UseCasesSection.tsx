@@ -6,12 +6,16 @@ import {
   getLoremParagraph,
   getLoremShortText,
 } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface UseCasesSectionProps {
   section: UseCasesSectionType;
+  sectionIndex?: number;
 }
 
-export default function UseCasesSection({ section }: UseCasesSectionProps) {
+export default function UseCasesSection({ section, sectionIndex }: UseCasesSectionProps) {
+  const editor = useInlineEditor();
   const title = section.title || "Use cases";
   const description = section.description || getLoremParagraph();
   
@@ -44,35 +48,70 @@ export default function UseCasesSection({ section }: UseCasesSectionProps) {
           }}>
             <div className="t1-use-cases-text">
               <span className="t1-label">Use Cases</span>
-              <h2 className="t1-section-heading" style={{ textAlign: "left", marginBottom: "var(--spacing-md)" }}>
-                {title}
-              </h2>
-              <p style={{ 
-                fontSize: "var(--font-size-lg)", 
-                color: "var(--color-text-secondary)",
-                lineHeight: 1.7,
-                marginBottom: "var(--spacing-lg)"
-              }}>
-                {description}
-              </p>
+              <EditableText
+                as="h2"
+                className="t1-section-heading"
+                value={title}
+                placeholder="Use cases title"
+                style={{ textAlign: "left", marginBottom: "var(--spacing-md)" }}
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  editor.updateSection(sectionIndex, { ...section, title: next });
+                }}
+              />
+              <EditableText
+                as="p"
+                value={description}
+                placeholder="Use cases description"
+                multiline
+                style={{ 
+                  fontSize: "var(--font-size-lg)", 
+                  color: "var(--color-text-secondary)",
+                  lineHeight: 1.7,
+                  marginBottom: "var(--spacing-lg)"
+                }}
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  editor.updateSection(sectionIndex, { ...section, description: next });
+                }}
+              />
             </div>
             <div className="t1-use-case-card">
-              <h3 style={{ 
-                fontSize: "var(--font-size-2xl)", 
-                fontWeight: "bold",
-                color: "var(--color-text-primary)",
-                marginBottom: "var(--spacing-md)"
-              }}>
-                {item.title}
-              </h3>
-              <p style={{ 
-                fontSize: "var(--font-size-base)", 
-                color: "var(--color-text-secondary)",
-                lineHeight: 1.6,
-                marginBottom: "var(--spacing-md)"
-              }}>
-                {item.description}
-              </p>
+              <EditableText
+                as="h3"
+                value={item.title}
+                placeholder="Use case title"
+                style={{ 
+                  fontSize: "var(--font-size-2xl)", 
+                  fontWeight: "bold",
+                  color: "var(--color-text-primary)",
+                  marginBottom: "var(--spacing-md)"
+                }}
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextItems = filledItems.map((x) => ({ ...x }));
+                  nextItems[index] = { ...nextItems[index], title: next };
+                  editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                }}
+              />
+              <EditableText
+                as="p"
+                value={item.description}
+                placeholder="Use case description"
+                multiline
+                style={{ 
+                  fontSize: "var(--font-size-base)", 
+                  color: "var(--color-text-secondary)",
+                  lineHeight: 1.6,
+                  marginBottom: "var(--spacing-md)"
+                }}
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextItems = filledItems.map((x) => ({ ...x }));
+                  nextItems[index] = { ...nextItems[index], description: next };
+                  editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                }}
+              />
               {item.linkText && item.linkHref && (
                 <a 
                   href={item.linkHref} 
@@ -87,7 +126,17 @@ export default function UseCasesSection({ section }: UseCasesSectionProps) {
                     marginTop: "var(--spacing-md)"
                   }}
                 >
-                  {item.linkText}
+                  <EditableText
+                    as="span"
+                    value={item.linkText}
+                    placeholder="Link text"
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      const nextItems = filledItems.map((x) => ({ ...x }));
+                      nextItems[index] = { ...nextItems[index], linkText: next };
+                      editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                    }}
+                  />
                   <svg
                     width="16"
                     height="16"

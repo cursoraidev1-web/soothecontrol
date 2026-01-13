@@ -2,12 +2,16 @@
 
 import type { GallerySection as GallerySectionType } from "@/lib/pageSchema";
 import { getLoremHeadline } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface GallerySectionProps {
   section: GallerySectionType;
+  sectionIndex?: number;
 }
 
-export default function GallerySection({ section }: GallerySectionProps) {
+export default function GallerySection({ section, sectionIndex }: GallerySectionProps) {
+  const editor = useInlineEditor();
   const title = section.title || getLoremHeadline();
   
   // Ensure at least 6 images for display
@@ -30,9 +34,17 @@ export default function GallerySection({ section }: GallerySectionProps) {
         <span className="t1-label" style={{ display: "block", textAlign: "center", marginBottom: "var(--spacing-sm)" }}>
           Gallery
         </span>
-        <h2 className="t1-section-title" style={{ textAlign: "center", marginBottom: "var(--spacing-2xl)" }}>
-          {title}
-        </h2>
+        <EditableText
+          as="h2"
+          className="t1-section-title"
+          value={title}
+          placeholder="Gallery title"
+          style={{ textAlign: "center", marginBottom: "var(--spacing-2xl)" }}
+          onCommit={(next) => {
+            if (!editor || sectionIndex == null) return;
+            editor.updateSection(sectionIndex, { ...section, title: next });
+          }}
+        />
         <div className="t1-gallery-grid">
           {filledImages.map((image, index) => (
             <div key={index} className="t1-gallery-item">

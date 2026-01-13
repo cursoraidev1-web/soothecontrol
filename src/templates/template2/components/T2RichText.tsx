@@ -2,13 +2,18 @@
 
 import type { RichTextSection as RichTextSectionType } from "@/lib/pageSchema";
 import { getLoremParagraph } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
+import EditableHtml from "@/components/inline-editor/EditableHtml";
 
 interface T2RichTextProps {
   section: RichTextSectionType;
+  sectionIndex?: number;
   label?: string;
 }
 
-export default function T2RichText({ section, label }: T2RichTextProps) {
+export default function T2RichText({ section, sectionIndex, label }: T2RichTextProps) {
+  const editor = useInlineEditor();
   const title = section.title || "";
   const body = section.body || getLoremParagraph();
 
@@ -23,13 +28,20 @@ export default function T2RichText({ section, label }: T2RichTextProps) {
               </span>
             </div>
           ) : null}
-          {title ? (
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              {title}
-            </h2>
+          {title || editor?.enabled ? (
+            <EditableText
+              as="h2"
+              className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+              value={title}
+              placeholder="Section title"
+              onCommit={(next) => {
+                if (!editor || sectionIndex == null) return;
+                editor.updateSection(sectionIndex, { ...section, title: next });
+              }}
+            />
           ) : null}
 
-          <div
+          <EditableHtml
             className={[
               "mt-6 text-gray-600 leading-relaxed",
               "[&_p]:mt-4",
@@ -41,7 +53,11 @@ export default function T2RichText({ section, label }: T2RichTextProps) {
               "[&_a]:font-semibold [&_a]:text-gray-900 [&_a]:underline [&_a]:underline-offset-4",
               "[&_blockquote]:mt-6 [&_blockquote]:border-l-2 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:text-gray-700",
             ].join(" ")}
-            dangerouslySetInnerHTML={{ __html: body }}
+            html={body}
+            onCommit={(nextHtml) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, body: nextHtml });
+            }}
           />
         </div>
       </div>

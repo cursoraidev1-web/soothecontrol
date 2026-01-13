@@ -2,12 +2,17 @@
 
 import type { RichTextSection as RichTextSectionType } from "@/lib/pageSchema";
 import { getLoremParagraph } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
+import EditableHtml from "@/components/inline-editor/EditableHtml";
 
 interface RichTextSectionProps {
   section: RichTextSectionType;
+  sectionIndex?: number;
 }
 
-export default function RichTextSection({ section }: RichTextSectionProps) {
+export default function RichTextSection({ section, sectionIndex }: RichTextSectionProps) {
+  const editor = useInlineEditor();
   const title = section.title || "";
   const body = section.body || getLoremParagraph();
 
@@ -17,15 +22,28 @@ export default function RichTextSection({ section }: RichTextSectionProps) {
   return (
     <section className="t1-section">
       <div className="t1-container">
-        {title && (
+        {(title || editor?.enabled) && (
           <>
             <span className="t1-label">About</span>
-            <h2 className="t1-section-heading">{title}</h2>
+            <EditableText
+              as="h2"
+              className="t1-section-heading"
+              value={title}
+              placeholder="Section title"
+              onCommit={(next) => {
+                if (!editor || sectionIndex == null) return;
+                editor.updateSection(sectionIndex, { ...section, title: next });
+              }}
+            />
           </>
         )}
-        <div
+        <EditableHtml
           className={`t1-richtext ${hasTwoColumn ? "t1-richtext-two-col" : ""}`}
-          dangerouslySetInnerHTML={{ __html: body }}
+          html={body}
+          onCommit={(nextHtml) => {
+            if (!editor || sectionIndex == null) return;
+            editor.updateSection(sectionIndex, { ...section, body: nextHtml });
+          }}
         />
       </div>
     </section>

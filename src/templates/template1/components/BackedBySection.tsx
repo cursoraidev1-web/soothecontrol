@@ -1,13 +1,16 @@
 "use client";
 
 import type { BackedBySection as BackedBySectionType } from "@/lib/pageSchema";
-import { getLoremSentence } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface BackedBySectionProps {
   section: BackedBySectionType;
+  sectionIndex?: number;
 }
 
-export default function BackedBySection({ section }: BackedBySectionProps) {
+export default function BackedBySection({ section, sectionIndex }: BackedBySectionProps) {
+  const editor = useInlineEditor();
   const title = section.title || "Backed by the best companies and visionary angels";
   
   // Ensure at least 3 logos for display
@@ -37,9 +40,17 @@ export default function BackedBySection({ section }: BackedBySectionProps) {
           <span className="t1-label" style={{ display: "block", marginBottom: "var(--spacing-md)" }}>
             Partners
           </span>
-          <h2 className="t1-section-title" style={{ marginBottom: 0 }}>
-            {title}
-          </h2>
+          <EditableText
+            as="h2"
+            className="t1-section-title"
+            value={title}
+            placeholder="Partners title"
+            style={{ marginBottom: 0 }}
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, title: next });
+            }}
+          />
         </div>
         <div className="t1-backed-by-grid">
           {filledLogos.map((logo, index) => (
@@ -58,7 +69,17 @@ export default function BackedBySection({ section }: BackedBySectionProps) {
                   padding: "var(--spacing-md)",
                   opacity: 0.6
                 }}>
-                  {logo.name}
+                  <EditableText
+                    as="span"
+                    value={logo.name}
+                    placeholder="Logo name"
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      const nextLogos = filledLogos.map((x) => ({ ...x }));
+                      nextLogos[index] = { ...nextLogos[index], name: next };
+                      editor.updateSection(sectionIndex, { ...section, logos: nextLogos });
+                    }}
+                  />
                 </div>
               )}
             </div>

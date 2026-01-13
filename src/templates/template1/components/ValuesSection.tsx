@@ -5,12 +5,16 @@ import {
   getLoremValueTitle,
   getLoremValueDesc,
 } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface ValuesSectionProps {
   section: ValuesSectionType;
+  sectionIndex?: number;
 }
 
-export default function ValuesSection({ section }: ValuesSectionProps) {
+export default function ValuesSection({ section, sectionIndex }: ValuesSectionProps) {
+  const editor = useInlineEditor();
   // Ensure at least 3 values for display
   const values = section.items && section.items.length > 0
     ? section.items
@@ -49,8 +53,31 @@ export default function ValuesSection({ section }: ValuesSectionProps) {
                   <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
               </div>
-              <h3 className="t1-value-title">{value.title}</h3>
-              <p className="t1-value-desc">{value.desc}</p>
+              <EditableText
+                as="h3"
+                className="t1-value-title"
+                value={value.title}
+                placeholder="Value title"
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextItems = [...values].map((it) => ({ ...it }));
+                  nextItems[index] = { ...nextItems[index], title: next };
+                  editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                }}
+              />
+              <EditableText
+                as="p"
+                className="t1-value-desc"
+                value={value.desc}
+                placeholder="Value description"
+                multiline
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextItems = [...values].map((it) => ({ ...it }));
+                  nextItems[index] = { ...nextItems[index], desc: next };
+                  editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                }}
+              />
             </div>
           ))}
         </div>

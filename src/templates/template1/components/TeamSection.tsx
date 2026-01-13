@@ -2,9 +2,12 @@
 
 import type { TeamSection as TeamSectionType } from "@/lib/pageSchema";
 import { getLoremHeadline, getLoremParagraph } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface TeamSectionProps {
   section: TeamSectionType;
+  sectionIndex?: number;
 }
 
 function initials(name: string) {
@@ -14,7 +17,8 @@ function initials(name: string) {
   return `${first}${last}`.toUpperCase();
 }
 
-export default function TeamSection({ section }: TeamSectionProps) {
+export default function TeamSection({ section, sectionIndex }: TeamSectionProps) {
+  const editor = useInlineEditor();
   const title = section.title || "Meet the team";
   const subtitle =
     section.subtitle ||
@@ -43,10 +47,27 @@ export default function TeamSection({ section }: TeamSectionProps) {
         <span className="t1-label" style={{ display: "block", textAlign: "center", marginBottom: "var(--spacing-sm)" }}>
           Team
         </span>
-        <h2 className="t1-section-title" style={{ textAlign: "center", marginBottom: "var(--spacing-md)" }}>
-          {title}
-        </h2>
-        <p
+        <EditableText
+          as="h2"
+          className="t1-section-title"
+          value={title}
+          placeholder="Team title"
+          onCommit={(next) => {
+            if (!editor || sectionIndex == null) return;
+            editor.updateSection(sectionIndex, { ...section, title: next });
+          }}
+          style={{ textAlign: "center", marginBottom: "var(--spacing-md)" }}
+        />
+        <EditableText
+          as="p"
+          value={subtitle}
+          placeholder="Team subtitle"
+          multiline
+          onCommit={(next) => {
+            if (!editor || sectionIndex == null) return;
+            editor.updateSection(sectionIndex, { ...section, subtitle: next });
+          }}
+          className=""
           style={{
             maxWidth: 760,
             margin: "0 auto",
@@ -56,9 +77,7 @@ export default function TeamSection({ section }: TeamSectionProps) {
             lineHeight: 1.7,
             marginBottom: "var(--spacing-3xl)",
           }}
-        >
-          {subtitle}
-        </p>
+        />
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "var(--spacing-2xl)" }}>
           {filled.map((m, idx) => (
@@ -105,11 +124,31 @@ export default function TeamSection({ section }: TeamSectionProps) {
                   </div>
                 )}
                 <div>
-                  <div style={{ fontWeight: 800, color: "var(--color-text-primary)", fontSize: "var(--font-size-lg)" }}>
-                    {m.name}
-                  </div>
+                  <EditableText
+                    as="div"
+                    value={m.name}
+                    placeholder="Name"
+                    onCommit={(next) => {
+                      if (!editor || sectionIndex == null) return;
+                      const nextMembers = filled.map((x) => ({ ...x }));
+                      nextMembers[idx] = { ...nextMembers[idx], name: next };
+                      editor.updateSection(sectionIndex, { ...section, members: nextMembers });
+                    }}
+                    className=""
+                    style={{ fontWeight: 800, color: "var(--color-text-primary)", fontSize: "var(--font-size-lg)" }}
+                  />
                   <div style={{ color: "var(--color-text-secondary)", fontSize: "var(--font-size-sm)" }}>
-                    {m.role}
+                    <EditableText
+                      as="span"
+                      value={m.role}
+                      placeholder="Role"
+                      onCommit={(next) => {
+                        if (!editor || sectionIndex == null) return;
+                        const nextMembers = filled.map((x) => ({ ...x }));
+                        nextMembers[idx] = { ...nextMembers[idx], role: next };
+                        editor.updateSection(sectionIndex, { ...section, members: nextMembers });
+                      }}
+                    />
                     {m.linkedinUrl ? (
                       <>
                         {" · "}
@@ -126,9 +165,20 @@ export default function TeamSection({ section }: TeamSectionProps) {
                   </div>
                 </div>
               </div>
-              <p style={{ marginTop: "var(--spacing-lg)", color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
-                {m.bio}
-              </p>
+              <EditableText
+                as="p"
+                value={m.bio}
+                placeholder="Bio"
+                multiline
+                onCommit={(next) => {
+                  if (!editor || sectionIndex == null) return;
+                  const nextMembers = filled.map((x) => ({ ...x }));
+                  nextMembers[idx] = { ...nextMembers[idx], bio: next };
+                  editor.updateSection(sectionIndex, { ...section, members: nextMembers });
+                }}
+                className=""
+                style={{ marginTop: "var(--spacing-lg)", color: "var(--color-text-secondary)", lineHeight: 1.7 }}
+              />
             </div>
           ))}
         </div>

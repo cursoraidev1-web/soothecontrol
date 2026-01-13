@@ -30,23 +30,54 @@ export default function ContactUsPage({ pageData, profile }: ContactUsPageProps)
       {validSections.map((section, index) => {
         switch (section.type) {
           case "hero":
-            return <HeroSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <HeroSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "contact_card":
             return (
               <ContactCardSection
                 key={`${section.type}-${index}`}
                 section={section}
+                sectionIndex={index}
                 profile={profile}
               />
             );
           case "richtext":
-            return <RichTextSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <RichTextSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "gallery":
-            return <GallerySection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <GallerySection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "testimonials":
-            return <TestimonialsSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <TestimonialsSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "faq":
-            return <FAQSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <FAQSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           default:
             return null;
         }

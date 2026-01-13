@@ -2,9 +2,12 @@
 
 import type { ValuesSection as ValuesSectionType } from "@/lib/pageSchema";
 import { getLoremServiceDesc, getLoremServiceTitle } from "@/lib/loremIpsum";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2ValuesProps {
   section: ValuesSectionType;
+  sectionIndex?: number;
 }
 
 const ICONS = [
@@ -71,7 +74,8 @@ const ICONS = [
   },
 ];
 
-export default function T2Values({ section }: T2ValuesProps) {
+export default function T2Values({ section, sectionIndex }: T2ValuesProps) {
+  const editor = useInlineEditor();
   const items =
     section.items && section.items.length > 0
       ? section.items
@@ -113,10 +117,31 @@ export default function T2Values({ section }: T2ValuesProps) {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 ring-1 ring-gray-200 transition-colors group-hover:from-gray-100 group-hover:to-gray-200">
                   <Icon />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-gray-900">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-gray-600 leading-relaxed">{item.desc}</p>
+                <EditableText
+                  as="h3"
+                  className="mt-6 text-xl font-semibold text-gray-900"
+                  value={item.title}
+                  placeholder="Value title"
+                  onCommit={(next) => {
+                    if (!editor || sectionIndex == null) return;
+                    const nextItems = filled.map((x) => ({ ...x }));
+                    nextItems[idx] = { ...nextItems[idx], title: next };
+                    editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                  }}
+                />
+                <EditableText
+                  as="p"
+                  className="mt-3 text-gray-600 leading-relaxed"
+                  value={item.desc}
+                  placeholder="Value description"
+                  multiline
+                  onCommit={(next) => {
+                    if (!editor || sectionIndex == null) return;
+                    const nextItems = filled.map((x) => ({ ...x }));
+                    nextItems[idx] = { ...nextItems[idx], desc: next };
+                    editor.updateSection(sectionIndex, { ...section, items: nextItems });
+                  }}
+                />
               </div>
             );
           })}

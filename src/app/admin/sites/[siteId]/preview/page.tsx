@@ -7,10 +7,12 @@ import { useParams } from "next/navigation";
 import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
 import ColorPaletteSidebar from "@/components/admin/ColorPaletteSidebar";
+import { InlineEditorProvider } from "@/components/inline-editor/InlineEditorContext";
 import { resolveSiteById } from "@/lib/siteResolver";
 import type { SiteData } from "@/lib/siteResolver";
-import type { PageKey } from "@/lib/pageSchema";
+import { validatePageData, type PageKey, type Section } from "@/lib/pageSchema";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export default function SitePreviewPage() {
   const params = useParams();
@@ -21,6 +23,10 @@ export default function SitePreviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<PageKey>("home");
   const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     if (!siteId) {
@@ -91,6 +97,7 @@ export default function SitePreviewPage() {
           padding: "8px",
           borderRadius: "8px",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          alignItems: "center",
         }}
       >
         <button
@@ -159,33 +166,187 @@ export default function SitePreviewPage() {
         >
           Back
         </Link>
+
+        <div style={{ width: 1, height: 24, background: "#E5E7EB", marginLeft: 8 }} />
+
+        <button
+          onClick={() => {
+            setSaveError(null);
+            setSaveSuccess(false);
+            setEditMode((v) => !v);
+          }}
+          style={{
+            padding: "8px 12px",
+            borderRadius: "6px",
+            border: "1px solid #E5E7EB",
+            background: editMode ? "#111827" : "transparent",
+            color: editMode ? "#FFFFFF" : "#111827",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: 700,
+          }}
+        >
+          {editMode ? "Editing" : "Edit"}
+        </button>
+
+        {editMode && (
+          <>
+            <button
+              onClick={async () => {
+                if (!siteData) return;
+                setIsSaving(true);
+                setSaveError(null);
+                setSaveSuccess(false);
+                try {
+                  const draft = siteData.pages[currentPage];
+                  const valid = validatePageData(draft);
+                  if (!valid.ok) {
+                    setSaveError(valid.error ?? "Invalid page data.");
+                    return;
+                  }
+
+                  const supabase = supabaseBrowser();
+                  const { error: err } = await supabase
+                    .from("pages")
+                    .update({ data: draft, status: "draft" })
+                    .eq("site_id", siteId)
+                    .eq("key", currentPage);
+
+                  if (err) throw err;
+                  setSaveSuccess(true);
+                } catch (err) {
+                  setSaveError(formatSupabaseError(err));
+                } finally {
+                  setIsSaving(false);
+                }
+              }}
+              disabled={isSaving}
+              style={{
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "none",
+                background: "#6B46C1",
+                color: "#FFFFFF",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: 700,
+                opacity: isSaving ? 0.7 : 1,
+              }}
+            >
+              {isSaving ? "Saving…" : "Save Draft"}
+            </button>
+
+            <div style={{ fontSize: 12, color: "#6B7280", marginLeft: 6 }}>
+              Click text to edit
+            </div>
+          </>
+        )}
       </div>
 
+      {/* Save toast */}
+      {saveError ? (
+        <div
+          style={{
+            position: "fixed",
+            top: 88,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 999,
+            borderRadius: 10,
+            border: "1px solid #FCA5A5",
+            backgroundColor: "#FEF2F2",
+            padding: "10px 12px",
+            fontSize: 13,
+            color: "#B91C1C",
+            maxWidth: 720,
+          }}
+        >
+          {saveError}
+        </div>
+      ) : null}
+      {saveSuccess ? (
+        <div
+          style={{
+            position: "fixed",
+            top: 88,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 999,
+            borderRadius: 10,
+            border: "1px solid #86EFAC",
+            backgroundColor: "#ECFDF5",
+            padding: "10px 12px",
+            fontSize: 13,
+            color: "#065F46",
+          }}
+        >
+          Draft saved.
+        </div>
+      ) : null}
+
       {/* Template Preview - Full Screen */}
-      {siteData.site.template_key === "t1" && (
-        <>
-          <Template1
+      <InlineEditorProvider
+        value={{
+          enabled: editMode,
+          pageKey: currentPage,
+          pageData: siteData.pages[currentPage],
+          updateSection: (sectionIndex: number, next: Section) => {
+            setSiteData((prev) => {
+              if (!prev) return prev;
+              const page = prev.pages[currentPage];
+              const sections = page.sections.map((s, i) => (i === sectionIndex ? next : s));
+              return {
+                ...prev,
+                pages: {
+                  ...prev.pages,
+                  [currentPage]: { ...page, sections },
+                },
+              };
+            });
+          },
+          updateSectionField: (sectionIndex: number, field: any, value: any) => {
+            setSiteData((prev) => {
+              if (!prev) return prev;
+              const page = prev.pages[currentPage];
+              const section = page.sections[sectionIndex] as any;
+              const nextSection = { ...section, [field]: value } as Section;
+              const sections = page.sections.map((s, i) => (i === sectionIndex ? nextSection : s));
+              return {
+                ...prev,
+                pages: {
+                  ...prev.pages,
+                  [currentPage]: { ...page, sections },
+                },
+              };
+            });
+          },
+        }}
+      >
+        {siteData.site.template_key === "t1" && (
+          <>
+            <Template1
+              site={siteData.site}
+              profile={siteData.profile}
+              pages={siteData.pages}
+              currentPage={currentPage}
+              baseUrl=""
+            />
+            <ColorPaletteSidebar
+              isOpen={colorPaletteOpen}
+              onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
+            />
+          </>
+        )}
+        {siteData.site.template_key === "t2" && (
+          <Template2
             site={siteData.site}
             profile={siteData.profile}
             pages={siteData.pages}
             currentPage={currentPage}
             baseUrl=""
           />
-          <ColorPaletteSidebar
-            isOpen={colorPaletteOpen}
-            onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
-          />
-        </>
-      )}
-      {siteData.site.template_key === "t2" && (
-        <Template2
-          site={siteData.site}
-          profile={siteData.profile}
-          pages={siteData.pages}
-          currentPage={currentPage}
-          baseUrl=""
-        />
-      )}
+        )}
+      </InlineEditorProvider>
       {!["t1", "t2"].includes(siteData.site.template_key) && (
         <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
           <div style={{ textAlign: "center" }}>

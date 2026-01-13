@@ -37,31 +37,86 @@ export default function HomePage({ pageData, profile }: HomePageProps) {
         }
         switch (section.type) {
           case "hero":
-            return <HeroSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <HeroSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "services":
-            return <ServicesSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <ServicesSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "richtext":
-            return <RichTextSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <RichTextSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "values":
-            return <ValuesSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <ValuesSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "contact_card":
             return (
               <ContactCardSection
                 key={`${section.type}-${index}`}
                 section={section}
+                sectionIndex={index}
                 profile={profile}
               />
             );
           case "backed_by":
-            return <BackedBySection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <BackedBySection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "use_cases":
-            return <UseCasesSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <UseCasesSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "gallery":
-            return <GallerySection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <GallerySection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "testimonials":
-            return <TestimonialsSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <TestimonialsSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           case "faq":
-            return <FAQSection key={`${section.type}-${index}`} section={section} />;
+            return (
+              <FAQSection
+                key={`${section.type}-${index}`}
+                section={section}
+                sectionIndex={index}
+              />
+            );
           default:
             return null;
         }
