@@ -14,6 +14,7 @@ import UseCasesEditor from "@/components/page-editor/UseCasesEditor";
 import GalleryEditor from "@/components/page-editor/GalleryEditor";
 import TestimonialsEditor from "@/components/page-editor/TestimonialsEditor";
 import FAQEditor from "@/components/page-editor/FAQEditor";
+import TeamEditor from "@/components/page-editor/TeamEditor";
 import {
   defaultPageData,
   defaultSection,
@@ -48,6 +49,7 @@ const sectionOptions: Array<Section["type"]> = [
   "gallery",
   "testimonials",
   "faq",
+  "team",
 ];
 
 export default function PageEditorPage({
@@ -591,6 +593,11 @@ export default function PageEditorPage({
                             />
                           ) : section.type === "faq" ? (
                             <FAQEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : section.type === "team" ? (
+                            <TeamEditor
                               value={section}
                               onChange={(next) => updateSection(idx, next)}
                             />

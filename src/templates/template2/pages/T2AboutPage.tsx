@@ -11,6 +11,7 @@ import T2UseCases from "../components/T2UseCases";
 import T2Testimonials from "../components/T2Testimonials";
 import T2FAQ from "../components/T2FAQ";
 import T2ContactCard from "../components/T2ContactCard";
+import T2Team from "../components/T2Team";
 import { getPublicAssetUrl } from "@/lib/assets";
 
 interface T2AboutPageProps {
@@ -58,6 +59,8 @@ export default function T2AboutPage({ pageData, profile }: T2AboutPageProps) {
             return <T2RichText key={`${section.type}-${index}`} section={section} label="Our story" />;
           case "values":
             return <T2Values key={`${section.type}-${index}`} section={section} />;
+          case "team":
+            return <T2Team key={`${section.type}-${index}`} section={section} />;
           case "backed_by":
             return <T2BackedBy key={`${section.type}-${index}`} section={section} />;
           case "use_cases":

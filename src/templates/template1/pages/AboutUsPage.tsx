@@ -4,6 +4,7 @@ import type { PageData } from "@/lib/pageSchema";
 import HeroSection from "../components/HeroSection";
 import RichTextSection from "../components/RichTextSection";
 import ValuesSection from "../components/ValuesSection";
+import TeamSection from "../components/TeamSection";
 import GallerySection from "../components/GallerySection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import FAQSection from "../components/FAQSection";
@@ -30,6 +31,8 @@ export default function AboutUsPage({ pageData, profile }: AboutUsPageProps) {
             return <HeroSection key={`${section.type}-${index}`} section={section} />;
           case "richtext":
             return <RichTextSection key={`${section.type}-${index}`} section={section} />;
+          case "team":
+            return <TeamSection key={`${section.type}-${index}`} section={section} />;
           case "values":
             return <ValuesSection key={`${section.type}-${index}`} section={section} />;
           case "gallery":

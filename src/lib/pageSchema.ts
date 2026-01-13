@@ -79,6 +79,19 @@ export type FAQSection = {
   }>;
 };
 
+export type TeamSection = {
+  type: "team";
+  title: string;
+  subtitle: string;
+  members: Array<{
+    name: string;
+    role: string;
+    bio: string;
+    photoUrl?: string;
+    linkedinUrl?: string;
+  }>;
+};
+
 export type Section =
   | HeroSection
   | ServicesSection
@@ -89,7 +102,8 @@ export type Section =
   | UseCasesSection
   | GallerySection
   | TestimonialsSection
-  | FAQSection;
+  | FAQSection
+  | TeamSection;
 
 export type PageData = {
   seo: SeoData;
@@ -209,6 +223,21 @@ export function defaultSection(type: Section["type"]): Section {
           },
         ],
       };
+    case "team":
+      return {
+        type: "team",
+        title: "",
+        subtitle: "",
+        members: [
+          {
+            name: "",
+            role: "",
+            bio: "",
+            photoUrl: "",
+            linkedinUrl: "",
+          },
+        ],
+      };
   }
 }
 
@@ -238,6 +267,7 @@ export function defaultPageData(key: PageKey): PageData {
       sections: [
         defaultSection("hero"),
         defaultSection("richtext"),
+        defaultSection("team"),
         defaultSection("values"),
         defaultSection("testimonials"),
         defaultSection("gallery"),
