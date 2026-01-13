@@ -43,47 +43,48 @@ export default function TestimonialsSection({ section }: TestimonialsSectionProp
   }));
 
   return (
-    <section className="t1-section" style={{ backgroundColor: "var(--color-bg-light)" }}>
-      <div className="t1-container">
-        <span className="t1-label" style={{ display: "block", textAlign: "center", marginBottom: "var(--spacing-sm)" }}>
-          Testimonials
-        </span>
-        <h2 className="t1-section-title" style={{ textAlign: "center", marginBottom: "var(--spacing-2xl)" }}>
-          {title}
-        </h2>
+    <section className="t1-section relative overflow-hidden bg-slate-50">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute -top-[200px] -right-[200px] w-[600px] h-[600px] rounded-full bg-indigo-100/50 blur-[80px]" />
+        <div className="absolute -bottom-[200px] -left-[200px] w-[600px] h-[600px] rounded-full bg-purple-100/50 blur-[80px]" />
+      </div>
+
+      <div className="t1-container relative z-10">
+        <div className="text-center mb-16">
+          <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-indigo-600 uppercase bg-indigo-50 rounded-full">
+            Testimonials
+          </span>
+          <h2 className="t1-section-heading">
+            {title}
+          </h2>
+        </div>
+        
         <div className="t1-testimonials-grid">
           {filledTestimonials.map((testimonial, index) => (
-            <div key={index} className="t1-testimonial-card">
-              <div className="t1-testimonial-quote">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ marginBottom: "var(--spacing-md)", opacity: 0.3 }}
-                >
-                  <path
-                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.151c-2.433.917-3.995 3.638-3.995 5.849h4v10h-9.984zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.995 3.638-3.995 5.849h3.983v10h-9.984z"
-                    fill="currentColor"
-                  />
-                </svg>
-                <p style={{ 
-                  fontSize: "var(--font-size-base)", 
-                  lineHeight: 1.7,
-                  color: "var(--color-text-primary)",
-                  marginBottom: "var(--spacing-md)",
-                  fontStyle: "italic"
-                }}>
+            <div key={index} className="t1-testimonial-card group bg-white/80 backdrop-blur-sm border border-slate-100 hover:border-indigo-100">
+              <div className="absolute -top-6 -left-4 text-8xl text-indigo-100 font-serif leading-none select-none group-hover:text-indigo-200 transition-colors duration-300">
+                &ldquo;
+              </div>
+              
+              <div className="relative z-10">
+                <p className="text-lg text-slate-700 italic mb-8 leading-relaxed">
                   "{testimonial.quote}"
                 </p>
-              </div>
-              <div className="t1-testimonial-author">
-                <div style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>
-                  {testimonial.name}
-                </div>
-                <div style={{ fontSize: "var(--font-size-sm)", color: "var(--color-text-secondary)" }}>
-                  {testimonial.role}
-                  {testimonial.company && `, ${testimonial.company}`}
+                
+                <div className="flex items-center gap-4 pt-6 border-t border-slate-100">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    {testimonial.name.charAt(0)}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-slate-900">
+                      {testimonial.name}
+                    </span>
+                    <span className="text-sm text-slate-500">
+                      {testimonial.role}
+                      {testimonial.company && <span className="text-indigo-500"> @ {testimonial.company}</span>}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

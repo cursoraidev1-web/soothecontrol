@@ -98,6 +98,7 @@ export default async function PublicSitePagePage({
     notFound();
   }
 
+  const pageData = siteData.pages[pageKey];
   const domain = siteData.site.slug; // In production, this would be the actual domain
   const logoUrl = siteData.profile.logo_path
     ? `https://${domain}${siteData.profile.logo_path}`
