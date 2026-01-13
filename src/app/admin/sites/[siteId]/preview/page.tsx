@@ -229,14 +229,15 @@ export default function SitePreviewPage() {
 
               const wrap = previewWrapRef.current;
               const tk = siteData.site.template_key;
-              const root =
+              const root = (
                 (tk === "t1"
                   ? wrap?.querySelector(".template1-container")
                   : tk === "t3"
                     ? wrap?.querySelector(".template3")
                     : tk === "t4"
                       ? wrap?.querySelector(".template4")
-                      : null) ?? wrap;
+                      : null) ?? wrap
+              ) as HTMLElement | null;
 
               if (!root) throw new Error("Preview not ready.");
 
@@ -291,14 +292,15 @@ export default function SitePreviewPage() {
 
                 const wrap = previewWrapRef.current;
                 const tk = siteData.site.template_key;
-                const root =
+                const root = (
                   (tk === "t1"
                     ? wrap?.querySelector(".template1-container")
                     : tk === "t3"
                       ? wrap?.querySelector(".template3")
                       : tk === "t4"
                         ? wrap?.querySelector(".template4")
-                        : null) ?? wrap;
+                        : null) ?? wrap
+                ) as HTMLElement | null;
 
                 if (!root) return;
 
