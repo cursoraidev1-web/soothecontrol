@@ -1,6 +1,7 @@
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import type { PageData, PageKey } from "@/lib/pageSchema";
 import { defaultPageData, validatePageData } from "@/lib/pageSchema";
+import { normalizeHostname } from "@/lib/domains";
 
 export interface SiteData {
   site: {
@@ -198,6 +199,101 @@ export async function resolveSiteById(siteId: string): Promise<SiteData | null> 
   }
 
   // Ensure all pages exist, use defaults if missing
+  const homePage = pagesMap.get("home") || defaultPageData("home");
+  const aboutPage = pagesMap.get("about") || defaultPageData("about");
+  const contactPage = pagesMap.get("contact") || defaultPageData("contact");
+
+  return {
+    site,
+    profile: {
+      ...profile,
+      logo_path: logoPath,
+    },
+    pages: {
+      home: homePage,
+      about: aboutPage,
+      contact: contactPage,
+    },
+  };
+}
+
+export async function resolveSiteByHostname(hostname: string): Promise<SiteData | null> {
+  const supabase = supabaseBrowser();
+  const normalized = normalizeHostname(hostname);
+  if (!normalized) return null;
+
+  // Resolve hostname -> site_id (active only)
+  const { data: domain, error: domainError } = await supabase
+    .from("domains")
+    .select("site_id, status")
+    .eq("hostname", normalized)
+    .eq("status", "active")
+    .single();
+
+  if (domainError || !domain) return null;
+
+  // Load site (published only)
+  const { data: site, error: siteError } = await supabase
+    .from("sites")
+    .select("id, slug, template_key, status")
+    .eq("id", domain.site_id)
+    .eq("status", "published")
+    .single();
+
+  if (siteError || !site) return null;
+
+  // Load profile
+  const { data: profile, error: profileError } = await supabase
+    .from("business_profiles")
+    .select(
+      "business_name, tagline, description, address, phone, email, whatsapp, socials, logo_asset_id",
+    )
+    .eq("site_id", site.id)
+    .single();
+
+  if (profileError || !profile) return null;
+
+  // Load logo path if logo_asset_id exists
+  let logoPath: string | null = null;
+  if (profile.logo_asset_id) {
+    const { data: asset } = await supabase
+      .from("assets")
+      .select("path")
+      .eq("id", profile.logo_asset_id)
+      .single();
+    if (asset) {
+      logoPath = asset.path;
+    }
+  }
+
+  // Load pages (published only)
+  const { data: pagesData, error: pagesError } = await supabase
+    .from("pages")
+    .select("key, data, status")
+    .eq("site_id", site.id)
+    .eq("status", "published")
+    .in("key", ["home", "about", "contact"]);
+
+  if (pagesError || !pagesData) return null;
+
+  const pagesMap = new Map<PageKey, PageData>();
+  for (const page of pagesData) {
+    if (page.data && typeof page.data === "object") {
+      const pageKey = page.key as PageKey;
+      const validation = validatePageData(page.data);
+      if (validation.ok) {
+        const pageData = page.data as PageData;
+        const validSections = (pageData.sections || []).filter(
+          (section): section is NonNullable<typeof section> =>
+            section != null && typeof section === "object" && "type" in section
+        );
+        pagesMap.set(pageKey, { ...pageData, sections: validSections });
+      } else {
+        pagesMap.set(pageKey, defaultPageData(pageKey));
+      }
+    }
+  }
+
   const homePage = pagesMap.get("home") || defaultPageData("home");
   const aboutPage = pagesMap.get("about") || defaultPageData("about");
   const contactPage = pagesMap.get("contact") || defaultPageData("contact");

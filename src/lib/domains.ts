@@ -3,7 +3,12 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 export type DomainStatus = "pending" | "active" | "blocked";
 
 export function normalizeHostname(hostname: string) {
-  return hostname.trim().toLowerCase();
+  const raw = hostname.trim().toLowerCase();
+  if (!raw) return "";
+  // Strip port (localhost:3000)
+  const noPort = raw.split(":")[0] ?? raw;
+  // Treat www as alias for the apex by default
+  return noPort.startsWith("www.") ? noPort.slice(4) : noPort;
 }
 
 export async function addDomain(siteId: string, hostname: string) {

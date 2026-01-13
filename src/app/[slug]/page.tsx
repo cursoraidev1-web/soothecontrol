@@ -5,12 +5,21 @@ import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
 import { resolveSiteBySlug } from "@/lib/siteResolver";
 import Script from "next/script";
+import { headers } from "next/headers";
+import { getPublicAssetUrl } from "@/lib/assets";
+import { normalizeHostname } from "@/lib/domains";
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
+  const hostHeader = headers().get("host") || "";
+  const reqHost = normalizeHostname(hostHeader);
+  const platformDomain =
+    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
+  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+
   const siteData = await resolveSiteBySlug(params.slug);
 
   if (!siteData) {
@@ -21,10 +30,15 @@ export async function generateMetadata({
 
   const pageData = siteData.pages.home;
   const businessName = siteData.profile.business_name;
-  const domain = siteData.site.slug; // In production, this would be the actual domain
   const logoUrl = siteData.profile.logo_path
-    ? `https://${domain}${siteData.profile.logo_path}`
+    ? getPublicAssetUrl(siteData.profile.logo_path)
     : undefined;
+  const canonicalHost = isSubdomain
+    ? reqHost
+    : reqHost && reqHost !== platformDomain
+      ? reqHost
+      : `${params.slug}.${platformDomain}`;
+  const canonical = canonicalHost ? `https://${canonicalHost}` : undefined;
 
   return {
     title: pageData.seo.title || `${businessName} | Professional Services`,
@@ -34,7 +48,7 @@ export async function generateMetadata({
     openGraph: {
       title: pageData.seo.title || `${businessName} | Professional Services`,
       description: pageData.seo.description || `Learn about ${businessName} and our professional services.`,
-      url: `https://${domain}`,
+      url: canonical,
       siteName: businessName,
       images: logoUrl
         ? [
@@ -67,7 +81,7 @@ export async function generateMetadata({
       },
     },
     alternates: {
-      canonical: `https://${domain}`,
+      canonical: canonical,
     },
   };
 }
@@ -77,15 +91,20 @@ export default async function PublicSitePage({
 }: {
   params: { slug: string };
 }) {
+  const hostHeader = headers().get("host") || "";
+  const reqHost = normalizeHostname(hostHeader);
+  const platformDomain =
+    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
+  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+
   const siteData = await resolveSiteBySlug(params.slug);
 
   if (!siteData) {
     notFound();
   }
 
-  const domain = siteData.site.slug; // In production, this would be the actual domain
   const logoUrl = siteData.profile.logo_path
-    ? `https://${domain}${siteData.profile.logo_path}`
+    ? getPublicAssetUrl(siteData.profile.logo_path)
     : undefined;
 
   // JSON-LD Structured Data
@@ -93,7 +112,9 @@ export default async function PublicSitePage({
     "@context": "https://schema.org",
     "@type": "Organization",
     name: siteData.profile.business_name,
-    url: `https://${domain}`,
+    url: isSubdomain
+      ? `https://${reqHost}`
+      : `https://${params.slug}.${platformDomain}`,
     ...(logoUrl && { logo: logoUrl }),
     ...(siteData.profile.description && {
       description: siteData.profile.description,
@@ -130,7 +151,7 @@ export default async function PublicSitePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage="home"
-          baseUrl={`/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${params.slug}`}
         />
       </>
     );
@@ -151,7 +172,7 @@ export default async function PublicSitePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage="home"
-          baseUrl={`/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${params.slug}`}
         />
       </>
     );

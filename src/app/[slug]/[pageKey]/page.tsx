@@ -7,12 +7,21 @@ import { resolveSiteBySlug } from "@/lib/siteResolver";
 import { isPageKey } from "@/lib/pageSchema";
 import type { PageKey } from "@/lib/pageSchema";
 import Script from "next/script";
+import { headers } from "next/headers";
+import { getPublicAssetUrl } from "@/lib/assets";
+import { normalizeHostname } from "@/lib/domains";
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string; pageKey: string };
 }): Promise<Metadata> {
+  const hostHeader = headers().get("host") || "";
+  const reqHost = normalizeHostname(hostHeader);
+  const platformDomain =
+    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
+  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+
   if (!isPageKey(params.pageKey)) {
     return {
       title: "Page Not Found",
@@ -30,11 +39,18 @@ export async function generateMetadata({
 
   const pageData = siteData.pages[pageKey];
   const businessName = siteData.profile.business_name;
-  const domain = siteData.site.slug; // In production, this would be the actual domain
   const logoUrl = siteData.profile.logo_path
-    ? `https://${domain}${siteData.profile.logo_path}`
+    ? getPublicAssetUrl(siteData.profile.logo_path)
     : undefined;
   const pageTitle = pageData.seo.title || `${businessName} | ${pageKey === "about" ? "About Us" : pageKey === "contact" ? "Contact Us" : "Home"}`;
+  const canonicalHost = isSubdomain
+    ? reqHost
+    : reqHost && reqHost !== platformDomain
+      ? reqHost
+      : `${params.slug}.${platformDomain}`;
+  const canonical = canonicalHost
+    ? `https://${canonicalHost}/${pageKey === "home" ? "" : pageKey}`.replace(/\/$/, "")
+    : undefined;
 
   return {
     title: pageTitle,
@@ -44,7 +60,7 @@ export async function generateMetadata({
     openGraph: {
       title: pageTitle,
       description: pageData.seo.description || `Learn about ${businessName}${pageKey === "about" ? " and our story" : pageKey === "contact" ? " and get in touch" : ""}.`,
-      url: `https://${domain}/${pageKey === "home" ? "" : pageKey}`,
+      url: canonical,
       siteName: businessName,
       images: logoUrl
         ? [
@@ -77,7 +93,7 @@ export async function generateMetadata({
       },
     },
     alternates: {
-      canonical: `https://${domain}/${pageKey === "home" ? "" : pageKey}`,
+      canonical,
     },
   };
 }
@@ -87,6 +103,12 @@ export default async function PublicSitePagePage({
 }: {
   params: { slug: string; pageKey: string };
 }) {
+  const hostHeader = headers().get("host") || "";
+  const reqHost = normalizeHostname(hostHeader);
+  const platformDomain =
+    (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "yourfree.site").toLowerCase();
+  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+
   if (!isPageKey(params.pageKey)) {
     notFound();
   }
@@ -98,9 +120,8 @@ export default async function PublicSitePagePage({
     notFound();
   }
 
-  const domain = siteData.site.slug; // In production, this would be the actual domain
   const logoUrl = siteData.profile.logo_path
-    ? `https://${domain}${siteData.profile.logo_path}`
+    ? getPublicAssetUrl(siteData.profile.logo_path)
     : undefined;
 
   // JSON-LD Structured Data based on page type
@@ -109,6 +130,7 @@ export default async function PublicSitePagePage({
     structuredData = {
       "@context": "https://schema.org",
       "@type": "ContactPage",
+      ...(isSubdomain ? { url: `https://${reqHost}/contact` } : {}),
       mainEntity: {
         "@type": "Organization",
         name: siteData.profile.business_name,
@@ -128,7 +150,9 @@ export default async function PublicSitePagePage({
       "@type": "WebPage",
       name: pageData.seo.title || `${siteData.profile.business_name} - ${pageKey}`,
       description: pageData.seo.description,
-      url: `https://${domain}/${pageKey === "home" ? "" : pageKey}`,
+      ...(isSubdomain
+        ? { url: `https://${reqHost}/${pageKey === "home" ? "" : pageKey}`.replace(/\/$/, "") }
+        : {}),
       ...(logoUrl && { image: logoUrl }),
     };
   }
@@ -149,7 +173,7 @@ export default async function PublicSitePagePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage={pageKey}
-          baseUrl={`/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${params.slug}`}
         />
       </>
     );
@@ -170,7 +194,7 @@ export default async function PublicSitePagePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage={pageKey}
-          baseUrl={`/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${params.slug}`}
         />
       </>
     );
