@@ -8,6 +8,7 @@ import Template1 from "@/templates/template1/Template1";
 import Template2 from "@/templates/template2/Template2";
 import Template3 from "@/templates/template3/Template3";
 import Template4 from "@/templates/template4/Template4";
+import Template5 from "@/templates/template5/Template5";
 import ColorPaletteSidebar from "@/components/admin/ColorPaletteSidebar";
 import { InlineEditorProvider } from "@/components/inline-editor/InlineEditorContext";
 import { resolveSiteById } from "@/lib/siteResolver";
@@ -533,16 +534,25 @@ export default function SitePreviewPage() {
               baseUrl=""
             />
           )}
+          {siteData.site.template_key === "t5" && (
+            <Template5
+              site={siteData.site}
+              profile={siteData.profile}
+              pages={siteData.pages}
+              currentPage={currentPage}
+              baseUrl=""
+            />
+          )}
         </InlineEditorProvider>
       </div>
-      {!["t1", "t2", "t3", "t4"].includes(siteData.site.template_key) && (
+      {!["t1", "t2", "t3", "t4", "t5"].includes(siteData.site.template_key) && (
         <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
           <div style={{ textAlign: "center" }}>
             <p style={{ fontSize: "18px", fontWeight: "600", color: "#1F2937" }}>
               Template {siteData.site.template_key.toUpperCase()} not yet implemented
             </p>
             <p style={{ marginTop: "8px", fontSize: "14px", color: "#6B7280" }}>
-              Only Template1 (t1), Template2 (t2), Template3 (t3), and Template4 (t4) are currently available.
+              Only Template1 (t1), Template2 (t2), Template3 (t3), Template4 (t4), and Template5 (t5) are currently available.
             </p>
           </div>
         </div>
