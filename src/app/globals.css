@@ -5,3 +5,8 @@ html,
 body {
   height: 100%;
 }
+
+/* Ensure admin pages have proper background */
+body {
+  background-color: #f9fafb;
+}

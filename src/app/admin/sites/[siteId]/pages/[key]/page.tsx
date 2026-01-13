@@ -9,6 +9,11 @@ import HeroEditor from "@/components/page-editor/HeroEditor";
 import RichTextEditor from "@/components/page-editor/RichTextEditor";
 import ServicesEditor from "@/components/page-editor/ServicesEditor";
 import ValuesEditor from "@/components/page-editor/ValuesEditor";
+import BackedByEditor from "@/components/page-editor/BackedByEditor";
+import UseCasesEditor from "@/components/page-editor/UseCasesEditor";
+import GalleryEditor from "@/components/page-editor/GalleryEditor";
+import TestimonialsEditor from "@/components/page-editor/TestimonialsEditor";
+import FAQEditor from "@/components/page-editor/FAQEditor";
 import {
   defaultPageData,
   defaultSection,
@@ -38,6 +43,11 @@ const sectionOptions: Array<Section["type"]> = [
   "richtext",
   "values",
   "contact_card",
+  "backed_by",
+  "use_cases",
+  "gallery",
+  "testimonials",
+  "faq",
 ];
 
 export default function PageEditorPage({
@@ -554,12 +564,37 @@ export default function PageEditorPage({
                               value={section}
                               onChange={(next) => updateSection(idx, next)}
                             />
-                          ) : (
+                          ) : section.type === "contact_card" ? (
                             <ContactCardEditor
                               value={section}
                               onChange={(next) => updateSection(idx, next)}
                             />
-                          )}
+                          ) : section.type === "backed_by" ? (
+                            <BackedByEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : section.type === "use_cases" ? (
+                            <UseCasesEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : section.type === "gallery" ? (
+                            <GalleryEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : section.type === "testimonials" ? (
+                            <TestimonialsEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : section.type === "faq" ? (
+                            <FAQEditor
+                              value={section}
+                              onChange={(next) => updateSection(idx, next)}
+                            />
+                          ) : null}
                         </div>
                       </div>
                     ))}

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 
 import { addDomain, normalizeHostname, setDomainStatus, type DomainStatus } from "@/lib/domains";
 import { getPublicAssetUrl, uploadLogo } from "@/lib/assets";
@@ -66,9 +67,14 @@ const pageOrder: Record<PageRow["key"], number> = {
 export default function SiteOverviewPage({
   params,
 }: {
-  params: { siteId: string };
+  params?: { siteId: string } | Promise<{ siteId: string }>;
 }) {
-  const siteId = params.siteId;
+  // Use useParams() hook as primary source (more reliable in client components)
+  const routeParams = useParams();
+  const siteId = (routeParams?.siteId as string) || 
+    (params && typeof params === "object" && "siteId" in params && !("then" in params)
+      ? (params as { siteId: string }).siteId
+      : null) || null;
 
   const [site, setSite] = useState<SiteRow | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
@@ -119,6 +125,12 @@ export default function SiteOverviewPage({
   });
 
   useEffect(() => {
+    if (!siteId) {
+      setLoadError("Invalid site ID");
+      setIsLoading(false);
+      return;
+    }
+
     let isMounted = true;
     const supabase = supabaseBrowser();
 
@@ -229,8 +241,17 @@ export default function SiteOverviewPage({
     return domains.find((d) => d.status === "active") ?? null;
   }, [domains]);
 
+  if (!siteId) {
+    return (
+      <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        Invalid site ID. Please go back to the sites list.
+      </div>
+    );
+  }
+
   async function onSaveProfile(e: React.FormEvent) {
     e.preventDefault();
+    if (!siteId) return;
     setSaveSuccess(false);
     setSaveError(null);
     setIsSaving(true);
@@ -269,6 +290,7 @@ export default function SiteOverviewPage({
 
   async function onAddDomain(e: React.FormEvent) {
     e.preventDefault();
+    if (!siteId) return;
     setDomainError(null);
 
     const normalized = normalizeHostname(domainHostname);
@@ -310,6 +332,7 @@ export default function SiteOverviewPage({
   }
 
   async function onUploadLogo() {
+    if (!siteId) return;
     setLogoError(null);
     setLogoSuccess(null);
 
@@ -334,6 +357,7 @@ export default function SiteOverviewPage({
   }
 
   async function onRemoveLogo() {
+    if (!siteId) return;
     if (!window.confirm("Remove logo from this site?")) return;
     setLogoError(null);
     setLogoSuccess(null);
@@ -360,6 +384,7 @@ export default function SiteOverviewPage({
   }
 
   async function onPublishSite() {
+    if (!siteId) return;
     if (!window.confirm("Publish this site and all 3 pages?")) return;
 
     setPublishSuccess(null);
@@ -384,6 +409,7 @@ export default function SiteOverviewPage({
   }
 
   async function onUnpublishSite() {
+    if (!siteId) return;
     if (!window.confirm("Unpublish this site and set all pages back to draft?")) return;
 
     setPublishSuccess(null);
@@ -455,6 +481,17 @@ export default function SiteOverviewPage({
             <dt className="text-xs font-medium text-gray-600">Preview URL</dt>
             <dd className="mt-1 font-mono text-sm">
               https://{site.slug}.yourfree.site
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-medium text-gray-600">Admin Preview</dt>
+            <dd className="mt-1">
+              <Link
+                href={`/admin/sites/${siteId}/preview`}
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 underline"
+              >
+                View Preview
+              </Link>
             </dd>
           </div>
           <div>
