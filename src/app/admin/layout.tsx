@@ -2,11 +2,11 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import LogoutButton from "@/components/LogoutButton";
-import RequireAuth from "@/components/RequireAuth";
+import RequireAdmin from "@/components/RequireAdmin";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <RequireAuth>
+    <RequireAdmin>
       <div className="min-h-screen bg-gray-50">
         <header className="border-b border-gray-200 bg-white shadow-sm">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
         <main className="mx-auto max-w-5xl p-6 bg-gray-50">{children}</main>
       </div>
-    </RequireAuth>
+    </RequireAdmin>
   );
 }
 
