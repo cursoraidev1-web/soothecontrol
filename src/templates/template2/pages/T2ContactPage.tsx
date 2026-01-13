@@ -44,6 +44,7 @@ export default function T2ContactPage({ pageData, profile }: T2ContactPageProps)
                 businessName={profile.business_name}
                 logoUrl={logoUrl}
                 isHomePage={false}
+                pageLabel="Contact"
               />
             );
           case "richtext":

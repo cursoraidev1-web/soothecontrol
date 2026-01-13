@@ -9,6 +9,7 @@ interface T2HeroProps {
   businessName: string;
   logoUrl: string | null;
   isHomePage?: boolean;
+  pageLabel?: string;
 }
 
 export default function T2Hero({
@@ -16,6 +17,7 @@ export default function T2Hero({
   businessName,
   logoUrl,
   isHomePage = false,
+  pageLabel,
 }: T2HeroProps) {
   const headline = section.headline || getLoremHeadline();
   const subtext = section.subtext || getLoremParagraph();
@@ -117,11 +119,18 @@ export default function T2Hero({
 
   // About/Contact page hero (smaller)
   return (
-    <section className="bg-gradient-to-br from-gray-50 to-white border-b border-gray-200">
+    <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50 border-b border-gray-200">
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, #000 1px, transparent 0)`,
+          backgroundSize: "48px 48px",
+        }}
+      />
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <div className="text-center">
+        <div className="relative text-center">
           <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 block">
-            {section.headline ? "" : "About"}
+            {pageLabel || ""}
           </span>
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
             {headline || `About ${businessName}`}

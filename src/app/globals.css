@@ -6,7 +6,4 @@ body {
   height: 100%;
 }
 
-/* Ensure admin pages have proper background */
-body {
-  background-color: #f9fafb;
-}
+/* Public pages should be styled by templates/layouts (admin sets its own bg). */

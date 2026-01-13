@@ -23,6 +23,12 @@ export default function ContactCardSection({
   const phone = profile?.phone || "+1 (555) 123-4567";
   const email = profile?.email || "contact@example.com";
   const whatsapp = profile?.whatsapp;
+  const mapEmbedUrl = (() => {
+    const link = section.mapLink?.trim();
+    if (link && link.includes("output=embed")) return link;
+    const query = encodeURIComponent(profile?.address || businessName || "Location");
+    return `https://maps.google.com/maps?q=${query}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+  })();
 
   return (
     <section className="t1-section">
@@ -204,6 +210,28 @@ export default function ContactCardSection({
               </form>
             </div>
           )}
+        </div>
+
+        {/* Embedded map (adds the "professional" contact feel) */}
+        <div
+          style={{
+            marginTop: "var(--spacing-3xl)",
+            borderRadius: "var(--radius-2xl)",
+            overflow: "hidden",
+            border: "1px solid var(--color-border-light)",
+            boxShadow: "var(--shadow-lg)",
+            background: "var(--color-bg-light)",
+          }}
+        >
+          <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9" as any }}>
+            <iframe
+              title="Map"
+              src={mapEmbedUrl}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </div>
       </div>
     </section>

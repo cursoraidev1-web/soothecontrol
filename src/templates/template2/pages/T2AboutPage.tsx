@@ -51,6 +51,7 @@ export default function T2AboutPage({ pageData, profile }: T2AboutPageProps) {
                 businessName={profile.business_name}
                 logoUrl={logoUrl}
                 isHomePage={false}
+                pageLabel="About"
               />
             );
           case "services":
