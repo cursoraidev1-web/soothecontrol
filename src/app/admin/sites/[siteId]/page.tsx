@@ -10,6 +10,9 @@ import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { publishSite, unpublishSite } from "@/lib/publishing";
 import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 import AiSiteContentGenerator from "@/components/admin/AiSiteContentGenerator";
+import { createExtraPage, listExtraPages, type ExtraPageRow } from "@/lib/extraPages";
+import { defaultPageData } from "@/lib/pageSchema";
+import { slugify } from "@/lib/slugify";
 
 type SiteRow = {
   id: string;
@@ -81,6 +84,7 @@ export default function SiteOverviewPage({
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [pages, setPages] = useState<PageRow[]>([]);
   const [domains, setDomains] = useState<DomainRow[]>([]);
+  const [extraPages, setExtraPages] = useState<ExtraPageRow[]>([]);
   const [logoAsset, setLogoAsset] = useState<AssetRow | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
@@ -107,6 +111,10 @@ export default function SiteOverviewPage({
   const [isLogoUploading, setIsLogoUploading] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
   const [logoSuccess, setLogoSuccess] = useState<string | null>(null);
+
+  const [newExtraKey, setNewExtraKey] = useState("");
+  const [extraError, setExtraError] = useState<string | null>(null);
+  const [isCreatingExtra, setIsCreatingExtra] = useState(false);
 
   const [form, setForm] = useState({
     business_name: "",
@@ -153,7 +161,7 @@ export default function SiteOverviewPage({
         return;
       }
 
-      const [siteRes, profileRes, pagesRes, domainsRes] = await Promise.all([
+      const [siteRes, profileRes, pagesRes, domainsRes, extraPagesRes] = await Promise.all([
         authenticatedSupabase
           .from("sites")
           .select("id, slug, template_key, status")
@@ -175,13 +183,22 @@ export default function SiteOverviewPage({
           .select("id, hostname, status, created_at")
           .eq("site_id", siteId)
           .order("created_at", { ascending: false }),
+        authenticatedSupabase
+          .from("extra_pages")
+          .select("id, site_id, key, status, data, updated_at, published_at")
+          .eq("site_id", siteId)
+          .order("updated_at", { ascending: false }),
       ]);
 
       if (!isMounted) return;
       setIsLoading(false);
 
       const err =
-        siteRes.error || profileRes.error || pagesRes.error || domainsRes.error;
+        siteRes.error ||
+        profileRes.error ||
+        pagesRes.error ||
+        domainsRes.error ||
+        extraPagesRes.error;
       if (err) {
         setLoadError(formatSupabaseError(err));
         return;
@@ -191,11 +208,13 @@ export default function SiteOverviewPage({
       const loadedProfile = profileRes.data as ProfileRow;
       const loadedPages = (pagesRes.data ?? []) as PageRow[];
       const loadedDomains = (domainsRes.data ?? []) as DomainRow[];
+      const loadedExtraPages = (extraPagesRes.data ?? []) as unknown as ExtraPageRow[];
 
       setSite(loadedSite);
       setProfile(loadedProfile);
       setPages(loadedPages);
       setDomains(loadedDomains);
+      setExtraPages(loadedExtraPages);
 
       setForm({
         business_name: loadedProfile.business_name ?? "",
@@ -904,6 +923,110 @@ export default function SiteOverviewPage({
 
       {/* B2) AI content generator (optional) */}
       <AiSiteContentGenerator siteId={siteId} />
+
+      {/* B3) Extra pages (per site) */}
+      <section className="rounded-lg bg-white p-6 ring-1 ring-gray-200">
+        <h2 className="text-lg font-semibold">Extra pages</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Create additional pages for this specific site (not template-wide). URLs will be:
+          <span className="ml-2 font-mono text-xs">
+            https://{site?.slug ?? "your-slug"}.soothecontrols.site/p/&lt;key&gt;
+          </span>
+        </p>
+
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (!siteId) return;
+            setExtraError(null);
+
+            const raw = newExtraKey.trim();
+            const key = slugify(raw);
+            if (!key) {
+              setExtraError("Please enter a valid page key (e.g. pricing).");
+              return;
+            }
+            if (["home", "about", "contact", "p"].includes(key)) {
+              setExtraError(`"${key}" is reserved. Choose another key.`);
+              return;
+            }
+
+            setIsCreatingExtra(true);
+            try {
+              const seed = defaultPageData("home");
+              // Keep the SEO blank by default; editors can fill it later.
+              const created = await createExtraPage(siteId, key, seed);
+              setExtraPages((prev) => [created, ...prev]);
+              setNewExtraKey("");
+            } catch (err) {
+              setExtraError(formatSupabaseError(err));
+            } finally {
+              setIsCreatingExtra(false);
+            }
+          }}
+          className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center"
+        >
+          <input
+            value={newExtraKey}
+            onChange={(e) => setNewExtraKey(e.target.value)}
+            placeholder="pricing"
+            className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+          />
+          <button
+            type="submit"
+            disabled={isCreatingExtra || !newExtraKey.trim()}
+            className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          >
+            {isCreatingExtra ? "Creating…" : "Create page"}
+          </button>
+        </form>
+
+        {extraError ? (
+          <div className="mt-3 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {extraError}
+          </div>
+        ) : null}
+
+        <div className="mt-4 overflow-hidden rounded-lg ring-1 ring-gray-200">
+          <table className="w-full table-auto">
+            <thead className="bg-gray-50 text-left text-xs font-semibold text-gray-700">
+              <tr>
+                <th className="px-4 py-3">Key</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Updated</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 text-sm">
+              {extraPages.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-4 text-gray-600" colSpan={4}>
+                    No extra pages yet.
+                  </td>
+                </tr>
+              ) : (
+                extraPages.map((p) => (
+                  <tr key={p.id}>
+                    <td className="px-4 py-3 font-mono">{p.key}</td>
+                    <td className="px-4 py-3">{p.status}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {new Date(p.updated_at).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        href={`/admin/sites/${siteId}/extra-pages/${p.key}`}
+                        className="text-sm font-medium text-black underline underline-offset-2"
+                      >
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       {/* C) Pages quick links */}
       <section className="rounded-lg bg-white p-6 ring-1 ring-gray-200">

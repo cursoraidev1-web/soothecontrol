@@ -7,7 +7,7 @@ import type { PageKey } from "@/lib/pageSchema";
 interface HeaderProps {
   businessName: string;
   logoUrl: string | null;
-  currentPage: PageKey;
+  currentPage: PageKey | null;
   baseUrl: string;
 }
 

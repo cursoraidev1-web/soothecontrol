@@ -11,7 +11,7 @@ export default function T5Header({
 }: {
   businessName: string;
   logoUrl: string | null;
-  currentPage: PageKey;
+  currentPage: PageKey | null;
   baseUrl: string;
 }) {
   return (

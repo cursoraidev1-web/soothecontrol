@@ -31,8 +31,9 @@ interface Template2Props {
     about: PageData;
     contact: PageData;
   };
-  currentPage?: PageKey;
+  currentPage?: PageKey | null;
   baseUrl?: string;
+  pageOverride?: PageData;
 }
 
 export default function Template2({
@@ -41,6 +42,7 @@ export default function Template2({
   pages,
   currentPage = "home",
   baseUrl = "",
+  pageOverride,
 }: Template2Props) {
   const logoUrl = profile.logo_path
     ? getPublicAssetUrl(profile.logo_path)
@@ -48,24 +50,26 @@ export default function Template2({
 
   const socials = (profile.socials || {}) as Record<string, string>;
 
-  const currentPageData = pages[currentPage];
+  const effectivePage: PageKey = (pageOverride ? "home" : (currentPage ?? "home"));
+  const navPage: PageKey | null = pageOverride ? null : (currentPage ?? "home");
+  const currentPageData = pageOverride ?? pages[effectivePage];
 
   return (
     <div className="min-h-screen bg-white">
       <T2Header
         businessName={profile.business_name}
         logoUrl={logoUrl}
-        currentPage={currentPage}
+        currentPage={navPage}
         baseUrl={baseUrl}
       />
 
-      {currentPage === "home" && (
+      {effectivePage === "home" && (
         <T2HomePage pageData={currentPageData} profile={profile} />
       )}
-      {currentPage === "about" && (
+      {effectivePage === "about" && (
         <T2AboutPage pageData={currentPageData} profile={profile} />
       )}
-      {currentPage === "contact" && (
+      {effectivePage === "contact" && (
         <T2ContactPage pageData={currentPageData} profile={profile} />
       )}
 

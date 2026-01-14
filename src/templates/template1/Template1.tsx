@@ -32,8 +32,9 @@ interface Template1Props {
     about: PageData;
     contact: PageData;
   };
-  currentPage?: PageKey;
+  currentPage?: PageKey | null;
   baseUrl?: string;
+  pageOverride?: PageData;
 }
 
 export default function Template1({
@@ -42,6 +43,7 @@ export default function Template1({
   pages,
   currentPage = "home",
   baseUrl = "",
+  pageOverride,
 }: Template1Props) {
   const logoUrl = profile.logo_path
     ? getPublicAssetUrl(profile.logo_path)
@@ -49,24 +51,26 @@ export default function Template1({
 
   const socials = (profile.socials || {}) as Record<string, string>;
 
-  const currentPageData = pages[currentPage];
+  const effectivePage: PageKey = (pageOverride ? "home" : (currentPage ?? "home"));
+  const navPage: PageKey | null = pageOverride ? null : (currentPage ?? "home");
+  const currentPageData = pageOverride ?? pages[effectivePage];
 
   return (
     <div className="template1-container">
       <Header
         businessName={profile.business_name}
         logoUrl={logoUrl}
-        currentPage={currentPage}
+        currentPage={navPage}
         baseUrl={baseUrl}
       />
 
-      {currentPage === "home" && (
+      {effectivePage === "home" && (
         <HomePage pageData={currentPageData} profile={profile} />
       )}
-      {currentPage === "about" && (
+      {effectivePage === "about" && (
         <AboutUsPage pageData={currentPageData} profile={profile} />
       )}
-      {currentPage === "contact" && (
+      {effectivePage === "contact" && (
         <ContactUsPage pageData={currentPageData} profile={profile} />
       )}
 

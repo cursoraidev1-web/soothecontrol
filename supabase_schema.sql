@@ -92,6 +92,19 @@ create table if not exists public.pages (
   unique (site_id, key)
 );
 
+-- Extra pages (per-site, arbitrary keys) for single projects
+-- Example keys: "services", "pricing", "blog", "terms"
+create table if not exists public.extra_pages (
+  id uuid primary key default gen_random_uuid(),
+  site_id uuid not null references public.sites(id) on delete cascade,
+  key text not null,
+  status public.publish_status not null default 'draft',
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  published_at timestamptz null,
+  unique (site_id, key)
+);
+
 create table if not exists public.domains (
   id uuid primary key default gen_random_uuid(),
   site_id uuid not null references public.sites(id) on delete cascade,
@@ -112,6 +125,8 @@ create table if not exists public.assets (
 
 -- Useful indexes (some are redundant with UNIQUE, but included per requirements)
 create index if not exists pages_site_id_idx on public.pages (site_id);
+create index if not exists extra_pages_site_id_idx on public.extra_pages (site_id);
+create index if not exists extra_pages_site_id_key_idx on public.extra_pages (site_id, key);
 create index if not exists domains_hostname_idx on public.domains (hostname);
 create index if not exists assets_site_id_idx on public.assets (site_id);
 
@@ -142,6 +157,13 @@ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_pages_set_updated_at') then
     create trigger trg_pages_set_updated_at
     before update on public.pages
+    for each row
+    execute function public.set_updated_at();
+  end if;
+
+  if not exists (select 1 from pg_trigger where tgname = 'trg_extra_pages_set_updated_at') then
+    create trigger trg_extra_pages_set_updated_at
+    before update on public.extra_pages
     for each row
     execute function public.set_updated_at();
   end if;
@@ -197,6 +219,7 @@ alter table public.admin_users enable row level security;
 alter table public.sites enable row level security;
 alter table public.business_profiles enable row level security;
 alter table public.pages enable row level security;
+alter table public.extra_pages enable row level security;
 alter table public.domains enable row level security;
 alter table public.assets enable row level security;
 
@@ -214,6 +237,7 @@ begin
         'admin_full_access',
         'public_read_published_sites',
         'public_read_published_pages',
+        'public_read_published_extra_pages',
         'public_read_active_domains',
         'public_read_profiles_for_published_sites'
       )
@@ -248,6 +272,12 @@ to authenticated
 using (public.is_admin())
 with check (public.is_admin());
 
+create policy admin_full_access on public.extra_pages
+for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
 create policy admin_full_access on public.domains
 for all
 to authenticated
@@ -267,6 +297,11 @@ to anon, authenticated
 using (status = 'published'::public.site_status);
 
 create policy public_read_published_pages on public.pages
+for select
+to anon, authenticated
+using (status = 'published'::public.publish_status);
+
+create policy public_read_published_extra_pages on public.extra_pages
 for select
 to anon, authenticated
 using (status = 'published'::public.publish_status);
@@ -295,6 +330,7 @@ grant select, insert, update, delete on
   public.sites,
   public.business_profiles,
   public.pages,
+  public.extra_pages,
   public.domains,
   public.assets
 to authenticated;
@@ -303,6 +339,7 @@ grant select on
   public.sites,
   public.business_profiles,
   public.pages,
+  public.extra_pages,
   public.domains
 to anon;
 
