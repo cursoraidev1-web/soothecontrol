@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 
 import { validatePageData } from "@/lib/pageSchema";
 
+function parseRetryAfterSeconds(detail: string): number | null {
+  const m = detail.match(/retry in\s+([0-9.]+)s/i);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+}
+
 function extractJson(text: string) {
   const cleaned = text
     .trim()
@@ -38,10 +46,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const model = (process.env.GEMINI_MODEL || "gemini-2.5-pro").trim();
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-      model,
-    )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    // NOTE: gemini-2.5-pro frequently has 0 free-tier quota on new projects.
+    // Default to a Flash model to avoid immediate 429s unless explicitly overridden.
+    const primaryModel = (process.env.GEMINI_MODEL || "gemini-2.0-flash").trim();
+    const fallbackModels = (process.env.GEMINI_MODEL_FALLBACKS || "gemini-2.0-flash,gemini-1.5-flash")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const modelsToTry = [primaryModel, ...fallbackModels.filter((m) => m !== primaryModel)];
 
     const prompt = `
 You are generating content for a small business website builder.
@@ -112,27 +124,64 @@ User brief:
 ${brief}
 `.trim();
 
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.65,
-          maxOutputTokens: 8192,
-        },
-      }),
-    });
+    let lastErrStatus: number | null = null;
+    let lastErrDetail: string | null = null;
+    let data: any = null;
 
-    if (!res.ok) {
-      const txt = await res.text();
+    for (const model of modelsToTry) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        model,
+      )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.65,
+            maxOutputTokens: 8192,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        lastErrStatus = res.status;
+        lastErrDetail = txt.slice(0, 2000);
+
+        // If rate-limited, optionally honor suggested retry delay once.
+        if (res.status === 429) {
+          const retry = parseRetryAfterSeconds(txt);
+          if (retry && retry <= 35) {
+            await new Promise((r) => setTimeout(r, Math.ceil(retry * 1000)));
+            continue;
+          }
+        }
+
+        // Try next model if available.
+        continue;
+      }
+
+      data = (await res.json()) as any;
+      break;
+    }
+
+    if (!data) {
+      const status = lastErrStatus ?? 502;
+      const detail = lastErrDetail ?? "Unknown error";
+      const isQuota = status === 429;
       return NextResponse.json(
-        { error: `Gemini request failed (${res.status}).`, detail: txt.slice(0, 2000) },
+        {
+          error: isQuota
+            ? "AI quota/rate limit exceeded. Try again later or switch to a Flash model / enable billing."
+            : `Gemini request failed (${status}).`,
+          detail,
+        },
         { status: 502 },
       );
     }
 
-    const data = (await res.json()) as any;
     const text =
       data?.candidates?.[0]?.content?.parts?.map((p: any) => p?.text).filter(Boolean).join("\n") ??
       "";
