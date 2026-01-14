@@ -237,6 +237,8 @@ export default function SitePreviewPage() {
                     ? wrap?.querySelector(".template3")
                     : tk === "t4"
                       ? wrap?.querySelector(".template4")
+                      : tk === "t5"
+                        ? wrap?.querySelector(".template5")
                       : null) ?? wrap
               ) as HTMLElement | null;
 
@@ -257,6 +259,11 @@ export default function SitePreviewPage() {
                 root.style.setProperty("--t4-accent", colors.dominant);
                 root.style.setProperty("--t4-accent2", colors.accent);
                 root.style.setProperty("--t4-ring", hexToRgba(colors.dominant, 0.22));
+              }
+              if (tk === "t5") {
+                root.style.setProperty("--t5-accent", colors.dominant);
+                root.style.setProperty("--t5-accent2", colors.accent);
+                root.style.setProperty("--t5-ring", hexToRgba(colors.dominant, 0.18));
               }
             } catch (err) {
               setBrandError(formatSupabaseError(err));
@@ -300,6 +307,8 @@ export default function SitePreviewPage() {
                       ? wrap?.querySelector(".template3")
                       : tk === "t4"
                         ? wrap?.querySelector(".template4")
+                        : tk === "t5"
+                          ? wrap?.querySelector(".template5")
                         : null) ?? wrap
                 ) as HTMLElement | null;
 
@@ -320,6 +329,11 @@ export default function SitePreviewPage() {
                   root.style.removeProperty("--t4-accent");
                   root.style.removeProperty("--t4-accent2");
                   root.style.removeProperty("--t4-ring");
+                }
+                if (tk === "t5") {
+                  root.style.removeProperty("--t5-accent");
+                  root.style.removeProperty("--t5-accent2");
+                  root.style.removeProperty("--t5-ring");
                 }
               }}
               style={{

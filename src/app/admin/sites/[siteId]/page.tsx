@@ -9,6 +9,7 @@ import { getPublicAssetUrl, uploadLogo } from "@/lib/assets";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { publishSite, unpublishSite } from "@/lib/publishing";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import AiSiteContentGenerator from "@/components/admin/AiSiteContentGenerator";
 
 type SiteRow = {
   id: string;
@@ -878,6 +879,9 @@ export default function SiteOverviewPage({
           </button>
         </form>
       </section>
+
+      {/* B2) AI content generator (optional) */}
+      <AiSiteContentGenerator siteId={siteId} />
 
       {/* C) Pages quick links */}
       <section className="rounded-lg bg-white p-6 ring-1 ring-gray-200">
