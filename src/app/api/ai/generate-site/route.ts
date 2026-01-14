@@ -49,11 +49,14 @@ export async function POST(req: Request) {
     // NOTE: gemini-2.5-pro frequently has 0 free-tier quota on new projects.
     // Default to a Flash model to avoid immediate 429s unless explicitly overridden.
     const primaryModel = (process.env.GEMINI_MODEL || "gemini-2.0-flash").trim();
-    const fallbackModels = (process.env.GEMINI_MODEL_FALLBACKS || "gemini-2.0-flash,gemini-1.5-flash")
+    const fallbackModels = (process.env.GEMINI_MODEL_FALLBACKS || "gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-pro")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
     const modelsToTry = [primaryModel, ...fallbackModels.filter((m) => m !== primaryModel)];
+
+    // Try v1beta first (works with gemini-2.0-flash), then v1 as fallback
+    const apiVersions = ["v1beta", "v1"];
 
     const prompt = `
 You are generating content for a small business website builder.
@@ -128,54 +131,94 @@ ${brief}
     let lastErrDetail: string | null = null;
     let data: any = null;
 
-    for (const model of modelsToTry) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-        model,
-      )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    // Try each API version with each model
+    for (const apiVersion of apiVersions) {
+      for (const model of modelsToTry) {
+        // Use query parameter method (works with both v1 and v1beta)
+        const endpoint = `https://generativelanguage.googleapis.com/${apiVersion}/models/${encodeURIComponent(
+          model,
+        )}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.65,
-            maxOutputTokens: 8192,
-          },
-        }),
-      });
+        try {
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { 
+              "content-type": "application/json",
+              // Also include header method as fallback (some API keys prefer this)
+              "X-goog-api-key": apiKey,
+            },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.65,
+                maxOutputTokens: 8192,
+              },
+            }),
+          });
 
-      if (!res.ok) {
-        const txt = await res.text();
-        lastErrStatus = res.status;
-        lastErrDetail = txt.slice(0, 2000);
+          if (!res.ok) {
+            const txt = await res.text();
+            lastErrStatus = res.status;
+            lastErrDetail = txt.slice(0, 2000);
 
-        // If rate-limited, optionally honor suggested retry delay once.
-        if (res.status === 429) {
-          const retry = parseRetryAfterSeconds(txt);
-          if (retry && retry <= 35) {
-            await new Promise((r) => setTimeout(r, Math.ceil(retry * 1000)));
+            // If rate-limited, honor suggested retry delay and try again
+            if (res.status === 429) {
+              const retry = parseRetryAfterSeconds(txt);
+              // Wait up to 60 seconds if retry time is suggested
+              if (retry && retry <= 60) {
+                await new Promise((r) => setTimeout(r, Math.ceil(retry * 1000)));
+                // Retry the same model/version after waiting
+                continue;
+              }
+              // If no retry time suggested or too long, try next model
+              continue;
+            }
+
+            // If model not found (404), try next model/version
+            if (res.status === 404) {
+              continue; // Try next model or API version
+            }
+
+            // For other errors, try next model/version
             continue;
           }
-        }
 
-        // Try next model if available.
-        continue;
+          data = (await res.json()) as any;
+          break; // Success - exit both loops
+        } catch (fetchErr) {
+          // Network error - try next
+          lastErrDetail = fetchErr instanceof Error ? fetchErr.message : "Network error";
+          continue;
+        }
       }
 
-      data = (await res.json()) as any;
-      break;
+      if (data) break; // Success - exit API version loop
     }
 
     if (!data) {
       const status = lastErrStatus ?? 502;
       const detail = lastErrDetail ?? "Unknown error";
       const isQuota = status === 429;
+      const isNotFound = status === 404;
+      
+      let errorMessage = `Gemini request failed (${status}).`;
+      if (isQuota) {
+        errorMessage = `AI quota/rate limit exceeded for all models tried (${modelsToTry.join(", ")}). 
+
+Solutions:
+1. Wait a few minutes and try again (quota resets periodically)
+2. Enable billing in Google Cloud Console for your Gemini API project
+3. Check your quota limits at: https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com/quotas
+4. Try using a different Google Cloud project with available quota
+
+Note: Free tier quotas are limited. Enabling billing (even with $0 spend limit) often increases quota limits.`;
+      } else if (isNotFound) {
+        errorMessage = "Gemini model not found. Please check GEMINI_MODEL environment variable or use gemini-1.5-flash.";
+      }
+      
       return NextResponse.json(
         {
-          error: isQuota
-            ? "AI quota/rate limit exceeded. Try again later or switch to a Flash model / enable billing."
-            : `Gemini request failed (${status}).`,
+          error: errorMessage,
           detail,
         },
         { status: 502 },

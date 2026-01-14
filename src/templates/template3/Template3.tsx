@@ -58,6 +58,7 @@ export default function Template3({
         logoUrl={logoUrl}
         currentPage={navPage}
         baseUrl={baseUrl}
+        profile={profile}
       />
 
       {effectivePage === "home" && (

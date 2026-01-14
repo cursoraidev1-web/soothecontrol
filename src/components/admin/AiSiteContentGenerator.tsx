@@ -40,6 +40,8 @@ export default function AiSiteContentGenerator({ siteId }: { siteId: string }) {
 
   const canGenerate = useMemo(() => brief.trim().length > 30, [brief]);
 
+  const [aiProvider, setAiProvider] = useState<"gemini" | "groq">("groq");
+
   async function onGenerate() {
     setError(null);
     setSuccess(null);
@@ -51,7 +53,12 @@ export default function AiSiteContentGenerator({ siteId }: { siteId: string }) {
 
     setIsGenerating(true);
     try {
-      const res = await fetch("/api/ai/generate-site", {
+      // Use Groq by default (better free tier), fallback to Gemini
+      const endpoint = aiProvider === "groq" 
+        ? "/api/ai/generate-site-groq"
+        : "/api/ai/generate-site";
+      
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ brief }),
@@ -153,6 +160,44 @@ export default function AiSiteContentGenerator({ siteId }: { siteId: string }) {
       </div>
 
       <div className="mt-4 space-y-3">
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-800">AI Provider:</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setAiProvider("groq")}
+              className={`rounded px-3 py-1.5 text-xs font-medium ${
+                aiProvider === "groq"
+                  ? "bg-black text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              Groq (Free, Unlimited)
+            </button>
+            <button
+              type="button"
+              onClick={() => setAiProvider("gemini")}
+              className={`rounded px-3 py-1.5 text-xs font-medium ${
+                aiProvider === "gemini"
+                  ? "bg-black text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              Gemini
+            </button>
+          </div>
+        </div>
+
+        {aiProvider === "groq" && (
+          <div className="rounded border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+            <strong>Groq:</strong> Free tier with generous limits. Get API key at{" "}
+            <a href="https://console.groq.com/" target="_blank" rel="noopener noreferrer" className="underline">
+              console.groq.com
+            </a>
+            {" "}(set GROQ_API_KEY env var)
+          </div>
+        )}
+
         <textarea
           value={brief}
           onChange={(e) => setBrief(e.target.value)}

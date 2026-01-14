@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { PageKey } from "@/lib/pageSchema";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2HeaderProps {
   businessName: string;
   logoUrl: string | null;
   currentPage: PageKey | null;
   baseUrl: string;
+  profile?: {
+    socials?: Record<string, unknown> | null;
+  };
 }
 
 export default function T2Header({
@@ -16,8 +21,17 @@ export default function T2Header({
   logoUrl,
   currentPage,
   baseUrl,
+  profile,
 }: T2HeaderProps) {
+  const editor = useInlineEditor();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Get navigation labels from profile socials (or use defaults)
+  const socials = (profile?.socials || {}) as Record<string, unknown>;
+  const navLabels = (socials.nav_labels as Record<string, string>) || {};
+  const navHome = navLabels.home || "Home";
+  const navAbout = navLabels.about || "About";
+  const navContact = navLabels.contact || "Contact";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/80 bg-white/80 backdrop-blur-md transition-all">
@@ -36,7 +50,11 @@ export default function T2Header({
               href={`${baseUrl}/`}
               className="text-xl font-bold text-gray-900 transition-colors hover:text-gray-700"
             >
-              {businessName}
+              <EditableText
+                value={businessName}
+                onCommit={(next) => editor?.updateProfileField?.("business_name", next)}
+                style={{ display: "inline" }}
+              />
             </Link>
           )}
           <div className="hidden md:flex md:items-center md:gap-6">
@@ -121,7 +139,20 @@ export default function T2Header({
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              Home
+              <EditableText
+                value={navHome}
+                onCommit={(next) => {
+                  const updatedSocials = {
+                    ...socials,
+                    nav_labels: {
+                      ...(navLabels || {}),
+                      home: next,
+                    },
+                  };
+                  editor?.updateProfileField?.("socials", updatedSocials);
+                }}
+                style={{ display: "inline" }}
+              />
             </Link>
             <Link
               href={`${baseUrl}/about`}
@@ -132,7 +163,20 @@ export default function T2Header({
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              About
+              <EditableText
+                value={navAbout}
+                onCommit={(next) => {
+                  const updatedSocials = {
+                    ...socials,
+                    nav_labels: {
+                      ...(navLabels || {}),
+                      about: next,
+                    },
+                  };
+                  editor?.updateProfileField?.("socials", updatedSocials);
+                }}
+                style={{ display: "inline" }}
+              />
             </Link>
             <Link
               href={`${baseUrl}/contact`}
@@ -143,7 +187,20 @@ export default function T2Header({
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              Contact
+              <EditableText
+                value={navContact}
+                onCommit={(next) => {
+                  const updatedSocials = {
+                    ...socials,
+                    nav_labels: {
+                      ...(navLabels || {}),
+                      contact: next,
+                    },
+                  };
+                  editor?.updateProfileField?.("socials", updatedSocials);
+                }}
+                style={{ display: "inline" }}
+              />
             </Link>
             <Link
               href={`${baseUrl}/contact`}

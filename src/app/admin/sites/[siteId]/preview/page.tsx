@@ -28,6 +28,197 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function hexToRgb(hex: string) {
+  const m = hex.trim().replace("#", "");
+  if (m.length !== 6) return { r: 0, g: 0, b: 0 };
+  return {
+    r: parseInt(m.slice(0, 2), 16),
+    g: parseInt(m.slice(2, 4), 16),
+    b: parseInt(m.slice(4, 6), 16),
+  };
+}
+
+function rgbToHex({ r, g, b }: { r: number; g: number; b: number }) {
+  return `#${[r, g, b].map((x) => Math.round(x).toString(16).padStart(2, "0")).join("")}`.toUpperCase();
+}
+
+function darken(hex: string, amount: number) {
+  const rgb = hexToRgb(hex);
+  return rgbToHex({
+    r: Math.max(0, rgb.r * (1 - amount)),
+    g: Math.max(0, rgb.g * (1 - amount)),
+    b: Math.max(0, rgb.b * (1 - amount)),
+  });
+}
+
+function lighten(hex: string, amount: number) {
+  const rgb = hexToRgb(hex);
+  return rgbToHex({
+    r: Math.min(255, rgb.r + (255 - rgb.r) * amount),
+    g: Math.min(255, rgb.g + (255 - rgb.g) * amount),
+    b: Math.min(255, rgb.b + (255 - rgb.b) * amount),
+  });
+}
+
+function applyBrandColors(
+  root: HTMLElement,
+  templateKey: string,
+  colors: ExtractedLogoColors,
+) {
+  const { dominant, accent } = colors;
+
+  if (templateKey === "t1") {
+    // Template1: Comprehensive color system
+    root.style.setProperty("--color-primary", dominant);
+    root.style.setProperty("--color-primary-dark", darken(dominant, 0.15));
+    root.style.setProperty("--color-primary-light", lighten(dominant, 0.2));
+    root.style.setProperty("--color-accent", accent);
+    root.style.setProperty("--color-accent-light", lighten(accent, 0.15));
+    root.style.setProperty("--color-dark", darken(dominant, 0.4));
+    
+    // Derive text colors from dominant (ensure good contrast)
+    const dominantRgb = hexToRgb(dominant);
+    const dominantLuma = 0.2126 * dominantRgb.r + 0.7152 * dominantRgb.g + 0.0722 * dominantRgb.b;
+    if (dominantLuma > 128) {
+      // Light color - use dark text
+      root.style.setProperty("--color-text-primary", "#0F172A");
+      root.style.setProperty("--color-text-secondary", "#64748B");
+    } else {
+      // Dark color - use light text
+      root.style.setProperty("--color-text-primary", "#F8FAFC");
+      root.style.setProperty("--color-text-secondary", "#CBD5E1");
+    }
+    
+    // Backgrounds stay neutral for readability
+    root.style.setProperty("--color-bg-main", "#FFFFFF");
+    root.style.setProperty("--color-bg-light", "#F8FAFC");
+    root.style.setProperty("--color-bg-dark", darken(dominant, 0.5));
+    
+    // Borders derived from dominant (subtle)
+    root.style.setProperty("--color-border", hexToRgba(dominant, 0.15));
+    root.style.setProperty("--color-border-light", hexToRgba(dominant, 0.08));
+    
+    // Shadows with brand color glow
+    root.style.setProperty("--shadow-glow", `0 0 20px ${hexToRgba(dominant, 0.30)}`);
+    root.style.setProperty("--shadow-glow-lg", `0 0 40px ${hexToRgba(dominant, 0.40)}`);
+    
+    // Gradient
+    root.style.setProperty("--color-bg-gradient", `linear-gradient(135deg, ${dominant} 0%, ${accent} 100%)`);
+  }
+
+  if (templateKey === "t3") {
+    root.style.setProperty("--t3-accent", dominant);
+    root.style.setProperty("--t3-accent2", accent);
+    root.style.setProperty("--t3-ring", hexToRgba(dominant, 0.18));
+    
+    // Derive text colors
+    const dominantRgb = hexToRgb(dominant);
+    const dominantLuma = 0.2126 * dominantRgb.r + 0.7152 * dominantRgb.g + 0.0722 * dominantRgb.b;
+    if (dominantLuma > 128) {
+      root.style.setProperty("--t3-ink", "#121212");
+      root.style.setProperty("--t3-muted", "#5a615b");
+    } else {
+      root.style.setProperty("--t3-ink", "#F8FAFC");
+      root.style.setProperty("--t3-muted", "#CBD5E1");
+    }
+    
+    // Keep backgrounds neutral
+    root.style.setProperty("--t3-bg", "#fbfaf7");
+    root.style.setProperty("--t3-surface", "#ffffff");
+    root.style.setProperty("--t3-border", hexToRgba(dominant, 0.12));
+  }
+
+  if (templateKey === "t4") {
+    root.style.setProperty("--t4-accent", dominant);
+    root.style.setProperty("--t4-accent2", accent);
+    root.style.setProperty("--t4-ring", hexToRgba(dominant, 0.22));
+    
+    // Template4 is dark theme - keep light text
+    root.style.setProperty("--t4-ink", "rgba(255, 255, 255, 0.92)");
+    root.style.setProperty("--t4-muted", "rgba(255, 255, 255, 0.66)");
+    
+    // Dark background with brand color hints
+    root.style.setProperty("--t4-bg", "#0b0f19");
+    root.style.setProperty("--t4-surface", hexToRgba(dominant, 0.06));
+    root.style.setProperty("--t4-surface-2", hexToRgba(dominant, 0.08));
+    root.style.setProperty("--t4-border", hexToRgba(dominant, 0.12));
+  }
+
+  if (templateKey === "t5") {
+    root.style.setProperty("--t5-accent", dominant);
+    root.style.setProperty("--t5-accent2", accent);
+    root.style.setProperty("--t5-ring", hexToRgba(dominant, 0.18));
+    
+    // Derive text colors
+    const dominantRgb = hexToRgb(dominant);
+    const dominantLuma = 0.2126 * dominantRgb.r + 0.7152 * dominantRgb.g + 0.0722 * dominantRgb.b;
+    if (dominantLuma > 128) {
+      root.style.setProperty("--t5-ink", "#0b1220");
+      root.style.setProperty("--t5-muted", "rgba(11, 18, 32, 0.62)");
+    } else {
+      root.style.setProperty("--t5-ink", "#F8FAFC");
+      root.style.setProperty("--t5-muted", "rgba(248, 250, 252, 0.62)");
+    }
+    
+    // Light backgrounds
+    root.style.setProperty("--t5-bg", "#f7f8fb");
+    root.style.setProperty("--t5-surface", "#ffffff");
+    root.style.setProperty("--t5-border", hexToRgba(dominant, 0.12));
+  }
+}
+
+function resetBrandColors(root: HTMLElement, templateKey: string) {
+  if (templateKey === "t1") {
+    root.style.removeProperty("--color-primary");
+    root.style.removeProperty("--color-primary-dark");
+    root.style.removeProperty("--color-primary-light");
+    root.style.removeProperty("--color-accent");
+    root.style.removeProperty("--color-accent-light");
+    root.style.removeProperty("--color-dark");
+    root.style.removeProperty("--color-text-primary");
+    root.style.removeProperty("--color-text-secondary");
+    root.style.removeProperty("--color-bg-main");
+    root.style.removeProperty("--color-bg-light");
+    root.style.removeProperty("--color-bg-dark");
+    root.style.removeProperty("--color-border");
+    root.style.removeProperty("--color-border-light");
+    root.style.removeProperty("--shadow-glow");
+    root.style.removeProperty("--shadow-glow-lg");
+    root.style.removeProperty("--color-bg-gradient");
+  }
+  if (templateKey === "t3") {
+    root.style.removeProperty("--t3-accent");
+    root.style.removeProperty("--t3-accent2");
+    root.style.removeProperty("--t3-ring");
+    root.style.removeProperty("--t3-ink");
+    root.style.removeProperty("--t3-muted");
+    root.style.removeProperty("--t3-bg");
+    root.style.removeProperty("--t3-surface");
+    root.style.removeProperty("--t3-border");
+  }
+  if (templateKey === "t4") {
+    root.style.removeProperty("--t4-accent");
+    root.style.removeProperty("--t4-accent2");
+    root.style.removeProperty("--t4-ring");
+    root.style.removeProperty("--t4-ink");
+    root.style.removeProperty("--t4-muted");
+    root.style.removeProperty("--t4-bg");
+    root.style.removeProperty("--t4-surface");
+    root.style.removeProperty("--t4-surface-2");
+    root.style.removeProperty("--t4-border");
+  }
+  if (templateKey === "t5") {
+    root.style.removeProperty("--t5-accent");
+    root.style.removeProperty("--t5-accent2");
+    root.style.removeProperty("--t5-ring");
+    root.style.removeProperty("--t5-ink");
+    root.style.removeProperty("--t5-muted");
+    root.style.removeProperty("--t5-bg");
+    root.style.removeProperty("--t5-surface");
+    root.style.removeProperty("--t5-border");
+  }
+}
+
 export default function SitePreviewPage() {
   const params = useParams();
   const siteId = params?.siteId as string;
@@ -51,6 +242,60 @@ export default function SitePreviewPage() {
     const path = siteData?.profile?.logo_path;
     return path ? getPublicAssetUrl(path) : null;
   }, [siteData?.profile?.logo_path]);
+
+  // Load saved brand colors from database on mount and when siteData changes
+  useEffect(() => {
+    const currentSiteData = siteData;
+    if (!currentSiteData || !siteId) return;
+
+    async function loadBrandColors() {
+      try {
+        const supabase = await getAuthenticatedClient();
+        const { data, error } = await supabase
+          .from("business_profiles")
+          .select("brand_colors")
+          .eq("site_id", siteId)
+          .single();
+
+        if (error) {
+          // Not found or other error - ignore silently
+          return;
+        }
+
+        if (data?.brand_colors) {
+          const colors = data.brand_colors as ExtractedLogoColors;
+          if (colors.dominant && colors.accent) {
+            setBrandColors(colors);
+
+            // Apply colors after a short delay to ensure DOM is ready
+            setTimeout(() => {
+              const wrap = previewWrapRef.current;
+              const tk = currentSiteData.site.template_key;
+              const root = (
+                (tk === "t1"
+                  ? wrap?.querySelector(".template1-container")
+                  : tk === "t3"
+                    ? wrap?.querySelector(".template3")
+                    : tk === "t4"
+                      ? wrap?.querySelector(".template4")
+                      : tk === "t5"
+                        ? wrap?.querySelector(".template5")
+                      : null) ?? wrap
+              ) as HTMLElement | null;
+
+              if (root) {
+                applyBrandColors(root, tk, colors);
+              }
+            }, 100);
+          }
+        }
+      } catch {
+        // Error loading - ignore silently
+      }
+    }
+
+    loadBrandColors();
+  }, [siteData, siteId]);
 
   useEffect(() => {
     if (!siteId) {
@@ -228,6 +473,17 @@ export default function SitePreviewPage() {
               const colors = await extractLogoColors(logoUrl);
               setBrandColors(colors);
 
+              // Save to database
+              const supabase = await getAuthenticatedClient();
+              const { error: dbError } = await supabase
+                .from("business_profiles")
+                .update({ brand_colors: colors })
+                .eq("site_id", siteId);
+
+              if (dbError) {
+                throw dbError;
+              }
+
               const wrap = previewWrapRef.current;
               const tk = siteData.site.template_key;
               const root = (
@@ -244,27 +500,7 @@ export default function SitePreviewPage() {
 
               if (!root) throw new Error("Preview not ready.");
 
-              if (tk === "t1") {
-                root.style.setProperty("--color-primary", colors.dominant);
-                root.style.setProperty("--color-accent", colors.accent);
-                root.style.setProperty("--shadow-glow", `0 0 20px ${hexToRgba(colors.dominant, 0.30)}`);
-                root.style.setProperty("--shadow-glow-lg", `0 0 40px ${hexToRgba(colors.dominant, 0.40)}`);
-              }
-              if (tk === "t3") {
-                root.style.setProperty("--t3-accent", colors.dominant);
-                root.style.setProperty("--t3-accent2", colors.accent);
-                root.style.setProperty("--t3-ring", hexToRgba(colors.dominant, 0.18));
-              }
-              if (tk === "t4") {
-                root.style.setProperty("--t4-accent", colors.dominant);
-                root.style.setProperty("--t4-accent2", colors.accent);
-                root.style.setProperty("--t4-ring", hexToRgba(colors.dominant, 0.22));
-              }
-              if (tk === "t5") {
-                root.style.setProperty("--t5-accent", colors.dominant);
-                root.style.setProperty("--t5-accent2", colors.accent);
-                root.style.setProperty("--t5-ring", hexToRgba(colors.dominant, 0.18));
-              }
+              applyBrandColors(root, tk, colors);
             } catch (err) {
               setBrandError(formatSupabaseError(err));
             } finally {
@@ -293,10 +529,21 @@ export default function SitePreviewPage() {
             <div style={{ width: 12, height: 12, borderRadius: 3, background: brandColors.dominant, border: "1px solid rgba(0,0,0,0.10)" }} />
             <div style={{ width: 12, height: 12, borderRadius: 3, background: brandColors.accent, border: "1px solid rgba(0,0,0,0.10)" }} />
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (!siteData) return;
                 setBrandError(null);
                 setBrandColors(null);
+
+                // Remove from database
+                try {
+                  const supabase = await getAuthenticatedClient();
+                  await supabase
+                    .from("business_profiles")
+                    .update({ brand_colors: null })
+                    .eq("site_id", siteId);
+                } catch (err) {
+                  // Ignore errors on reset
+                }
 
                 const wrap = previewWrapRef.current;
                 const tk = siteData.site.template_key;
@@ -314,27 +561,7 @@ export default function SitePreviewPage() {
 
                 if (!root) return;
 
-                if (tk === "t1") {
-                  root.style.removeProperty("--color-primary");
-                  root.style.removeProperty("--color-accent");
-                  root.style.removeProperty("--shadow-glow");
-                  root.style.removeProperty("--shadow-glow-lg");
-                }
-                if (tk === "t3") {
-                  root.style.removeProperty("--t3-accent");
-                  root.style.removeProperty("--t3-accent2");
-                  root.style.removeProperty("--t3-ring");
-                }
-                if (tk === "t4") {
-                  root.style.removeProperty("--t4-accent");
-                  root.style.removeProperty("--t4-accent2");
-                  root.style.removeProperty("--t4-ring");
-                }
-                if (tk === "t5") {
-                  root.style.removeProperty("--t5-accent");
-                  root.style.removeProperty("--t5-accent2");
-                  root.style.removeProperty("--t5-ring");
-                }
+                resetBrandColors(root, tk);
               }}
               style={{
                 padding: "6px 8px",
@@ -504,6 +731,35 @@ export default function SitePreviewPage() {
                   },
                 };
               });
+            },
+            updateProfileField: async (field: string, value: unknown) => {
+              if (!siteId) return;
+              try {
+                const supabase = await getAuthenticatedClient();
+                const { error } = await supabase
+                  .from("business_profiles")
+                  .update({ [field]: value })
+                  .eq("site_id", siteId);
+                
+                if (error) {
+                  console.error("Failed to update profile field:", error);
+                  return;
+                }
+
+                // Update local state
+                setSiteData((prev) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    profile: {
+                      ...prev.profile,
+                      [field]: value,
+                    },
+                  };
+                });
+              } catch (err) {
+                console.error("Error updating profile field:", err);
+              }
             },
           }}
         >

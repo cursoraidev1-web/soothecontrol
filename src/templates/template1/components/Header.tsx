@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import type { PageKey } from "@/lib/pageSchema";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface HeaderProps {
   businessName: string;
   logoUrl: string | null;
   currentPage: PageKey | null;
   baseUrl: string;
+  profile?: {
+    socials?: Record<string, unknown> | null;
+  };
 }
 
 export default function Header({
@@ -16,9 +21,18 @@ export default function Header({
   logoUrl,
   currentPage,
   baseUrl,
+  profile,
 }: HeaderProps) {
+  const editor = useInlineEditor();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  
+  // Get navigation labels from profile socials (or use defaults)
+  const socials = (profile?.socials || {}) as Record<string, unknown>;
+  const navLabels = (socials.nav_labels as Record<string, string>) || {};
+  const navHome = navLabels.home || "Home";
+  const navAbout = navLabels.about || "About Us";
+  const navContact = navLabels.contact || "Contact Us";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,7 +56,11 @@ export default function Header({
             </Link>
           ) : (
             <Link href={`${baseUrl}/`} className="t1-logo-text">
-              {businessName}
+              <EditableText
+                value={businessName}
+                onCommit={(next) => editor?.updateProfileField?.("business_name", next)}
+                style={{ display: "inline" }}
+              />
             </Link>
           )}
         </div>
@@ -52,19 +70,60 @@ export default function Header({
             href={`${baseUrl}/`}
             className={`t1-nav-link ${currentPage === "home" ? "active" : ""}`}
           >
-            Home
+            <EditableText
+              value={navHome}
+              onCommit={(next) => {
+                // Store in profile socials as nav_labels
+                const currentSocials = socials;
+                const updatedSocials = {
+                  ...currentSocials,
+                  nav_labels: {
+                    ...(navLabels || {}),
+                    home: next,
+                  },
+                };
+                editor?.updateProfileField?.("socials", updatedSocials);
+              }}
+              style={{ display: "inline" }}
+            />
           </Link>
           <Link
             href={`${baseUrl}/about`}
             className={`t1-nav-link ${currentPage === "about" ? "active" : ""}`}
           >
-            About Us
+            <EditableText
+              value={navAbout}
+              onCommit={(next) => {
+                const updatedSocials = {
+                  ...socials,
+                  nav_labels: {
+                    ...(navLabels || {}),
+                    about: next,
+                  },
+                };
+                editor?.updateProfileField?.("socials", updatedSocials);
+              }}
+              style={{ display: "inline" }}
+            />
           </Link>
           <Link
             href={`${baseUrl}/contact`}
             className={`t1-nav-link ${currentPage === "contact" ? "active" : ""}`}
           >
-            Contact Us
+            <EditableText
+              value={navContact}
+              onCommit={(next) => {
+                const updatedSocials = {
+                  ...socials,
+                  nav_labels: {
+                    ...(navLabels || {}),
+                    contact: next,
+                  },
+                };
+                editor?.updateProfileField?.("socials", updatedSocials);
+              }}
+              style={{ display: "inline" }}
+            />
           </Link>
         </nav>
 
@@ -107,21 +166,60 @@ export default function Header({
             className={`t1-mobile-menu-link ${currentPage === "home" ? "active" : ""}`}
             onClick={() => setMobileMenuOpen(false)}
           >
-            Home
+            <EditableText
+              value={navHome}
+              onCommit={(next) => {
+                const updatedSocials = {
+                  ...socials,
+                  nav_labels: {
+                    ...(navLabels || {}),
+                    home: next,
+                  },
+                };
+                editor?.updateProfileField?.("socials", updatedSocials);
+              }}
+              style={{ display: "inline" }}
+            />
           </Link>
           <Link
             href={`${baseUrl}/about`}
             className={`t1-mobile-menu-link ${currentPage === "about" ? "active" : ""}`}
             onClick={() => setMobileMenuOpen(false)}
           >
-            About Us
+            <EditableText
+              value={navAbout}
+              onCommit={(next) => {
+                const updatedSocials = {
+                  ...socials,
+                  nav_labels: {
+                    ...(navLabels || {}),
+                    about: next,
+                  },
+                };
+                editor?.updateProfileField?.("socials", updatedSocials);
+              }}
+              style={{ display: "inline" }}
+            />
           </Link>
           <Link
             href={`${baseUrl}/contact`}
             className={`t1-mobile-menu-link ${currentPage === "contact" ? "active" : ""}`}
             onClick={() => setMobileMenuOpen(false)}
           >
-            Contact Us
+            <EditableText
+              value={navContact}
+              onCommit={(next) => {
+                const updatedSocials = {
+                  ...socials,
+                  nav_labels: {
+                    ...(navLabels || {}),
+                    contact: next,
+                  },
+                };
+                editor?.updateProfileField?.("socials", updatedSocials);
+              }}
+              style={{ display: "inline" }}
+            />
           </Link>
         </div>
       )}

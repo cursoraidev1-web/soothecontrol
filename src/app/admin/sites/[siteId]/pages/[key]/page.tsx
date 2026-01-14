@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import ContactCardEditor from "@/components/page-editor/ContactCardEditor";
@@ -52,12 +52,14 @@ const sectionOptions: Array<Section["type"]> = [
   "team",
 ];
 
-export default function PageEditorPage({
-  params,
-}: {
-  params: { siteId: string; key: string };
-}) {
-  const { siteId, key } = params;
+export default function PageEditorPage() {
+  const params = useParams();
+  const siteId = params?.siteId as string;
+  const key = params?.key as string;
+
+  if (!siteId || !key) {
+    return <div>Loading...</div>;
+  }
 
   if (!isPageKey(key)) notFound();
   const pageKey = key;

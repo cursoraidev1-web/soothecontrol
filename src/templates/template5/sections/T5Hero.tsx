@@ -23,9 +23,8 @@ export default function T5Hero({
   return (
     <section className="t5-hero">
       <div className="t5-container">
-        <div className="t5-grid">
-          <div>
-            <span className="t5-eyebrow">Designed for {businessName}</span>
+        <div style={{ maxWidth: "800px" }}>
+          <span className="t5-eyebrow">Designed for {businessName}</span>
             <EditableText
               as="h1"
               className="t5-h1"
@@ -84,54 +83,6 @@ export default function T5Hero({
             <div style={{ marginTop: 14, color: "var(--t5-muted)", fontWeight: 700, fontSize: 13 }}>
               Clean layout · Strong typography · Great on mobile
             </div>
-          </div>
-
-          <div className="t5-card" style={{ padding: 16 }}>
-            <div
-              style={{
-                borderRadius: 16,
-                border: "1px solid rgba(11,18,32,0.10)",
-                background:
-                  "radial-gradient(520px 280px at 20% 20%, rgba(37,99,235,0.18), transparent 55%), radial-gradient(520px 300px at 80% 30%, rgba(219,39,119,0.14), transparent 60%), rgba(255,255,255,0.80)",
-                minHeight: 360,
-                overflow: "hidden",
-              }}
-            >
-              <div style={{ padding: 14 }} className="t5-bento">
-                <div className="t5-tile" style={{ gridColumn: "span 7" }}>
-                  <div style={{ fontWeight: 900, letterSpacing: "-0.02em" }}>Modern structure</div>
-                  <div style={{ marginTop: 8, color: "var(--t5-muted)", lineHeight: 1.6 }}>
-                    Bento blocks and premium spacing.
-                  </div>
-                </div>
-                <div className="t5-tile" style={{ gridColumn: "span 5" }}>
-                  <div style={{ fontWeight: 900 }}>Trust</div>
-                  <div style={{ marginTop: 8, color: "var(--t5-muted)" }}>Proof + testimonials</div>
-                </div>
-                <div className="t5-tile" style={{ gridColumn: "span 6" }}>
-                  <div style={{ fontWeight: 900 }}>Clarity</div>
-                  <div style={{ marginTop: 8, color: "var(--t5-muted)" }}>Readable, elegant type</div>
-                </div>
-                <div className="t5-tile" style={{ gridColumn: "span 6" }}>
-                  <div style={{ fontWeight: 900 }}>Speed</div>
-                  <div style={{ marginTop: 8, color: "var(--t5-muted)" }}>Light and responsive</div>
-                </div>
-                <div className="t5-tile" style={{ gridColumn: "span 12" }}>
-                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <span style={{ padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(11,18,32,0.12)", color: "var(--t5-muted)", fontWeight: 800, fontSize: 12 }}>
-                      Modern
-                    </span>
-                    <span style={{ padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(11,18,32,0.12)", color: "var(--t5-muted)", fontWeight: 800, fontSize: 12 }}>
-                      Clean
-                    </span>
-                    <span style={{ padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(11,18,32,0.12)", color: "var(--t5-muted)", fontWeight: 800, fontSize: 12 }}>
-                      Premium
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>

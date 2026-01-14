@@ -10,6 +10,7 @@ import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { publishSite, unpublishSite } from "@/lib/publishing";
 import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 import AiSiteContentGenerator from "@/components/admin/AiSiteContentGenerator";
+import ManualContentGenerator from "@/components/admin/ManualContentGenerator";
 import { createExtraPage, listExtraPages, type ExtraPageRow } from "@/lib/extraPages";
 import { defaultPageData } from "@/lib/pageSchema";
 import { slugify } from "@/lib/slugify";
@@ -193,22 +194,41 @@ export default function SiteOverviewPage({
       if (!isMounted) return;
       setIsLoading(false);
 
-      const err =
+      // Check for critical errors (sites, profiles, pages, domains)
+      const criticalErr =
         siteRes.error ||
         profileRes.error ||
         pagesRes.error ||
-        domainsRes.error ||
-        extraPagesRes.error;
-      if (err) {
-        setLoadError(formatSupabaseError(err));
+        domainsRes.error;
+      if (criticalErr) {
+        setLoadError(formatSupabaseError(criticalErr));
         return;
+      }
+
+      // extra_pages table might not exist yet - handle gracefully
+      let loadedExtraPages: ExtraPageRow[] = [];
+      if (extraPagesRes.error) {
+        // If table doesn't exist, just log and continue with empty array
+        const errorMsg = (extraPagesRes.error as { message?: string })?.message || "";
+        const errorCode = (extraPagesRes.error as { code?: string })?.code || "";
+        const isTableMissing = 
+          errorMsg.includes("does not exist") || 
+          errorMsg.includes("schema cache") ||
+          errorMsg.includes("Could not find the table") ||
+          errorCode === "42P01"; // PostgreSQL "undefined_table" error code
+        
+        if (!isTableMissing) {
+          // Only show error if it's not a "table doesn't exist" error
+          console.warn("Could not load extra pages:", extraPagesRes.error);
+        }
+      } else {
+        loadedExtraPages = (extraPagesRes.data ?? []) as unknown as ExtraPageRow[];
       }
 
       const loadedSite = siteRes.data as SiteRow;
       const loadedProfile = profileRes.data as ProfileRow;
       const loadedPages = (pagesRes.data ?? []) as PageRow[];
       const loadedDomains = (domainsRes.data ?? []) as DomainRow[];
-      const loadedExtraPages = (extraPagesRes.data ?? []) as unknown as ExtraPageRow[];
 
       setSite(loadedSite);
       setProfile(loadedProfile);
@@ -924,7 +944,7 @@ export default function SiteOverviewPage({
       {/* B2) AI content generator (optional) */}
       <AiSiteContentGenerator siteId={siteId} />
 
-      {/* B3) Extra pages (per site) */}
+      {/* B4) Extra pages (per site) */}
       <section className="rounded-lg bg-white p-6 ring-1 ring-gray-200">
         <h2 className="text-lg font-semibold">Extra pages</h2>
         <p className="mt-1 text-sm text-gray-600">

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { buildEmailLink, buildTelLink } from "../utils";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface T2FooterProps {
   businessName: string;
@@ -38,12 +40,20 @@ export default function T2Footer({
               />
             ) : (
               <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {businessName}
+                <EditableText
+                  value={businessName}
+                  onCommit={(next) => editor?.updateProfileField?.("business_name", next)}
+                  as="span"
+                />
               </h3>
             )}
             {tagline && (
               <p className="text-sm text-gray-600 mb-4 max-w-md">
-                {tagline}
+                <EditableText
+                  value={tagline}
+                  onCommit={(next) => editor?.updateProfileField?.("tagline", next)}
+                  placeholder="Add a tagline..."
+                />
               </p>
             )}
             {(socials.instagram ||
@@ -109,7 +119,21 @@ export default function T2Footer({
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Quick Links</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+              <EditableText
+                value={quickLinksLabel}
+                onCommit={(next) => {
+                  const updatedSocials = {
+                    ...socials,
+                    footer_labels: {
+                      ...footerLabels,
+                      quickLinks: next,
+                    },
+                  };
+                  editor?.updateProfileField?.("socials", updatedSocials);
+                }}
+              />
+            </h3>
             <ul className="space-y-3">
               <li>
                 <Link
@@ -140,10 +164,30 @@ export default function T2Footer({
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Contact</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+              <EditableText
+                value={contactLabel}
+                onCommit={(next) => {
+                  const updatedSocials = {
+                    ...socials,
+                    footer_labels: {
+                      ...footerLabels,
+                      contact: next,
+                    },
+                  };
+                  editor?.updateProfileField?.("socials", updatedSocials);
+                }}
+              />
+            </h3>
             <ul className="space-y-3">
               {address && (
-                <li className="text-sm text-gray-600">{address}</li>
+                <li className="text-sm text-gray-600">
+                  <EditableText
+                    value={address}
+                    onCommit={(next) => editor?.updateProfileField?.("address", next)}
+                    multiline
+                  />
+                </li>
               )}
               {phone && (
                 <li>
@@ -151,7 +195,11 @@ export default function T2Footer({
                     href={buildTelLink(phone)}
                     className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                   >
-                    {phone}
+                    <EditableText
+                      value={phone}
+                      onCommit={(next) => editor?.updateProfileField?.("phone", next)}
+                      style={{ display: "inline" }}
+                    />
                   </a>
                 </li>
               )}
@@ -161,7 +209,11 @@ export default function T2Footer({
                     href={buildEmailLink(email)}
                     className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                   >
-                    {email}
+                    <EditableText
+                      value={email}
+                      onCommit={(next) => editor?.updateProfileField?.("email", next)}
+                      style={{ display: "inline" }}
+                    />
                   </a>
                 </li>
               )}
@@ -170,7 +222,13 @@ export default function T2Footer({
         </div>
         <div className="mt-12 border-t border-gray-200 pt-8">
           <p className="text-xs text-gray-500 text-center">
-            &copy; {new Date().getFullYear()} {businessName}. All rights reserved.
+            &copy; {new Date().getFullYear()}{" "}
+            <EditableText
+              value={businessName}
+              onCommit={(next) => editor?.updateProfileField?.("business_name", next)}
+              style={{ display: "inline" }}
+            />
+            . All rights reserved.
           </p>
         </div>
       </div>

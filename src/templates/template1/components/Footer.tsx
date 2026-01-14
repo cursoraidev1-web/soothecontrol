@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
+import EditableText from "@/components/inline-editor/EditableText";
 
 interface FooterProps {
   businessName: string;
@@ -23,6 +25,13 @@ export default function Footer({
   logoUrl,
   baseUrl,
 }: FooterProps) {
+  const editor = useInlineEditor();
+  
+  // Get footer labels from socials (or use defaults)
+  const footerLabels = (socials.footer_labels as Record<string, string>) || {};
+  const quickLinksLabel = footerLabels.quickLinks || "Quick Links";
+  const contactLabel = footerLabels.contact || "Contact";
+  
   return (
     <footer className="t1-footer">
       <div className="t1-footer-content">
@@ -34,15 +43,41 @@ export default function Footer({
               className="t1-logo"
             />
           ) : (
-            <h3>{businessName}</h3>
+            <h3>
+              <EditableText
+                value={businessName}
+                onCommit={(next) => editor?.updateProfileField?.("business_name", next)}
+                as="span"
+              />
+            </h3>
           )}
-          {tagline && <p style={{ marginTop: "var(--spacing-sm)", opacity: 0.8 }}>
-            {tagline}
-          </p>}
+          {tagline && (
+            <p style={{ marginTop: "var(--spacing-sm)", opacity: 0.8 }}>
+              <EditableText
+                value={tagline}
+                onCommit={(next) => editor?.updateProfileField?.("tagline", next)}
+                placeholder="Add a tagline..."
+              />
+            </p>
+          )}
         </div>
 
         <div className="t1-footer-section">
-          <h3>Quick Links</h3>
+          <h3>
+            <EditableText
+              value={quickLinksLabel}
+              onCommit={(next) => {
+                const updatedSocials = {
+                  ...socials,
+                  footer_labels: {
+                    ...footerLabels,
+                    quickLinks: next,
+                  },
+                };
+                editor?.updateProfileField?.("socials", updatedSocials);
+              }}
+            />
+          </h3>
           <ul className="t1-footer-links">
             <li>
               <Link href={`${baseUrl}/`} className="t1-footer-link">
@@ -63,22 +98,50 @@ export default function Footer({
         </div>
 
         <div className="t1-footer-section">
-          <h3>Contact</h3>
+          <h3>
+            <EditableText
+              value={contactLabel}
+              onCommit={(next) => {
+                const updatedSocials = {
+                  ...socials,
+                  footer_labels: {
+                    ...footerLabels,
+                    contact: next,
+                  },
+                };
+                editor?.updateProfileField?.("socials", updatedSocials);
+              }}
+            />
+          </h3>
           <ul className="t1-footer-links">
             {address && (
-              <li style={{ opacity: 0.8 }}>{address}</li>
+              <li style={{ opacity: 0.8 }}>
+                <EditableText
+                  value={address}
+                  onCommit={(next) => editor?.updateProfileField?.("address", next)}
+                  multiline
+                />
+              </li>
             )}
             {phone && (
               <li>
                 <a href={`tel:${phone}`} className="t1-footer-link">
-                  {phone}
+                  <EditableText
+                    value={phone}
+                    onCommit={(next) => editor?.updateProfileField?.("phone", next)}
+                    style={{ display: "inline" }}
+                  />
                 </a>
               </li>
             )}
             {email && (
               <li>
                 <a href={`mailto:${email}`} className="t1-footer-link">
-                  {email}
+                  <EditableText
+                    value={email}
+                    onCommit={(next) => editor?.updateProfileField?.("email", next)}
+                    style={{ display: "inline" }}
+                  />
                 </a>
               </li>
             )}
@@ -157,7 +220,13 @@ export default function Footer({
         </div>
       </div>
       <div className="t1-footer-copyright">
-        &copy; {new Date().getFullYear()} {businessName}. All rights reserved.
+        &copy; {new Date().getFullYear()}{" "}
+        <EditableText
+          value={businessName}
+          onCommit={(next) => editor?.updateProfileField?.("business_name", next)}
+          style={{ display: "inline" }}
+        />
+        . All rights reserved.
       </div>
     </footer>
   );

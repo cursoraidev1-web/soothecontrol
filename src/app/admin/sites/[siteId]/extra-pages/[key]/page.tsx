@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import ContactCardEditor from "@/components/page-editor/ContactCardEditor";
@@ -43,12 +44,14 @@ const sectionOptions: Array<Section["type"]> = [
   "team",
 ];
 
-export default function ExtraPageEditor({
-  params,
-}: {
-  params: { siteId: string; key: string };
-}) {
-  const { siteId, key } = params;
+export default function ExtraPageEditor() {
+  const params = useParams();
+  const siteId = params?.siteId as string;
+  const key = params?.key as string;
+
+  if (!siteId || !key) {
+    return <div>Loading...</div>;
+  }
 
   const [pageRow, setPageRow] = useState<ExtraPageRow | null>(null);
   const [pageDraft, setPageDraft] = useState<PageData | null>(null);

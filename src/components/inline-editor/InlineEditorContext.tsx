@@ -9,6 +9,8 @@ export type InlineEditorState = {
   pageData: PageData;
   updateSection: (sectionIndex: number, next: Section) => void;
   updateSectionField: (sectionIndex: number, field: string, value: unknown) => void;
+  // Business profile updates
+  updateProfileField?: (field: string, value: unknown) => void;
 };
 
 const InlineEditorContext = createContext<InlineEditorState | null>(null);
