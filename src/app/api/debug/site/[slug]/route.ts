@@ -3,9 +3,9 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { slug: string } },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
-  const slug = params.slug;
+  const { slug } = await params;
   const supabase = supabaseBrowser();
 
   // Check site
