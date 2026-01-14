@@ -9,6 +9,7 @@ import Template2 from "@/templates/template2/Template2";
 import Template3 from "@/templates/template3/Template3";
 import Template4 from "@/templates/template4/Template4";
 import Template5 from "@/templates/template5/Template5";
+import Template6 from "@/templates/template6/Template6";
 import ColorPaletteSidebar from "@/components/admin/ColorPaletteSidebar";
 import { InlineEditorProvider } from "@/components/inline-editor/InlineEditorContext";
 import { resolveSiteById } from "@/lib/siteResolver";
@@ -165,6 +166,20 @@ function applyBrandColors(
     root.style.setProperty("--t5-surface", "#ffffff");
     root.style.setProperty("--t5-border", hexToRgba(dominant, 0.12));
   }
+
+  if (templateKey === "t6") {
+    root.style.setProperty("--t6-accent", dominant);
+    root.style.setProperty("--t6-accent2", accent);
+    root.style.setProperty("--t6-ring", hexToRgba(dominant, 0.22));
+
+    // Template6 is dark theme - keep light text
+    root.style.setProperty("--t6-ink", "rgba(255, 255, 255, 0.92)");
+    root.style.setProperty("--t6-muted", "rgba(255, 255, 255, 0.66)");
+
+    root.style.setProperty("--t6-bg", "#070a12");
+    root.style.setProperty("--t6-surface", hexToRgba(dominant, 0.06));
+    root.style.setProperty("--t6-border", hexToRgba(dominant, 0.12));
+  }
 }
 
 function resetBrandColors(root: HTMLElement, templateKey: string) {
@@ -247,6 +262,7 @@ export default function SitePreviewPage() {
   useEffect(() => {
     const currentSiteData = siteData;
     if (!currentSiteData || !siteId) return;
+    const templateKey = currentSiteData.site.template_key;
 
     async function loadBrandColors() {
       try {
@@ -270,21 +286,22 @@ export default function SitePreviewPage() {
             // Apply colors after a short delay to ensure DOM is ready
             setTimeout(() => {
               const wrap = previewWrapRef.current;
-              const tk = currentSiteData.site.template_key;
               const root = (
-                (tk === "t1"
+                (templateKey === "t1"
                   ? wrap?.querySelector(".template1-container")
-                  : tk === "t3"
+                  : templateKey === "t3"
                     ? wrap?.querySelector(".template3")
-                    : tk === "t4"
+                    : templateKey === "t4"
                       ? wrap?.querySelector(".template4")
-                      : tk === "t5"
+                      : templateKey === "t5"
                         ? wrap?.querySelector(".template5")
+                        : templateKey === "t6"
+                          ? wrap?.querySelector(".template6")
                       : null) ?? wrap
               ) as HTMLElement | null;
 
               if (root) {
-                applyBrandColors(root, tk, colors);
+                applyBrandColors(root, templateKey, colors);
               }
             }, 100);
           }
@@ -495,6 +512,8 @@ export default function SitePreviewPage() {
                       ? wrap?.querySelector(".template4")
                       : tk === "t5"
                         ? wrap?.querySelector(".template5")
+                        : tk === "t6"
+                          ? wrap?.querySelector(".template6")
                       : null) ?? wrap
               ) as HTMLElement | null;
 
@@ -556,6 +575,8 @@ export default function SitePreviewPage() {
                         ? wrap?.querySelector(".template4")
                         : tk === "t5"
                           ? wrap?.querySelector(".template5")
+                          : tk === "t6"
+                            ? wrap?.querySelector(".template6")
                         : null) ?? wrap
                 ) as HTMLElement | null;
 
@@ -839,16 +860,32 @@ export default function SitePreviewPage() {
               />
             </>
           )}
+          {siteData.site.template_key === "t6" && (
+            <>
+              <Template6
+                site={siteData.site}
+                profile={siteData.profile}
+                pages={siteData.pages}
+                currentPage={currentPage}
+                baseUrl=""
+              />
+              <ColorPaletteSidebar
+                isOpen={colorPaletteOpen}
+                onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
+                templateKey="t6"
+              />
+            </>
+          )}
         </InlineEditorProvider>
       </div>
-      {!["t1", "t2", "t3", "t4", "t5"].includes(siteData.site.template_key) && (
+      {!["t1", "t2", "t3", "t4", "t5", "t6"].includes(siteData.site.template_key) && (
         <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
           <div style={{ textAlign: "center" }}>
             <p style={{ fontSize: "18px", fontWeight: "600", color: "#1F2937" }}>
               Template {siteData.site.template_key.toUpperCase()} not yet implemented
             </p>
             <p style={{ marginTop: "8px", fontSize: "14px", color: "#6B7280" }}>
-              Only Template1 (t1), Template2 (t2), Template3 (t3), Template4 (t4), and Template5 (t5) are currently available.
+              Only Template1 (t1), Template2 (t2), Template3 (t3), Template4 (t4), Template5 (t5), and Template6 (t6) are currently available.
             </p>
           </div>
         </div>

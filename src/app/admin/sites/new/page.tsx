@@ -7,7 +7,7 @@ import { slugify } from "@/lib/slugify";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 
-const templateOptions = ["t1", "t2", "t3", "t4", "t5"] as const;
+const templateOptions = ["t1", "t2", "t3", "t4", "t5", "t6"] as const;
 
 export default function NewSitePage() {
   const router = useRouter();

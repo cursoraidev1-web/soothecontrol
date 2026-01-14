@@ -6,6 +6,7 @@ import Template2 from "@/templates/template2/Template2";
 import Template3 from "@/templates/template3/Template3";
 import Template4 from "@/templates/template4/Template4";
 import Template5 from "@/templates/template5/Template5";
+import Template6 from "@/templates/template6/Template6";
 import { resolveSiteBySlug } from "@/lib/siteResolver";
 import Script from "next/script";
 import { headers } from "next/headers";
@@ -234,6 +235,27 @@ export default async function PublicSitePage({
           }}
         />
         <Template5
+          site={siteData.site}
+          profile={siteData.profile}
+          pages={siteData.pages}
+          currentPage="home"
+          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+        />
+      </>
+    );
+  }
+
+  if (siteData.site.template_key === "t6") {
+    return (
+      <>
+        <Script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
+        <Template6
           site={siteData.site}
           profile={siteData.profile}
           pages={siteData.pages}

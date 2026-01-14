@@ -121,6 +121,32 @@ const TEMPLATE_CONFIGS: Record<string, {
       surface: "Surface",
     },
   },
+  t6: {
+    defaults: {
+      accent: "#22c55e",
+      accent2: "#60a5fa",
+      ink: "rgba(255, 255, 255, 0.92)",
+      muted: "rgba(255, 255, 255, 0.66)",
+      bg: "#070a12",
+      surface: "rgba(255, 255, 255, 0.06)",
+    },
+    variables: {
+      accent: "--t6-accent",
+      accent2: "--t6-accent2",
+      ink: "--t6-ink",
+      muted: "--t6-muted",
+      bg: "--t6-bg",
+      surface: "--t6-surface",
+    },
+    labels: {
+      accent: "Primary Accent",
+      accent2: "Secondary Accent",
+      ink: "Text Color",
+      muted: "Muted Text",
+      bg: "Background",
+      surface: "Surface",
+    },
+  },
 };
 
 export default function ColorPaletteSidebar({
@@ -192,6 +218,9 @@ export default function ColorPaletteSidebar({
     }
     if (templateKey === "t5") {
       return "linear-gradient(135deg, var(--t5-accent, #2563eb) 0%, var(--t5-accent2, #db2777) 100%)";
+    }
+    if (templateKey === "t6") {
+      return "linear-gradient(135deg, var(--t6-accent, #22c55e) 0%, var(--t6-accent2, #60a5fa) 100%)";
     }
     return "linear-gradient(135deg, #6B46C1 0%, #8B5CF6 100%)";
   };

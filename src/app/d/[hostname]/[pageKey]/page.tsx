@@ -8,6 +8,7 @@ import Template2 from "@/templates/template2/Template2";
 import Template3 from "@/templates/template3/Template3";
 import Template4 from "@/templates/template4/Template4";
 import Template5 from "@/templates/template5/Template5";
+import Template6 from "@/templates/template6/Template6";
 import { resolveSiteByHostname } from "@/lib/siteResolver";
 import { isPageKey, type PageKey } from "@/lib/pageSchema";
 import { getPublicAssetUrl } from "@/lib/assets";
@@ -213,6 +214,25 @@ export default async function CustomDomainPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <Template5
+          site={siteData.site}
+          profile={siteData.profile}
+          pages={siteData.pages}
+          currentPage={pageKey}
+          baseUrl=""
+        />
+      </>
+    );
+  }
+
+  if (siteData.site.template_key === "t6") {
+    return (
+      <>
+        <Script
+          id={`${pageKey}-schema`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        <Template6
           site={siteData.site}
           profile={siteData.profile}
           pages={siteData.pages}
