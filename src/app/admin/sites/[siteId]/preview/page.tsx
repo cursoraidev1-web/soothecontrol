@@ -15,7 +15,7 @@ import { resolveSiteById } from "@/lib/siteResolver";
 import type { SiteData } from "@/lib/siteResolver";
 import { validatePageData, type PageKey, type Section } from "@/lib/pageSchema";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 import { getPublicAssetUrl } from "@/lib/assets";
 import { extractLogoColors, type ExtractedLogoColors } from "@/lib/logoColors";
 
@@ -354,7 +354,8 @@ export default function SitePreviewPage() {
                     return;
                   }
 
-                  const supabase = supabaseBrowser();
+                  // Ensure client is fully authenticated before making database call
+                  const supabase = await getAuthenticatedClient();
                   const { error: err } = await supabase
                     .from("pages")
                     .update({ data: draft, status: "draft" })
@@ -504,44 +505,69 @@ export default function SitePreviewPage() {
               <ColorPaletteSidebar
                 isOpen={colorPaletteOpen}
                 onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
+                templateKey="t1"
               />
             </>
           )}
           {siteData.site.template_key === "t2" && (
-            <Template2
-              site={siteData.site}
-              profile={siteData.profile}
-              pages={siteData.pages}
-              currentPage={currentPage}
-              baseUrl=""
-            />
+            <>
+              <Template2
+                site={siteData.site}
+                profile={siteData.profile}
+                pages={siteData.pages}
+                currentPage={currentPage}
+                baseUrl=""
+              />
+              {/* Template2 uses Tailwind CSS, color palette not applicable */}
+            </>
           )}
           {siteData.site.template_key === "t3" && (
-            <Template3
-              site={siteData.site}
-              profile={siteData.profile}
-              pages={siteData.pages}
-              currentPage={currentPage}
-              baseUrl=""
-            />
+            <>
+              <Template3
+                site={siteData.site}
+                profile={siteData.profile}
+                pages={siteData.pages}
+                currentPage={currentPage}
+                baseUrl=""
+              />
+              <ColorPaletteSidebar
+                isOpen={colorPaletteOpen}
+                onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
+                templateKey="t3"
+              />
+            </>
           )}
           {siteData.site.template_key === "t4" && (
-            <Template4
-              site={siteData.site}
-              profile={siteData.profile}
-              pages={siteData.pages}
-              currentPage={currentPage}
-              baseUrl=""
-            />
+            <>
+              <Template4
+                site={siteData.site}
+                profile={siteData.profile}
+                pages={siteData.pages}
+                currentPage={currentPage}
+                baseUrl=""
+              />
+              <ColorPaletteSidebar
+                isOpen={colorPaletteOpen}
+                onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
+                templateKey="t4"
+              />
+            </>
           )}
           {siteData.site.template_key === "t5" && (
-            <Template5
-              site={siteData.site}
-              profile={siteData.profile}
-              pages={siteData.pages}
-              currentPage={currentPage}
-              baseUrl=""
-            />
+            <>
+              <Template5
+                site={siteData.site}
+                profile={siteData.profile}
+                pages={siteData.pages}
+                currentPage={currentPage}
+                baseUrl=""
+              />
+              <ColorPaletteSidebar
+                isOpen={colorPaletteOpen}
+                onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
+                templateKey="t5"
+              />
+            </>
           )}
         </InlineEditorProvider>
       </div>

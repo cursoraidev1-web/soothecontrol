@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { formatSupabaseError } from "@/lib/supabase/formatError";
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 
 type SiteRow = {
   id: string;
@@ -28,7 +28,18 @@ export default function AdminSitesPage() {
       setIsLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
+      let authenticatedSupabase;
+      try {
+        // Ensure client is fully authenticated before making database call
+        authenticatedSupabase = await getAuthenticatedClient();
+      } catch (err) {
+        if (!isMounted) return;
+        setIsLoading(false);
+        setError(err instanceof Error ? err.message : "Session error. Please log in again.");
+        return;
+      }
+
+      const { data, error } = await authenticatedSupabase
         .from("sites")
         .select("id, slug, template_key, status, created_at")
         .order("created_at", { ascending: false });

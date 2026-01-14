@@ -1,4 +1,4 @@
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 
 export type DomainStatus = "pending" | "active" | "blocked";
 
@@ -15,7 +15,8 @@ export async function addDomain(siteId: string, hostname: string) {
   const normalized = normalizeHostname(hostname);
   if (!normalized) throw new Error("Hostname is required.");
 
-  const supabase = supabaseBrowser();
+  // Ensure client is fully authenticated before making database call
+  const supabase = await getAuthenticatedClient();
   const { data, error } = await supabase
     .from("domains")
     .insert({ site_id: siteId, hostname: normalized, status: "pending" })
@@ -33,7 +34,8 @@ export async function addDomain(siteId: string, hostname: string) {
 }
 
 export async function setDomainStatus(domainId: string, status: DomainStatus) {
-  const supabase = supabaseBrowser();
+  // Ensure client is fully authenticated before making database call
+  const supabase = await getAuthenticatedClient();
   const { data, error } = await supabase
     .from("domains")
     .update({ status })

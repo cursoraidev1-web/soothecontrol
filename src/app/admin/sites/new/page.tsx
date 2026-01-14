@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { slugify } from "@/lib/slugify";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 
 const templateOptions = ["t1", "t2", "t3", "t4", "t5"] as const;
 
@@ -34,31 +34,36 @@ export default function NewSitePage() {
 
     setIsSaving(true);
 
-    const supabase = supabaseBrowser();
-    const { data, error } = await supabase
-      .from("sites")
-      .insert({ slug: finalSlug, template_key: templateKey })
-      .select("id")
-      .single();
+    try {
+      // Ensure client is fully authenticated before making database call
+      const supabase = await getAuthenticatedClient();
+      const { data, error } = await supabase
+        .from("sites")
+        .insert({ slug: finalSlug, template_key: templateKey })
+        .select("id")
+        .single();
 
-    setIsSaving(false);
-
-    if (error) {
-      const msg = formatSupabaseError(error);
-      if (
-        error.code === "23505" ||
-        (msg ?? "").toLowerCase().includes("duplicate key")
-      ) {
-        setError(
-          `That slug is already taken. Try a different one (e.g. "${finalSlug}-2").`,
-        );
+      if (error) {
+        const msg = formatSupabaseError(error);
+        if (
+          error.code === "23505" ||
+          (msg ?? "").toLowerCase().includes("duplicate key")
+        ) {
+          setError(
+            `That slug is already taken. Try a different one (e.g. "${finalSlug}-2").`,
+          );
+          return;
+        }
+        setError(msg);
         return;
       }
-      setError(msg);
-      return;
-    }
 
-    router.replace(`/admin/sites/${data.id}`);
+      router.replace(`/admin/sites/${data.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create site. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (

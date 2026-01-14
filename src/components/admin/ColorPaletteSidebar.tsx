@@ -5,43 +5,154 @@ import { useState, useEffect } from "react";
 interface ColorPaletteSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  templateKey?: string;
 }
 
-const DEFAULT_COLORS = {
-  primary: "#6B46C1",
-  accent: "#8B5CF6",
-  dark: "#4C1D95",
-  textPrimary: "#1F2937",
-  textSecondary: "#6B7280",
-  bgMain: "#FFFFFF",
-  bgLight: "#F9FAFB",
+// Template-specific color configurations
+const TEMPLATE_CONFIGS: Record<string, {
+  defaults: Record<string, string>;
+  variables: Record<string, string>;
+  labels: Record<string, string>;
+}> = {
+  t1: {
+    defaults: {
+      primary: "#6B46C1",
+      accent: "#8B5CF6",
+      dark: "#4C1D95",
+      textPrimary: "#1F2937",
+      textSecondary: "#6B7280",
+      bgMain: "#FFFFFF",
+      bgLight: "#F9FAFB",
+    },
+    variables: {
+      primary: "--color-primary",
+      accent: "--color-accent",
+      dark: "--color-dark",
+      textPrimary: "--color-text-primary",
+      textSecondary: "--color-text-secondary",
+      bgMain: "--color-bg-main",
+      bgLight: "--color-bg-light",
+    },
+    labels: {
+      primary: "Primary Color",
+      accent: "Accent Color",
+      dark: "Dark Accent",
+      textPrimary: "Primary Text",
+      textSecondary: "Secondary Text",
+      bgMain: "Main Background",
+      bgLight: "Light Background",
+    },
+  },
+  t3: {
+    defaults: {
+      accent: "#0f766e",
+      accent2: "#b45309",
+      ink: "#121212",
+      muted: "#5a615b",
+      bg: "#fbfaf7",
+      surface: "#ffffff",
+    },
+    variables: {
+      accent: "--t3-accent",
+      accent2: "--t3-accent2",
+      ink: "--t3-ink",
+      muted: "--t3-muted",
+      bg: "--t3-bg",
+      surface: "--t3-surface",
+    },
+    labels: {
+      accent: "Primary Accent",
+      accent2: "Secondary Accent",
+      ink: "Text Color",
+      muted: "Muted Text",
+      bg: "Background",
+      surface: "Surface",
+    },
+  },
+  t4: {
+    defaults: {
+      accent: "#7c3aed",
+      accent2: "#06b6d4",
+      ink: "rgba(255, 255, 255, 0.92)",
+      muted: "rgba(255, 255, 255, 0.66)",
+      bg: "#0b0f19",
+      surface: "rgba(255, 255, 255, 0.06)",
+    },
+    variables: {
+      accent: "--t4-accent",
+      accent2: "--t4-accent2",
+      ink: "--t4-ink",
+      muted: "--t4-muted",
+      bg: "--t4-bg",
+      surface: "--t4-surface",
+    },
+    labels: {
+      accent: "Primary Accent",
+      accent2: "Secondary Accent",
+      ink: "Text Color",
+      muted: "Muted Text",
+      bg: "Background",
+      surface: "Surface",
+    },
+  },
+  t5: {
+    defaults: {
+      accent: "#2563eb",
+      accent2: "#db2777",
+      ink: "#0b1220",
+      muted: "rgba(11, 18, 32, 0.62)",
+      bg: "#f7f8fb",
+      surface: "#ffffff",
+    },
+    variables: {
+      accent: "--t5-accent",
+      accent2: "--t5-accent2",
+      ink: "--t5-ink",
+      muted: "--t5-muted",
+      bg: "--t5-bg",
+      surface: "--t5-surface",
+    },
+    labels: {
+      accent: "Primary Accent",
+      accent2: "Secondary Accent",
+      ink: "Text Color",
+      muted: "Muted Text",
+      bg: "Background",
+      surface: "Surface",
+    },
+  },
 };
 
 export default function ColorPaletteSidebar({
   isOpen,
   onClose,
+  templateKey = "t1",
 }: ColorPaletteSidebarProps) {
+  const config = TEMPLATE_CONFIGS[templateKey] || TEMPLATE_CONFIGS.t1;
+  const storageKey = `template-${templateKey}-colors`;
+
   const [colors, setColors] = useState(() => {
     // Load once on first render (client-only component).
-    const saved = localStorage.getItem("template1-colors");
-    if (!saved) return DEFAULT_COLORS;
+    const saved = localStorage.getItem(storageKey);
+    if (!saved) return config.defaults;
     try {
-      const parsed = JSON.parse(saved) as Partial<typeof DEFAULT_COLORS>;
-      return { ...DEFAULT_COLORS, ...parsed };
+      const parsed = JSON.parse(saved) as Partial<typeof config.defaults>;
+      return { ...config.defaults, ...parsed };
     } catch {
-      return DEFAULT_COLORS;
+      return config.defaults;
     }
   });
 
-  const applyColors = (newColors: typeof DEFAULT_COLORS) => {
+  const applyColors = (newColors: typeof config.defaults) => {
+    // Apply CSS variables to :root (document.documentElement) since all templates define variables there
     const root = document.documentElement;
-    root.style.setProperty("--color-primary", newColors.primary);
-    root.style.setProperty("--color-accent", newColors.accent);
-    root.style.setProperty("--color-dark", newColors.dark);
-    root.style.setProperty("--color-text-primary", newColors.textPrimary);
-    root.style.setProperty("--color-text-secondary", newColors.textSecondary);
-    root.style.setProperty("--color-bg-main", newColors.bgMain);
-    root.style.setProperty("--color-bg-light", newColors.bgLight);
+
+    Object.entries(newColors).forEach(([key, value]) => {
+      const cssVar = config.variables[key];
+      if (cssVar) {
+        root.style.setProperty(cssVar, value);
+      }
+    });
   };
 
   useEffect(() => {
@@ -50,17 +161,34 @@ export default function ColorPaletteSidebar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleColorChange = (key: keyof typeof DEFAULT_COLORS, value: string) => {
+  const handleColorChange = (key: string, value: string) => {
     const newColors = { ...colors, [key]: value };
     setColors(newColors);
     applyColors(newColors);
-    localStorage.setItem("template1-colors", JSON.stringify(newColors));
+    localStorage.setItem(storageKey, JSON.stringify(newColors));
   };
 
   const handleReset = () => {
-    setColors(DEFAULT_COLORS);
-    applyColors(DEFAULT_COLORS);
-    localStorage.removeItem("template1-colors");
+    setColors(config.defaults);
+    applyColors(config.defaults);
+    localStorage.removeItem(storageKey);
+  };
+
+  // Get button gradient color based on template
+  const getButtonGradient = () => {
+    if (templateKey === "t1") {
+      return "linear-gradient(135deg, var(--color-primary, #6B46C1) 0%, var(--color-accent, #8B5CF6) 100%)";
+    }
+    if (templateKey === "t3") {
+      return "linear-gradient(135deg, var(--t3-accent, #0f766e) 0%, var(--t3-accent2, #b45309) 100%)";
+    }
+    if (templateKey === "t4") {
+      return "linear-gradient(135deg, var(--t4-accent, #7c3aed) 0%, var(--t4-accent2, #06b6d4) 100%)";
+    }
+    if (templateKey === "t5") {
+      return "linear-gradient(135deg, var(--t5-accent, #2563eb) 0%, var(--t5-accent2, #db2777) 100%)";
+    }
+    return "linear-gradient(135deg, #6B46C1 0%, #8B5CF6 100%)";
   };
 
   return (
@@ -102,152 +230,27 @@ export default function ColorPaletteSidebar({
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          {/* Primary Color */}
-          <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: "600", color: "#1F2937" }}>
-              Primary Color
-            </label>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="color"
-                value={colors.primary}
-                onChange={(e) => handleColorChange("primary", e.target.value)}
-                style={{ width: "60px", height: "40px", border: "1px solid #E5E7EB", borderRadius: "8px", cursor: "pointer" }}
-              />
-              <input
-                type="text"
-                value={colors.primary}
-                onChange={(e) => handleColorChange("primary", e.target.value)}
-                style={{ flex: 1, padding: "8px", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "14px" }}
-              />
+          {Object.entries(config.defaults).map(([key]) => (
+            <div key={key}>
+              <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: "600", color: "#1F2937" }}>
+                {config.labels[key] || key}
+              </label>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <input
+                  type="color"
+                  value={colors[key]}
+                  onChange={(e) => handleColorChange(key, e.target.value)}
+                  style={{ width: "60px", height: "40px", border: "1px solid #E5E7EB", borderRadius: "8px", cursor: "pointer" }}
+                />
+                <input
+                  type="text"
+                  value={colors[key]}
+                  onChange={(e) => handleColorChange(key, e.target.value)}
+                  style={{ flex: 1, padding: "8px", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "14px" }}
+                />
+              </div>
             </div>
-          </div>
-
-          {/* Accent Color */}
-          <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: "600", color: "#1F2937" }}>
-              Accent Color
-            </label>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="color"
-                value={colors.accent}
-                onChange={(e) => handleColorChange("accent", e.target.value)}
-                style={{ width: "60px", height: "40px", border: "1px solid #E5E7EB", borderRadius: "8px", cursor: "pointer" }}
-              />
-              <input
-                type="text"
-                value={colors.accent}
-                onChange={(e) => handleColorChange("accent", e.target.value)}
-                style={{ flex: 1, padding: "8px", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "14px" }}
-              />
-            </div>
-          </div>
-
-          {/* Dark Accent */}
-          <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: "600", color: "#1F2937" }}>
-              Dark Accent
-            </label>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="color"
-                value={colors.dark}
-                onChange={(e) => handleColorChange("dark", e.target.value)}
-                style={{ width: "60px", height: "40px", border: "1px solid #E5E7EB", borderRadius: "8px", cursor: "pointer" }}
-              />
-              <input
-                type="text"
-                value={colors.dark}
-                onChange={(e) => handleColorChange("dark", e.target.value)}
-                style={{ flex: 1, padding: "8px", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "14px" }}
-              />
-            </div>
-          </div>
-
-          {/* Text Primary */}
-          <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: "600", color: "#1F2937" }}>
-              Primary Text
-            </label>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="color"
-                value={colors.textPrimary}
-                onChange={(e) => handleColorChange("textPrimary", e.target.value)}
-                style={{ width: "60px", height: "40px", border: "1px solid #E5E7EB", borderRadius: "8px", cursor: "pointer" }}
-              />
-              <input
-                type="text"
-                value={colors.textPrimary}
-                onChange={(e) => handleColorChange("textPrimary", e.target.value)}
-                style={{ flex: 1, padding: "8px", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "14px" }}
-              />
-            </div>
-          </div>
-
-          {/* Text Secondary */}
-          <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: "600", color: "#1F2937" }}>
-              Secondary Text
-            </label>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="color"
-                value={colors.textSecondary}
-                onChange={(e) => handleColorChange("textSecondary", e.target.value)}
-                style={{ width: "60px", height: "40px", border: "1px solid #E5E7EB", borderRadius: "8px", cursor: "pointer" }}
-              />
-              <input
-                type="text"
-                value={colors.textSecondary}
-                onChange={(e) => handleColorChange("textSecondary", e.target.value)}
-                style={{ flex: 1, padding: "8px", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "14px" }}
-              />
-            </div>
-          </div>
-
-          {/* Background Main */}
-          <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: "600", color: "#1F2937" }}>
-              Main Background
-            </label>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="color"
-                value={colors.bgMain}
-                onChange={(e) => handleColorChange("bgMain", e.target.value)}
-                style={{ width: "60px", height: "40px", border: "1px solid #E5E7EB", borderRadius: "8px", cursor: "pointer" }}
-              />
-              <input
-                type="text"
-                value={colors.bgMain}
-                onChange={(e) => handleColorChange("bgMain", e.target.value)}
-                style={{ flex: 1, padding: "8px", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "14px" }}
-              />
-            </div>
-          </div>
-
-          {/* Background Light */}
-          <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: "600", color: "#1F2937" }}>
-              Light Background
-            </label>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="color"
-                value={colors.bgLight}
-                onChange={(e) => handleColorChange("bgLight", e.target.value)}
-                style={{ width: "60px", height: "40px", border: "1px solid #E5E7EB", borderRadius: "8px", cursor: "pointer" }}
-              />
-              <input
-                type="text"
-                value={colors.bgLight}
-                onChange={(e) => handleColorChange("bgLight", e.target.value)}
-                style={{ flex: 1, padding: "8px", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "14px" }}
-              />
-            </div>
-          </div>
+          ))}
 
           {/* Reset Button */}
           <button
@@ -255,7 +258,7 @@ export default function ColorPaletteSidebar({
             style={{
               marginTop: "16px",
               padding: "12px 24px",
-              background: "linear-gradient(135deg, #6B46C1 0%, #8B5CF6 100%)",
+              background: getButtonGradient(),
               color: "#FFFFFF",
               border: "none",
               borderRadius: "8px",
@@ -287,7 +290,7 @@ export default function ColorPaletteSidebar({
           width: "56px",
           height: "56px",
           borderRadius: "50%",
-          background: "linear-gradient(135deg, var(--color-primary, #6B46C1) 0%, var(--color-accent, #8B5CF6) 100%)",
+          background: getButtonGradient(),
           border: "none",
           color: "#FFFFFF",
           cursor: "pointer",

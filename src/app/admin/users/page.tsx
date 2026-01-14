@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { formatSupabaseError } from "@/lib/supabase/formatError";
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 
 type AdminUserRow = {
   user_id: string;
@@ -46,7 +46,17 @@ export default function AdminUsersPage() {
     setIsLoading(true);
     setError(null);
 
-    const supabase = supabaseBrowser();
+    let authenticatedSupabase;
+    try {
+      // Ensure client is fully authenticated before making database call
+      authenticatedSupabase = await getAuthenticatedClient();
+    } catch (err) {
+      setIsLoading(false);
+      setError(err instanceof Error ? err.message : "Session error. Please log in again.");
+      return;
+    }
+
+    const supabase = authenticatedSupabase;
 
     try {
       const { data: adminData, error: adminError } = await supabase
@@ -88,9 +98,10 @@ export default function AdminUsersPage() {
 
     setIsAdding(true);
 
-    const supabase = supabaseBrowser();
-
     try {
+      // Ensure client is fully authenticated before making database call
+      const supabase = await getAuthenticatedClient();
+
       const { error: insertError } = await supabase
         .from("admin_users")
         .insert({ user_id: userId.trim() });
@@ -123,9 +134,10 @@ export default function AdminUsersPage() {
 
     setRemovingId(userId);
 
-    const supabase = supabaseBrowser();
-
     try {
+      // Ensure client is fully authenticated before making database call
+      const supabase = await getAuthenticatedClient();
+
       const { error } = await supabase
         .from("admin_users")
         .delete()

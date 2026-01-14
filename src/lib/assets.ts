@@ -1,4 +1,4 @@
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 
 /**
  * Storage bucket setup (Supabase Dashboard):
@@ -23,7 +23,8 @@ export function getPublicAssetUrl(path: string) {
 export async function uploadLogo(siteId: string, file: File) {
   if (!file) throw new Error("File is required.");
 
-  const supabase = supabaseBrowser();
+  // Ensure client is fully authenticated before making database call
+  const supabase = await getAuthenticatedClient();
   const path = `${siteId}/logo/${Date.now()}-${safeFilename(file.name)}`;
 
   const { error: uploadError } = await supabase.storage

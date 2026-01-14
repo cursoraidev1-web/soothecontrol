@@ -8,7 +8,7 @@ import { addDomain, normalizeHostname, setDomainStatus, type DomainStatus } from
 import { getPublicAssetUrl, uploadLogo } from "@/lib/assets";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { publishSite, unpublishSite } from "@/lib/publishing";
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 
 type SiteRow = {
   id: string;
@@ -141,8 +141,19 @@ export default function SiteOverviewPage({
       setLogoError(null);
       setLogoSuccess(null);
 
+      let authenticatedSupabase;
+      try {
+        // Ensure client is fully authenticated before making database calls
+        authenticatedSupabase = await getAuthenticatedClient();
+      } catch (err) {
+        if (!isMounted) return;
+        setIsLoading(false);
+        setLoadError(err instanceof Error ? err.message : "Session error. Please log in again.");
+        return;
+      }
+
       const [siteRes, profileRes, pagesRes, domainsRes] = await Promise.all([
-        supabase
+        authenticatedSupabase
           .from("sites")
           .select("id, slug, template_key, status")
           .eq("id", siteId)
@@ -154,11 +165,11 @@ export default function SiteOverviewPage({
           )
           .eq("site_id", siteId)
           .single(),
-        supabase
+        authenticatedSupabase
           .from("pages")
           .select("id, key, status")
           .eq("site_id", siteId),
-        supabase
+        authenticatedSupabase
           .from("domains")
           .select("id, hostname, status, created_at")
           .eq("site_id", siteId)
@@ -204,7 +215,7 @@ export default function SiteOverviewPage({
       });
 
       if (loadedProfile.logo_asset_id) {
-        const { data: asset, error: assetError } = await supabase
+        const { data: asset, error: assetError } = await authenticatedSupabase
           .from("assets")
           .select("id, path, mime_type, size_bytes, created_at")
           .eq("id", loadedProfile.logo_asset_id)
@@ -256,36 +267,41 @@ export default function SiteOverviewPage({
     setSaveError(null);
     setIsSaving(true);
 
-    const supabase = supabaseBrowser();
-    const payload = {
-      business_name: form.business_name.trim(),
-      tagline: form.tagline.trim() || null,
-      description: form.description.trim() || null,
-      address: form.address.trim() || null,
-      phone: form.phone.trim() || null,
-      email: form.email.trim() || null,
-      whatsapp: form.whatsapp.trim() || null,
-      socials: {
-        instagram: socials.instagram.trim() || null,
-        facebook: socials.facebook.trim() || null,
-        twitter: socials.twitter.trim() || null,
-        tiktok: socials.tiktok.trim() || null,
-      },
-    };
+    try {
+      // Ensure client is fully authenticated before making database call
+      const supabase = await getAuthenticatedClient();
+      const payload = {
+        business_name: form.business_name.trim(),
+        tagline: form.tagline.trim() || null,
+        description: form.description.trim() || null,
+        address: form.address.trim() || null,
+        phone: form.phone.trim() || null,
+        email: form.email.trim() || null,
+        whatsapp: form.whatsapp.trim() || null,
+        socials: {
+          instagram: socials.instagram.trim() || null,
+          facebook: socials.facebook.trim() || null,
+          twitter: socials.twitter.trim() || null,
+          tiktok: socials.tiktok.trim() || null,
+        },
+      };
 
-    const { error } = await supabase
-      .from("business_profiles")
-      .update(payload)
-      .eq("site_id", siteId);
+      const { error } = await supabase
+        .from("business_profiles")
+        .update(payload)
+        .eq("site_id", siteId);
 
-    setIsSaving(false);
+      if (error) {
+        setSaveError(formatSupabaseError(error));
+        return;
+      }
 
-    if (error) {
-      setSaveError(formatSupabaseError(error));
-      return;
+      setSaveSuccess(true);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save profile. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
-
-    setSaveSuccess(true);
   }
 
   async function onAddDomain(e: React.FormEvent) {
@@ -301,6 +317,7 @@ export default function SiteOverviewPage({
 
     setIsDomainSaving(true);
     try {
+      // addDomain already ensures authentication
       const created = await addDomain(siteId, normalized);
       setDomains((prev) => [created, ...prev]);
       setDomainHostname("");
@@ -320,6 +337,7 @@ export default function SiteOverviewPage({
     setDomainError(null);
     setDomainActionLoadingId(domainId);
     try {
+      // setDomainStatus already ensures authentication
       const updated = await setDomainStatus(domainId, status);
       setDomains((prev) =>
         prev.map((d) => (d.id === domainId ? { ...d, status: updated.status } : d)),
@@ -343,6 +361,7 @@ export default function SiteOverviewPage({
 
     setIsLogoUploading(true);
     try {
+      // uploadLogo already ensures authentication
       const asset = await uploadLogo(siteId, logoFile);
       setLogoAsset(asset);
       setLogoUrl(getPublicAssetUrl(asset.path));
@@ -364,7 +383,8 @@ export default function SiteOverviewPage({
     setIsLogoUploading(true);
 
     try {
-      const supabase = supabaseBrowser();
+      // Ensure client is fully authenticated before making database call
+      const supabase = await getAuthenticatedClient();
       const { error } = await supabase
         .from("business_profiles")
         .update({ logo_asset_id: null })
@@ -392,6 +412,7 @@ export default function SiteOverviewPage({
     setIsPublishing(true);
 
     try {
+      // publishSite already ensures authentication
       const res = await publishSite(siteId);
       setSite((prev) => (prev ? { ...prev, status: res.site.status } : prev));
       setPages((prev) =>
@@ -417,6 +438,7 @@ export default function SiteOverviewPage({
     setIsPublishing(true);
 
     try {
+      // unpublishSite already ensures authentication
       const res = await unpublishSite(siteId);
       setSite((prev) => (prev ? { ...prev, status: res.site.status } : prev));
       setPages((prev) =>

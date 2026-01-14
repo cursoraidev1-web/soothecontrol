@@ -1,4 +1,4 @@
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 import { validatePageData, type PageData } from "@/lib/pageSchema";
 
 type PublishablePageKey = "home" | "about" | "contact";
@@ -7,8 +7,10 @@ export async function publishPage(pageId: string, pageDraft: PageData) {
   const valid = validatePageData(pageDraft);
   if (!valid.ok) throw new Error(valid.error ?? "Invalid page JSON structure.");
 
+  // Ensure client is fully authenticated before making database call
+  const supabase = await getAuthenticatedClient();
+
   const now = new Date().toISOString();
-  const supabase = supabaseBrowser();
 
   const { data, error } = await supabase
     .from("pages")
@@ -24,7 +26,8 @@ export async function publishPage(pageId: string, pageDraft: PageData) {
 // We set published_at = NULL on unpublish to make it unambiguous for the public
 // frontend: if status != 'published', there is no active published timestamp.
 export async function unpublishPage(pageId: string) {
-  const supabase = supabaseBrowser();
+  // Ensure client is fully authenticated before making database call
+  const supabase = await getAuthenticatedClient();
 
   const { data, error } = await supabase
     .from("pages")
@@ -38,8 +41,10 @@ export async function unpublishPage(pageId: string) {
 }
 
 export async function publishSite(siteId: string) {
+  // Ensure client is fully authenticated before making database call
+  const supabase = await getAuthenticatedClient();
+
   const now = new Date().toISOString();
-  const supabase = supabaseBrowser();
 
   const { data: pages, error: pagesError } = await supabase
     .from("pages")
@@ -71,7 +76,8 @@ export async function publishSite(siteId: string) {
 }
 
 export async function unpublishSite(siteId: string) {
-  const supabase = supabaseBrowser();
+  // Ensure client is fully authenticated before making database call
+  const supabase = await getAuthenticatedClient();
 
   const { data: pages, error: pagesError } = await supabase
     .from("pages")

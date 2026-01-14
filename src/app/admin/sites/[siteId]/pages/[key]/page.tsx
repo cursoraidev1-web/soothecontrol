@@ -26,7 +26,7 @@ import {
 } from "@/lib/pageSchema";
 import { publishPage, unpublishPage } from "@/lib/publishing";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
 
 type PagesRow = {
   id: string;
@@ -95,7 +95,18 @@ export default function PageEditorPage({
       setRawError(null);
       setSeedNotice(null);
 
-      const { data, error } = await supabase
+      let authenticatedSupabase;
+      try {
+        // Ensure client is fully authenticated before making database call
+        authenticatedSupabase = await getAuthenticatedClient();
+      } catch (err) {
+        if (!isMounted) return;
+        setIsLoading(false);
+        setLoadError(err instanceof Error ? err.message : "Session error. Please log in again.");
+        return;
+      }
+
+      const { data, error } = await authenticatedSupabase
         .from("pages")
         .select("*")
         .eq("site_id", siteId)
@@ -256,22 +267,27 @@ export default function PageEditorPage({
     }
 
     setIsSaving(true);
-    const supabase = supabaseBrowser();
+    try {
+      // Ensure client is fully authenticated before making database call
+      const supabase = await getAuthenticatedClient();
 
-    const { error } = await supabase
-      .from("pages")
-      .update({ data: pageDraft, status: "draft" })
-      .eq("id", pageRow.id);
+      const { error } = await supabase
+        .from("pages")
+        .update({ data: pageDraft, status: "draft" })
+        .eq("id", pageRow.id);
 
-    setIsSaving(false);
+      if (error) {
+        setSaveError(formatSupabaseError(error));
+        return;
+      }
 
-    if (error) {
-      setSaveError(formatSupabaseError(error));
-      return;
+      setSaveSuccess(true);
+      setSeedNotice(null);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save draft. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
-
-    setSaveSuccess(true);
-    setSeedNotice(null);
   }
 
   async function onPublishPage() {
@@ -295,6 +311,7 @@ export default function PageEditorPage({
 
     setIsSaving(true);
     try {
+      // publishPage already ensures authentication
       const updated = await publishPage(pageRow.id, pageDraft);
       setPageRow((prev) =>
         prev
@@ -326,6 +343,7 @@ export default function PageEditorPage({
 
     setIsSaving(true);
     try {
+      // unpublishPage already ensures authentication
       const updated = await unpublishPage(pageRow.id);
       setPageRow((prev) =>
         prev
