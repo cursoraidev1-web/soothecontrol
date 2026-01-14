@@ -32,7 +32,7 @@ export interface SiteData {
 export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> {
   const supabase = supabaseBrowser();
 
-  // Load site
+  // Load site (check both published and draft to help debug)
   const { data: site, error: siteError } = await supabase
     .from("sites")
     .select("id, slug, template_key, status")
@@ -41,6 +41,18 @@ export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> 
     .single();
 
   if (siteError || !site) {
+    // Debug: Check if site exists but is draft
+    const { data: draftSite } = await supabase
+      .from("sites")
+      .select("id, slug, template_key, status")
+      .eq("slug", slug)
+      .single();
+    
+    if (draftSite && draftSite.status === "draft") {
+      console.warn(`[resolveSiteBySlug] Site "${slug}" exists but is draft. Publish it to make it accessible.`);
+    } else if (!draftSite) {
+      console.warn(`[resolveSiteBySlug] Site "${slug}" does not exist. Error: ${siteError?.message || "Not found"}`);
+    }
     return null;
   }
 
@@ -54,6 +66,7 @@ export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> 
     .single();
 
   if (profileError || !profile) {
+    console.warn(`[resolveSiteBySlug] Site "${slug}" (id: ${site.id}) has no business profile. Error: ${profileError?.message || "Profile not found"}`);
     return null;
   }
 
@@ -79,6 +92,21 @@ export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> 
     .in("key", ["home", "about", "contact"]);
 
   if (pagesError || !pagesData) {
+    // Debug: Check if pages exist but are draft
+    const { data: allPages } = await supabase
+      .from("pages")
+      .select("key, status")
+      .eq("site_id", site.id)
+      .in("key", ["home", "about", "contact"]);
+    
+    if (allPages && allPages.length > 0) {
+      const draftPages = allPages.filter(p => p.status === "draft");
+      if (draftPages.length > 0) {
+        console.warn(`[resolveSiteBySlug] Site "${slug}" has draft pages: ${draftPages.map(p => p.key).join(", ")}. Publish all pages.`);
+      }
+    } else {
+      console.warn(`[resolveSiteBySlug] Site "${slug}" has no pages (home, about, contact).`);
+    }
     return null;
   }
 

@@ -101,9 +101,15 @@ export default async function PublicSitePage({
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
   const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
 
-  const siteData = await resolveSiteBySlug(params.slug);
+  const slug = params.slug;
+  
+  // Log for debugging
+  console.log(`[PublicSitePage] Resolving site with slug: "${slug}"`);
+  
+  const siteData = await resolveSiteBySlug(slug);
 
   if (!siteData) {
+    console.error(`[PublicSitePage] Failed to resolve site with slug: "${slug}"`);
     notFound();
   }
 

@@ -1101,6 +1101,22 @@ export default function SiteOverviewPage({
           Jump into Home/About/Contact editing.
         </p>
 
+        {/* Warning if pages aren't published */}
+        {site.status === "published" && sortedPages.some((p) => p.status !== "published") ? (
+          <div className="mt-4 rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+            <strong>⚠️ Warning:</strong> Your site is published, but some pages are still in draft. 
+            The site won&apos;t be accessible until all pages (home, about, contact) are published. 
+            Click &quot;Publish Site&quot; again to publish all pages, or publish each page individually.
+          </div>
+        ) : null}
+
+        {sortedPages.length < 3 ? (
+          <div className="mt-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <strong>⚠️ Error:</strong> Missing pages! Expected 3 pages (home, about, contact), but found {sortedPages.length}. 
+            The database trigger may not have run. Please check your database or contact support.
+          </div>
+        ) : null}
+
         <div className="mt-4 overflow-hidden rounded-lg ring-1 ring-gray-200">
           <table className="w-full table-auto">
             <thead className="bg-gray-50 text-left text-xs font-semibold text-gray-700">
@@ -1121,7 +1137,15 @@ export default function SiteOverviewPage({
                 sortedPages.map((p) => (
                   <tr key={p.id}>
                     <td className="px-4 py-3 font-medium">{p.key}</td>
-                    <td className="px-4 py-3 text-gray-700">{p.status}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        p.status === "published" 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}>
+                        {p.status}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/admin/sites/${siteId}/pages/${p.key}`}
