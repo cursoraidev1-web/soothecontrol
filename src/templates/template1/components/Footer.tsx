@@ -28,7 +28,11 @@ export default function Footer({
   const editor = useInlineEditor();
   
   // Get footer labels from socials (or use defaults)
-  const footerLabels = (socials.footer_labels as Record<string, string>) || {};
+  const footerLabels = (() => {
+    const raw = (socials as Record<string, unknown>).footer_labels;
+    if (raw && typeof raw === "object") return raw as Record<string, string>;
+    return {} as Record<string, string>;
+  })();
   const quickLinksLabel = footerLabels.quickLinks || "Quick Links";
   const contactLabel = footerLabels.contact || "Contact";
   

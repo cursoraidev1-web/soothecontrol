@@ -26,6 +26,17 @@ export default function T2Footer({
   logoUrl,
   baseUrl,
 }: T2FooterProps) {
+  const editor = useInlineEditor();
+
+  // Get footer labels from socials (or use defaults)
+  const footerLabels = (() => {
+    const raw = (socials as Record<string, unknown>).footer_labels;
+    if (raw && typeof raw === "object") return raw as Record<string, string>;
+    return {} as Record<string, string>;
+  })();
+  const quickLinksLabel = footerLabels.quickLinks || "Quick Links";
+  const contactLabel = footerLabels.contact || "Contact";
+
   return (
     <footer className="border-t border-gray-200 bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">

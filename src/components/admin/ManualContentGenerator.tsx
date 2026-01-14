@@ -455,7 +455,6 @@ export default function ManualContentGenerator({ siteId }: { siteId: string }) {
           </div>
         )}
       </div>
-      )}
     </section>
   );
 }
