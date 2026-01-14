@@ -9,7 +9,7 @@ import Template3 from "@/templates/template3/Template3";
 import Template4 from "@/templates/template4/Template4";
 import Template5 from "@/templates/template5/Template5";
 import Template6 from "@/templates/template6/Template6";
-import { resolveSiteByHostname } from "@/lib/siteResolver";
+import { resolveSiteByHostname } from "@/lib/siteResolver.server";
 import { isPageKey, type PageKey } from "@/lib/pageSchema";
 import { getPublicAssetUrl } from "@/lib/assets";
 import { normalizeHostname } from "@/lib/domains";

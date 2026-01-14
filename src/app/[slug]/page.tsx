@@ -7,7 +7,7 @@ import Template3 from "@/templates/template3/Template3";
 import Template4 from "@/templates/template4/Template4";
 import Template5 from "@/templates/template5/Template5";
 import Template6 from "@/templates/template6/Template6";
-import { resolveSiteBySlug } from "@/lib/siteResolver";
+import { resolveSiteBySlug } from "@/lib/siteResolver.server";
 import Script from "next/script";
 import { headers } from "next/headers";
 import { getPublicAssetUrl } from "@/lib/assets";

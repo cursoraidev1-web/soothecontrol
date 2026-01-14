@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { supabaseBrowser } from "@/lib/supabase/browser";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const supabase = supabaseBrowser();
+  const supabase = supabaseServer();
 
   // Check site
   const { data: site, error: siteError } = await supabase

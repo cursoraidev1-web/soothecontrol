@@ -8,7 +8,7 @@ import Template2 from "@/templates/template2/Template2";
 import Template3 from "@/templates/template3/Template3";
 import Template4 from "@/templates/template4/Template4";
 import Template5 from "@/templates/template5/Template5";
-import { resolveSiteBySlug } from "@/lib/siteResolver";
+import { resolveSiteBySlug } from "@/lib/siteResolver.server";
 import { getPublicAssetUrl } from "@/lib/assets";
 import { normalizeHostname } from "@/lib/domains";
 import { getPublishedExtraPageBySiteSlug } from "@/lib/extraPages";
