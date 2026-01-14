@@ -137,7 +137,12 @@ export default function ColorPaletteSidebar({
     if (!saved) return config.defaults;
     try {
       const parsed = JSON.parse(saved) as Partial<typeof config.defaults>;
-      return { ...config.defaults, ...parsed };
+      // Prevent undefined values from widening the state type.
+      const next: Record<string, string> = { ...config.defaults };
+      for (const [k, v] of Object.entries(parsed)) {
+        if (typeof v === "string") next[k] = v;
+      }
+      return next;
     } catch {
       return config.defaults;
     }
