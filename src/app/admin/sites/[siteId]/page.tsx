@@ -74,6 +74,10 @@ export default function SiteOverviewPage({
 }: {
   params?: { siteId: string } | Promise<{ siteId: string }>;
 }) {
+  const platformDomain = (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site")
+    .trim()
+    .toLowerCase();
+
   // Use useParams() hook as primary source (more reliable in client components)
   const routeParams = useParams();
   const siteId = (routeParams?.siteId as string) || 
@@ -542,7 +546,10 @@ export default function SiteOverviewPage({
           <div>
             <dt className="text-xs font-medium text-gray-600">Preview URL</dt>
             <dd className="mt-1 font-mono text-sm">
-              https://{site.slug}.soothecontrols.site
+              https://{site.slug}.{platformDomain}
+            </dd>
+            <dd className="mt-1 text-xs text-gray-500">
+              Local dev uses path-based routing: <span className="font-mono">http://localhost:3000/{site.slug}</span>
             </dd>
           </div>
           <div>
@@ -609,9 +616,48 @@ export default function SiteOverviewPage({
       {/* A2) Domains */}
       <section className="rounded-lg bg-white p-6 ring-1 ring-gray-200">
         <h2 className="text-lg font-semibold">Domains</h2>
-        <p className="mt-1 text-sm text-gray-600">
-          After DNS points to our frontend, mark active.
-        </p>
+        <p className="mt-1 text-sm text-gray-600">Use either subdomains (recommended) or a custom domain.</p>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="text-sm font-semibold text-gray-900">Subdomains (recommended)</div>
+            <div className="mt-1 text-sm text-gray-700">
+              Your site is automatically available at:
+            </div>
+            <div className="mt-2 rounded bg-white px-3 py-2 font-mono text-sm ring-1 ring-gray-200">
+              https://{site.slug}.{platformDomain}
+            </div>
+            <div className="mt-3 text-sm text-gray-700">
+              DNS setup (one-time, for your whole platform):
+            </div>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
+              <li>
+                Add <span className="font-mono">{platformDomain}</span> to your hosting provider (Vercel/Netlify) as a domain.
+              </li>
+              <li>
+                Add wildcard <span className="font-mono">*.{platformDomain}</span> to the same project.
+              </li>
+              <li>
+                In your DNS provider, point both the base and wildcard records to your host (Vercel/Netlify) so all subdomains resolve.
+              </li>
+            </ul>
+            <div className="mt-3 text-xs text-gray-500">
+              Tip: for local testing with subdomains, set <span className="font-mono">NEXT_PUBLIC_PLATFORM_DOMAIN=lvh.me</span>{" "}
+              and use <span className="font-mono">http://{site.slug}.lvh.me:3000</span>.
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="text-sm font-semibold text-gray-900">Custom domain (per site)</div>
+            <div className="mt-1 text-sm text-gray-700">
+              If a client has their own domain (e.g. <span className="font-mono">client.com</span>), add it below.
+              After your DNS points to this app, mark it <b>Active</b>.
+            </div>
+            <div className="mt-2 text-xs text-gray-500">
+              This uses custom-domain routing (requests to <span className="font-mono">client.com</span> are routed to this site).
+            </div>
+          </div>
+        </div>
 
         <form onSubmit={onAddDomain} className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
