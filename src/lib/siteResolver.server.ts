@@ -49,6 +49,12 @@ function toPageDataMap(rows: Array<{ key: string; data: unknown }>) {
   return pagesMap;
 }
 
+function toDefaultPages(keys: PageKey[]) {
+  const pagesMap = new Map<PageKey, PageData>();
+  for (const k of keys) pagesMap.set(k, defaultPageData(k));
+  return pagesMap;
+}
+
 export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> {
   const supabase = supabaseServer();
 
@@ -82,16 +88,33 @@ export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> 
     if (asset) logoPath = (asset as { path: string }).path;
   }
 
+  const keys: PageKey[] = ["home", "about", "contact"];
+
+  // Public render needs `pages.data`, but some Supabase setups restrict column access.
+  // If we can’t read data, we fall back to defaults instead of 404’ing the whole site.
   const { data: pagesRows, error: pagesError } = await supabase
     .from("pages")
     .select("key, data, status")
-    .eq("site_id", site.id)
+    .eq("site_id", (site as { id: string }).id)
     .eq("status", "published")
-    .in("key", ["home", "about", "contact"]);
+    .in("key", keys);
 
-  if (pagesError) return null;
+  let pagesMap: Map<PageKey, PageData>;
+  if (pagesError) {
+    // Try a minimal select; if this succeeds, we can still render with defaults.
+    const { data: minimalRows, error: minimalError } = await supabase
+      .from("pages")
+      .select("key, status")
+      .eq("site_id", (site as { id: string }).id)
+      .eq("status", "published")
+      .in("key", keys);
 
-  const pagesMap = toPageDataMap((pagesRows ?? []) as Array<{ key: string; data: unknown }>);
+    if (minimalError || !(minimalRows && minimalRows.length > 0)) return null;
+    pagesMap = toDefaultPages(keys);
+  } else {
+    pagesMap = toPageDataMap((pagesRows ?? []) as Array<{ key: string; data: unknown }>);
+  }
+
   const homePage = pagesMap.get("home") || defaultPageData("home");
   const aboutPage = pagesMap.get("about") || defaultPageData("about");
   const contactPage = pagesMap.get("contact") || defaultPageData("contact");
@@ -156,16 +179,30 @@ export async function resolveSiteByHostname(hostname: string): Promise<SiteData 
     if (asset) logoPath = (asset as { path: string }).path;
   }
 
+  const keys: PageKey[] = ["home", "about", "contact"];
+
   const { data: pagesRows, error: pagesError } = await supabase
     .from("pages")
     .select("key, data, status")
     .eq("site_id", (site as { id: string }).id)
     .eq("status", "published")
-    .in("key", ["home", "about", "contact"]);
+    .in("key", keys);
 
-  if (pagesError) return null;
+  let pagesMap: Map<PageKey, PageData>;
+  if (pagesError) {
+    const { data: minimalRows, error: minimalError } = await supabase
+      .from("pages")
+      .select("key, status")
+      .eq("site_id", (site as { id: string }).id)
+      .eq("status", "published")
+      .in("key", keys);
 
-  const pagesMap = toPageDataMap((pagesRows ?? []) as Array<{ key: string; data: unknown }>);
+    if (minimalError || !(minimalRows && minimalRows.length > 0)) return null;
+    pagesMap = toDefaultPages(keys);
+  } else {
+    pagesMap = toPageDataMap((pagesRows ?? []) as Array<{ key: string; data: unknown }>);
+  }
+
   const homePage = pagesMap.get("home") || defaultPageData("home");
   const aboutPage = pagesMap.get("about") || defaultPageData("about");
   const contactPage = pagesMap.get("contact") || defaultPageData("contact");
