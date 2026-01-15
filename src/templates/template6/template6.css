@@ -347,6 +347,18 @@
   z-index: 3;
 }
 
+@media (max-width: 520px) {
+  .t6-slider-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .t6-dots {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
 .t6-dots {
   display: inline-flex;
   gap: 8px;

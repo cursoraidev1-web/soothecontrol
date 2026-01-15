@@ -73,10 +73,10 @@ export default function T2Hero({
                   editor.updateSection(sectionIndex, { ...section, subtext: next });
                 }}
               />
-              <div className="mt-10 flex items-center gap-4">
+              <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
                 <a
                   href={ctaHref}
-                  className="rounded-lg bg-gray-900 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-gray-800 hover:shadow-xl"
+                  className="w-full rounded-lg bg-gray-900 px-6 py-3 text-center text-base font-semibold text-white shadow-lg transition-all hover:bg-gray-800 hover:shadow-xl sm:w-auto"
                 >
                   <EditableText
                     as="span"
@@ -90,7 +90,7 @@ export default function T2Hero({
                 </a>
                 <a
                   href="#contact"
-                  className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-semibold text-gray-900 transition-all hover:bg-gray-50"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-6 py-3 text-center text-base font-semibold text-gray-900 transition-all hover:bg-gray-50 sm:w-auto"
                 >
                   Contact Us
                 </a>
@@ -109,11 +109,11 @@ export default function T2Hero({
             </div>
 
             {/* Right: Feature Card Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="rounded-xl bg-white p-6 shadow-md transition-all hover:shadow-lg hover:-translate-y-1 border border-gray-100"
+                  className="rounded-xl bg-white p-5 shadow-md transition-all hover:shadow-lg hover:-translate-y-1 border border-gray-100 sm:p-6"
                 >
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 mb-4 flex items-center justify-center">
                     <svg

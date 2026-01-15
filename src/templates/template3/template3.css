@@ -309,6 +309,12 @@
   padding: 14px;
 }
 
+@media (max-width: 560px) {
+  .t3-stat-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .t3-stat {
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.8);
