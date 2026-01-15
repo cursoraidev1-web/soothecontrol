@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { PageKey } from "@/lib/pageSchema";
 import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
 import EditableText from "@/components/inline-editor/EditableText";
@@ -28,6 +29,7 @@ export default function T4Header({
   const navHome = navLabels.home || "Home";
   const navAbout = navLabels.about || "About";
   const navContact = navLabels.contact || "Contact";
+  const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <header className="t4-header">
       <div className="t4-container">
@@ -98,11 +100,62 @@ export default function T4Header({
             </Link>
           </nav>
 
-          <Link href={`${baseUrl}/contact`} className="t4-cta">
-            Get started
-          </Link>
+          <div className="t4-header-actions">
+            <Link href={`${baseUrl}/contact`} className="t4-cta">
+              Get started
+            </Link>
+            <button
+              type="button"
+              className="t4-menu-btn"
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen(true)}
+            >
+              <span className="t4-menu-ico" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
+
+      {mobileOpen ? (
+        <div className="t4-mobile" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="t4-mobile-backdrop"
+            aria-label="Close menu"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="t4-mobile-panel">
+            <div className="t4-mobile-top">
+              <div className="t4-mobile-title">Menu</div>
+              <button
+                type="button"
+                className="t4-mobile-close"
+                aria-label="Close menu"
+                onClick={() => setMobileOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="t4-mobile-links" aria-label="Mobile">
+              <Link href={`${baseUrl}/`} onClick={() => setMobileOpen(false)}>
+                {navHome}
+              </Link>
+              <Link href={`${baseUrl}/about`} onClick={() => setMobileOpen(false)}>
+                {navAbout}
+              </Link>
+              <Link href={`${baseUrl}/contact`} onClick={() => setMobileOpen(false)}>
+                {navContact}
+              </Link>
+            </div>
+            <div className="t4-mobile-cta">
+              <Link href={`${baseUrl}/contact`} className="t4-cta" onClick={() => setMobileOpen(false)}>
+                Get started
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }

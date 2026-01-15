@@ -108,6 +108,113 @@
   filter: brightness(0.99);
 }
 
+.t5-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.t5-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--t5-border);
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  box-shadow: var(--t5-shadow-sm);
+}
+
+.t5-menu-ico {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--t5-ink);
+  border-radius: 999px;
+  margin: 0 auto;
+  position: relative;
+}
+.t5-menu-ico::before,
+.t5-menu-ico::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--t5-ink);
+  border-radius: 999px;
+}
+.t5-menu-ico::before {
+  top: -6px;
+}
+.t5-menu-ico::after {
+  top: 6px;
+}
+
+.t5-mobile {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+.t5-mobile-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(11, 18, 32, 0.30);
+}
+.t5-mobile-panel {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  left: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--t5-border);
+  box-shadow: var(--t5-shadow);
+  padding: 14px;
+}
+.t5-mobile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.t5-mobile-title {
+  font-family: var(--t5-serif);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.t5-mobile-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--t5-border);
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+.t5-mobile-links {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.t5-mobile-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 14px;
+  padding: 12px 12px;
+  text-decoration: none;
+  border: 1px solid rgba(11, 18, 32, 0.10);
+  background: rgba(255, 255, 255, 0.70);
+  color: var(--t5-ink);
+  font-weight: 800;
+}
+.t5-mobile-cta {
+  margin-top: 14px;
+}
+
 .t5-section {
   padding: 72px 0;
 }
@@ -161,6 +268,17 @@
   }
   .t5-nav {
     display: none;
+  }
+  .t5-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .t5-cta {
+    display: none;
+  }
+  .t5-bento {
+    grid-template-columns: 1fr;
   }
 }
 

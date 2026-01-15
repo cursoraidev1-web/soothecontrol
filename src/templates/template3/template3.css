@@ -108,6 +108,113 @@
   transform: translateY(-1px);
 }
 
+.t3-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.t3-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--t3-border);
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  box-shadow: var(--t3-shadow-sm);
+}
+
+.t3-menu-ico {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--t3-ink);
+  border-radius: 999px;
+  margin: 0 auto;
+  position: relative;
+}
+.t3-menu-ico::before,
+.t3-menu-ico::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--t3-ink);
+  border-radius: 999px;
+}
+.t3-menu-ico::before {
+  top: -6px;
+}
+.t3-menu-ico::after {
+  top: 6px;
+}
+
+.t3-mobile {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+.t3-mobile-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(18, 18, 18, 0.35);
+}
+.t3-mobile-panel {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  left: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--t3-border);
+  box-shadow: var(--t3-shadow);
+  padding: 14px;
+}
+.t3-mobile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.t3-mobile-title {
+  font-family: var(--t3-serif);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.t3-mobile-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--t3-border);
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+.t3-mobile-links {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.t3-mobile-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 14px;
+  padding: 12px 12px;
+  text-decoration: none;
+  border: 1px solid rgba(18, 18, 18, 0.10);
+  background: rgba(255, 255, 255, 0.70);
+  color: var(--t3-ink);
+  font-weight: 650;
+}
+.t3-mobile-cta {
+  margin-top: 14px;
+}
+
 .t3-section {
   padding: 72px 0;
 }
@@ -160,6 +267,14 @@
     grid-template-columns: 1fr;
   }
   .t3-nav {
+    display: none;
+  }
+  .t3-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .t3-cta {
     display: none;
   }
 }

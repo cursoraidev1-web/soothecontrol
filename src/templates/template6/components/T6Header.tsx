@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { PageKey } from "@/lib/pageSchema";
+import { useState } from "react";
 
 export default function T6Header({
   businessName,
@@ -14,6 +15,7 @@ export default function T6Header({
   currentPage: PageKey | null;
   baseUrl: string;
 }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <header className="t6-header">
       <div className="t6-container">
@@ -40,11 +42,62 @@ export default function T6Header({
             </Link>
           </nav>
 
-          <Link href={`${baseUrl}/contact`} className="t6-cta">
-            Get started
-          </Link>
+          <div className="t6-header-actions">
+            <Link href={`${baseUrl}/contact`} className="t6-cta">
+              Get started
+            </Link>
+            <button
+              type="button"
+              className="t6-menu-btn"
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen(true)}
+            >
+              <span className="t6-menu-ico" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
+
+      {mobileOpen ? (
+        <div className="t6-mobile" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="t6-mobile-backdrop"
+            aria-label="Close menu"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="t6-mobile-panel">
+            <div className="t6-mobile-top">
+              <div className="t6-mobile-title">Menu</div>
+              <button
+                type="button"
+                className="t6-mobile-close"
+                aria-label="Close menu"
+                onClick={() => setMobileOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="t6-mobile-links" aria-label="Mobile">
+              <Link href={`${baseUrl}/`} onClick={() => setMobileOpen(false)}>
+                Home
+              </Link>
+              <Link href={`${baseUrl}/about`} onClick={() => setMobileOpen(false)}>
+                About
+              </Link>
+              <Link href={`${baseUrl}/contact`} onClick={() => setMobileOpen(false)}>
+                Contact
+              </Link>
+            </div>
+            <div className="t6-mobile-cta">
+              <Link href={`${baseUrl}/contact`} className="t6-cta" onClick={() => setMobileOpen(false)}>
+                Get started
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }

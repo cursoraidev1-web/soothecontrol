@@ -110,6 +110,115 @@
   transform: translateY(-1px);
 }
 
+.t4-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.t4-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(11, 15, 25, 0.38);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.t4-menu-ico {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  margin: 0 auto;
+  position: relative;
+}
+.t4-menu-ico::before,
+.t4-menu-ico::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+}
+.t4-menu-ico::before {
+  top: -6px;
+}
+.t4-menu-ico::after {
+  top: 6px;
+}
+
+.t4-mobile {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+.t4-mobile-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+}
+.t4-mobile-panel {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  left: 12px;
+  border-radius: 18px;
+  background: rgba(11, 15, 25, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--t4-shadow);
+  padding: 14px;
+  backdrop-filter: blur(16px);
+}
+.t4-mobile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.t4-mobile-title {
+  font-family: var(--t4-serif);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.t4-mobile-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+.t4-mobile-links {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.t4-mobile-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 14px;
+  padding: 12px 12px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800;
+}
+.t4-mobile-cta {
+  margin-top: 14px;
+}
+
 .t4-section {
   padding: 76px 0;
 }
@@ -163,6 +272,17 @@
   }
   .t4-nav {
     display: none;
+  }
+  .t4-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .t4-cta {
+    display: none;
+  }
+  .t4-bento {
+    grid-template-columns: 1fr;
   }
 }
 
