@@ -63,9 +63,9 @@ export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> 
 
   const { data: profile, error: profileError } = await supabase
     .from("business_profiles")
-    .select(
-      "business_name, tagline, description, address, phone, email, whatsapp, socials, logo_asset_id",
-    )
+    // Use "*" for forward/backward-compatible selects across DB migrations.
+    // Some deployments may not have all optional columns yet (e.g. whatsapp).
+    .select("*")
     .eq("site_id", site.id)
     .single();
 
@@ -98,7 +98,18 @@ export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> 
 
   return {
     site: site as SiteData["site"],
-    profile: { ...(profile as SiteData["profile"]), logo_path: logoPath },
+    profile: {
+      business_name: (profile as any).business_name ?? "Business",
+      tagline: (profile as any).tagline ?? null,
+      description: (profile as any).description ?? null,
+      address: (profile as any).address ?? null,
+      phone: (profile as any).phone ?? null,
+      email: (profile as any).email ?? null,
+      whatsapp: (profile as any).whatsapp ?? null,
+      socials: (profile as any).socials ?? null,
+      logo_asset_id: (profile as any).logo_asset_id ?? null,
+      logo_path: logoPath,
+    },
     pages: { home: homePage, about: aboutPage, contact: contactPage },
   };
 }
@@ -128,9 +139,8 @@ export async function resolveSiteByHostname(hostname: string): Promise<SiteData 
 
   const { data: profile, error: profileError } = await supabase
     .from("business_profiles")
-    .select(
-      "business_name, tagline, description, address, phone, email, whatsapp, socials, logo_asset_id",
-    )
+    // Use "*" for forward/backward-compatible selects across DB migrations.
+    .select("*")
     .eq("site_id", (site as { id: string }).id)
     .single();
 
@@ -162,7 +172,18 @@ export async function resolveSiteByHostname(hostname: string): Promise<SiteData 
 
   return {
     site: site as SiteData["site"],
-    profile: { ...(profile as SiteData["profile"]), logo_path: logoPath },
+    profile: {
+      business_name: (profile as any).business_name ?? "Business",
+      tagline: (profile as any).tagline ?? null,
+      description: (profile as any).description ?? null,
+      address: (profile as any).address ?? null,
+      phone: (profile as any).phone ?? null,
+      email: (profile as any).email ?? null,
+      whatsapp: (profile as any).whatsapp ?? null,
+      socials: (profile as any).socials ?? null,
+      logo_asset_id: (profile as any).logo_asset_id ?? null,
+      logo_path: logoPath,
+    },
     pages: { home: homePage, about: aboutPage, contact: contactPage },
   };
 }
