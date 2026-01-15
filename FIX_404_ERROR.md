@@ -78,6 +78,13 @@ Expected results:
 **Issue:** Site is published but pages are draft
 - **Fix:** "Publish Site" should publish all pages. If not, manually publish each page.
 
+**Issue:** Debug JSON says published, but public page still 404
+- **Cause:** The public renderer must read `pages.data`. If your production Supabase/RLS/grants block reading the `data` column (or your DB schema is out of date), the UI can still show “published” but the public render fails.
+- **Fix:**
+  - Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel env vars (server-only) and redeploy, or
+  - Ensure public policies/grants allow selecting `pages.data` for published pages.
+  - Use the debug endpoint below and check `pages.dataAccess.ok`.
+
 **Issue:** Site slug doesn't match
 - **Fix:** Ensure the slug in database exactly matches `krabel-musicals` (case-sensitive, no spaces)
 
@@ -92,3 +99,12 @@ As a sanity check, test if the site works via path-based routing:
 
 If this works but the subdomain doesn't, it's a middleware/routing issue.
 If this also gives 404, the site isn't published or doesn't exist.
+
+## Use the Debug Endpoint
+
+Check:
+- `https://soothecontrols.soothetechnologies.com/api/debug/site/<slug>`
+
+Look for:
+- `diagnosis.canResolve === true`
+- `pages.dataAccess.ok === true`

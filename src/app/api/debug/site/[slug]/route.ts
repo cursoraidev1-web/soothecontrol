@@ -45,6 +45,16 @@ export async function GET(
     .eq("status", "published")
     .in("key", ["home", "about", "contact"]);
 
+  // Critical: can we read the page `data` column? (public rendering requires it)
+  const { data: pageDataRow, error: pageDataError } = await supabase
+    .from("pages")
+    .select("key, status, data")
+    .eq("site_id", site.id)
+    .eq("status", "published")
+    .in("key", ["home", "about", "contact"])
+    .limit(1)
+    .maybeSingle();
+
   return NextResponse.json({
     slug,
     site: {
@@ -63,6 +73,10 @@ export async function GET(
         (key) => !pages?.some((p) => p.key === key),
       ),
       draft: pages?.filter((p) => p.status === "draft") || [],
+      dataAccess: {
+        ok: !pageDataError && !!pageDataRow,
+        error: pageDataError?.message || null,
+      },
     },
     diagnosis: {
       sitePublished: site.status === "published",
@@ -75,7 +89,8 @@ export async function GET(
       canResolve:
         site.status === "published" &&
         publishedPages?.length === 3 &&
-        profile !== null,
+        profile !== null &&
+        !pageDataError,
     },
   });
 }
