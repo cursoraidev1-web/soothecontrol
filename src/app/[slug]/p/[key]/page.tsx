@@ -16,18 +16,19 @@ import { getPublishedExtraPageBySiteSlug } from "@/lib/extraPages";
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string; key: string };
+  params: Promise<{ slug: string; key: string }>;
 }): Promise<Metadata> {
+  const { slug, key } = await params;
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
-  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+  const isSubdomain = reqHost === `${slug}.${platformDomain}`;
 
-  const siteData = await resolveSiteBySlug(params.slug);
+  const siteData = await resolveSiteBySlug(slug);
   if (!siteData) return { title: "Site Not Found" };
 
-  const pageData = await getPublishedExtraPageBySiteSlug(siteData.site.id, params.key);
+  const pageData = await getPublishedExtraPageBySiteSlug(siteData.site.id, key);
   if (!pageData) return { title: "Page Not Found" };
 
   const businessName = siteData.profile.business_name;
@@ -39,16 +40,16 @@ export async function generateMetadata({
     ? reqHost
     : reqHost && reqHost !== platformDomain
       ? reqHost
-      : `${params.slug}.${platformDomain}`;
+      : `${slug}.${platformDomain}`;
   const canonical = canonicalHost
-    ? `https://${canonicalHost}/p/${params.key}`.replace(/\/$/, "")
+    ? `https://${canonicalHost}/p/${key}`.replace(/\/$/, "")
     : undefined;
 
   return {
-    title: pageData.seo.title || `${businessName} | ${params.key}`,
+    title: pageData.seo.title || `${businessName} | ${key}`,
     description: pageData.seo.description || `Learn more about ${businessName}.`,
     openGraph: {
-      title: pageData.seo.title || `${businessName} | ${params.key}`,
+      title: pageData.seo.title || `${businessName} | ${key}`,
       description: pageData.seo.description || `Learn more about ${businessName}.`,
       url: canonical,
       siteName: businessName,
@@ -60,7 +61,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: pageData.seo.title || `${businessName} | ${params.key}`,
+      title: pageData.seo.title || `${businessName} | ${key}`,
       description: pageData.seo.description || `Learn more about ${businessName}.`,
       images: logoUrl ? [logoUrl] : [],
     },
@@ -71,18 +72,19 @@ export async function generateMetadata({
 export default async function ExtraPublicPage({
   params,
 }: {
-  params: { slug: string; key: string };
+  params: Promise<{ slug: string; key: string }>;
 }) {
+  const { slug, key } = await params;
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
-  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+  const isSubdomain = reqHost === `${slug}.${platformDomain}`;
 
-  const siteData = await resolveSiteBySlug(params.slug);
+  const siteData = await resolveSiteBySlug(slug);
   if (!siteData) notFound();
 
-  const pageData = await getPublishedExtraPageBySiteSlug(siteData.site.id, params.key);
+  const pageData = await getPublishedExtraPageBySiteSlug(siteData.site.id, key);
   if (!pageData) notFound();
 
   const logoUrl = siteData.profile.logo_path
@@ -92,19 +94,19 @@ export default async function ExtraPublicPage({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: pageData.seo.title || `${siteData.profile.business_name} - ${params.key}`,
+    name: pageData.seo.title || `${siteData.profile.business_name} - ${key}`,
     description: pageData.seo.description,
-    ...(isSubdomain ? { url: `https://${reqHost}/p/${params.key}` } : {}),
+    ...(isSubdomain ? { url: `https://${reqHost}/p/${key}` } : {}),
     ...(logoUrl && { image: logoUrl }),
   };
 
-  const baseUrl = isSubdomain ? "" : `/${params.slug}`;
+  const baseUrl = isSubdomain ? "" : `/${slug}`;
 
   if (siteData.site.template_key === "t1") {
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
@@ -123,7 +125,7 @@ export default async function ExtraPublicPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
@@ -142,7 +144,7 @@ export default async function ExtraPublicPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
@@ -161,7 +163,7 @@ export default async function ExtraPublicPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
@@ -180,7 +182,7 @@ export default async function ExtraPublicPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />

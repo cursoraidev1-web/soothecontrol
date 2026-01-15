@@ -16,15 +16,16 @@ import { getPublishedExtraPageBySiteSlug } from "@/lib/extraPages";
 export async function generateMetadata({
   params,
 }: {
-  params: { hostname: string; key: string };
+  params: Promise<{ hostname: string; key: string }>;
 }): Promise<Metadata> {
+  const { hostname, key } = await params;
   const hostHeader = (await headers()).get("host") || "";
-  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
+  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
-  const siteData = await resolveSiteByHostname(params.hostname);
+  const siteData = await resolveSiteByHostname(hostname);
   if (!siteData) return { title: "Site Not Found" };
 
-  const pageData = await getPublishedExtraPageBySiteSlug(siteData.site.id, params.key);
+  const pageData = await getPublishedExtraPageBySiteSlug(siteData.site.id, key);
   if (!pageData) return { title: "Page Not Found" };
 
   const businessName = siteData.profile.business_name;
@@ -33,14 +34,14 @@ export async function generateMetadata({
     : undefined;
 
   const canonical = reqHost
-    ? `https://${reqHost}/p/${params.key}`.replace(/\/$/, "")
+    ? `https://${reqHost}/p/${key}`.replace(/\/$/, "")
     : undefined;
 
   return {
-    title: pageData.seo.title || `${businessName} | ${params.key}`,
+    title: pageData.seo.title || `${businessName} | ${key}`,
     description: pageData.seo.description || `Learn more about ${businessName}.`,
     openGraph: {
-      title: pageData.seo.title || `${businessName} | ${params.key}`,
+      title: pageData.seo.title || `${businessName} | ${key}`,
       description: pageData.seo.description || `Learn more about ${businessName}.`,
       url: canonical,
       siteName: businessName,
@@ -57,15 +58,16 @@ export async function generateMetadata({
 export default async function CustomDomainExtraPage({
   params,
 }: {
-  params: { hostname: string; key: string };
+  params: Promise<{ hostname: string; key: string }>;
 }) {
+  const { hostname, key } = await params;
   const hostHeader = (await headers()).get("host") || "";
-  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
+  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
-  const siteData = await resolveSiteByHostname(params.hostname);
+  const siteData = await resolveSiteByHostname(hostname);
   if (!siteData) notFound();
 
-  const pageData = await getPublishedExtraPageBySiteSlug(siteData.site.id, params.key);
+  const pageData = await getPublishedExtraPageBySiteSlug(siteData.site.id, key);
   if (!pageData) notFound();
 
   const logoUrl = siteData.profile.logo_path
@@ -75,9 +77,9 @@ export default async function CustomDomainExtraPage({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: pageData.seo.title || `${siteData.profile.business_name} - ${params.key}`,
+    name: pageData.seo.title || `${siteData.profile.business_name} - ${key}`,
     description: pageData.seo.description,
-    ...(reqHost ? { url: `https://${reqHost}/p/${params.key}` } : {}),
+    ...(reqHost ? { url: `https://${reqHost}/p/${key}` } : {}),
     ...(logoUrl && { image: logoUrl }),
   };
 
@@ -85,7 +87,7 @@ export default async function CustomDomainExtraPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
@@ -104,7 +106,7 @@ export default async function CustomDomainExtraPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
@@ -123,7 +125,7 @@ export default async function CustomDomainExtraPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
@@ -142,7 +144,7 @@ export default async function CustomDomainExtraPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
@@ -161,7 +163,7 @@ export default async function CustomDomainExtraPage({
     return (
       <>
         <Script
-          id={`p-${params.key}-schema`}
+          id={`p-${key}-schema`}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />

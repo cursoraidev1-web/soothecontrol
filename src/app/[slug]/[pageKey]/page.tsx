@@ -18,22 +18,23 @@ import { normalizeHostname } from "@/lib/domains";
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string; pageKey: string };
+  params: Promise<{ slug: string; pageKey: string }>;
 }): Promise<Metadata> {
+  const { slug, pageKey: rawPageKey } = await params;
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
-  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+  const isSubdomain = reqHost === `${slug}.${platformDomain}`;
 
-  if (!isPageKey(params.pageKey)) {
+  if (!isPageKey(rawPageKey)) {
     return {
       title: "Page Not Found",
     };
   }
 
-  const pageKey = params.pageKey as PageKey;
-  const siteData = await resolveSiteBySlug(params.slug);
+  const pageKey = rawPageKey as PageKey;
+  const siteData = await resolveSiteBySlug(slug);
 
   if (!siteData) {
     return {
@@ -51,7 +52,7 @@ export async function generateMetadata({
     ? reqHost
     : reqHost && reqHost !== platformDomain
       ? reqHost
-      : `${params.slug}.${platformDomain}`;
+      : `${slug}.${platformDomain}`;
   const canonical = canonicalHost
     ? `https://${canonicalHost}/${pageKey === "home" ? "" : pageKey}`.replace(/\/$/, "")
     : undefined;
@@ -105,20 +106,21 @@ export async function generateMetadata({
 export default async function PublicSitePagePage({
   params,
 }: {
-  params: { slug: string; pageKey: string };
+  params: Promise<{ slug: string; pageKey: string }>;
 }) {
+  const { slug, pageKey: rawPageKey } = await params;
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
-  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+  const isSubdomain = reqHost === `${slug}.${platformDomain}`;
 
-  if (!isPageKey(params.pageKey)) {
+  if (!isPageKey(rawPageKey)) {
     notFound();
   }
 
-  const pageKey = params.pageKey as PageKey;
-  const siteData = await resolveSiteBySlug(params.slug);
+  const pageKey = rawPageKey as PageKey;
+  const siteData = await resolveSiteBySlug(slug);
 
   if (!siteData) {
     notFound();
@@ -178,7 +180,7 @@ export default async function PublicSitePagePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage={pageKey}
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -199,7 +201,7 @@ export default async function PublicSitePagePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage={pageKey}
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -220,7 +222,7 @@ export default async function PublicSitePagePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage={pageKey}
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -241,7 +243,7 @@ export default async function PublicSitePagePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage={pageKey}
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -262,7 +264,7 @@ export default async function PublicSitePagePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage={pageKey}
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -283,7 +285,7 @@ export default async function PublicSitePagePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage={pageKey}
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );

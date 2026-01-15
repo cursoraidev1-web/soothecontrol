@@ -16,12 +16,13 @@ import { normalizeHostname } from "@/lib/domains";
 export async function generateMetadata({
   params,
 }: {
-  params: { hostname: string };
+  params: Promise<{ hostname: string }>;
 }): Promise<Metadata> {
+  const { hostname } = await params;
   const hostHeader = (await headers()).get("host") || "";
-  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
+  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
-  const siteData = await resolveSiteByHostname(params.hostname);
+  const siteData = await resolveSiteByHostname(hostname);
   if (!siteData) return { title: "Site Not Found" };
 
   const pageData = siteData.pages.home;
@@ -57,12 +58,13 @@ export async function generateMetadata({
 export default async function CustomDomainHome({
   params,
 }: {
-  params: { hostname: string };
+  params: Promise<{ hostname: string }>;
 }) {
+  const { hostname } = await params;
   const hostHeader = (await headers()).get("host") || "";
-  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
+  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
-  const siteData = await resolveSiteByHostname(params.hostname);
+  const siteData = await resolveSiteByHostname(hostname);
   if (!siteData) notFound();
 
   const logoUrl = siteData.profile.logo_path

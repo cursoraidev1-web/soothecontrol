@@ -16,15 +16,16 @@ import { normalizeHostname } from "@/lib/domains";
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const { slug } = await params;
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
-  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
+  const isSubdomain = reqHost === `${slug}.${platformDomain}`;
 
-  const siteData = await resolveSiteBySlug(params.slug);
+  const siteData = await resolveSiteBySlug(slug);
 
   if (!siteData) {
     return {
@@ -41,7 +42,7 @@ export async function generateMetadata({
     ? reqHost
     : reqHost && reqHost !== platformDomain
       ? reqHost
-      : `${params.slug}.${platformDomain}`;
+      : `${slug}.${platformDomain}`;
   const canonical = canonicalHost ? `https://${canonicalHost}` : undefined;
 
   return {
@@ -93,15 +94,14 @@ export async function generateMetadata({
 export default async function PublicSitePage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const hostHeader = (await headers()).get("host") || "";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
-  const isSubdomain = reqHost === `${params.slug}.${platformDomain}`;
-
-  const slug = params.slug;
+  const isSubdomain = reqHost === `${slug}.${platformDomain}`;
   
   // Log for debugging
   console.log(`[PublicSitePage] Resolving site with slug: "${slug}"`);
@@ -124,7 +124,7 @@ export default async function PublicSitePage({
     name: siteData.profile.business_name,
     url: isSubdomain
       ? `https://${reqHost}`
-      : `https://${params.slug}.${platformDomain}`,
+      : `https://${slug}.${platformDomain}`,
     ...(logoUrl && { logo: logoUrl }),
     ...(siteData.profile.description && {
       description: siteData.profile.description,
@@ -161,7 +161,7 @@ export default async function PublicSitePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage="home"
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -182,7 +182,7 @@ export default async function PublicSitePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage="home"
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -203,7 +203,7 @@ export default async function PublicSitePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage="home"
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -224,7 +224,7 @@ export default async function PublicSitePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage="home"
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -245,7 +245,7 @@ export default async function PublicSitePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage="home"
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );
@@ -266,7 +266,7 @@ export default async function PublicSitePage({
           profile={siteData.profile}
           pages={siteData.pages}
           currentPage="home"
-          baseUrl={isSubdomain ? "" : `/${params.slug}`}
+          baseUrl={isSubdomain ? "" : `/${slug}`}
         />
       </>
     );

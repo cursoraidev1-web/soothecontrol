@@ -17,15 +17,16 @@ import { normalizeHostname } from "@/lib/domains";
 export async function generateMetadata({
   params,
 }: {
-  params: { hostname: string; pageKey: string };
+  params: Promise<{ hostname: string; pageKey: string }>;
 }): Promise<Metadata> {
-  if (!isPageKey(params.pageKey)) return { title: "Page Not Found" };
+  const { hostname, pageKey: rawPageKey } = await params;
+  if (!isPageKey(rawPageKey)) return { title: "Page Not Found" };
 
   const hostHeader = (await headers()).get("host") || "";
-  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
+  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
-  const pageKey = params.pageKey as PageKey;
-  const siteData = await resolveSiteByHostname(params.hostname);
+  const pageKey = rawPageKey as PageKey;
+  const siteData = await resolveSiteByHostname(hostname);
   if (!siteData) return { title: "Site Not Found" };
 
   const pageData = siteData.pages[pageKey];
@@ -81,15 +82,16 @@ export async function generateMetadata({
 export default async function CustomDomainPage({
   params,
 }: {
-  params: { hostname: string; pageKey: string };
+  params: Promise<{ hostname: string; pageKey: string }>;
 }) {
-  if (!isPageKey(params.pageKey)) notFound();
-  const pageKey = params.pageKey as PageKey;
+  const { hostname, pageKey: rawPageKey } = await params;
+  if (!isPageKey(rawPageKey)) notFound();
+  const pageKey = rawPageKey as PageKey;
 
   const hostHeader = (await headers()).get("host") || "";
-  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(params.hostname);
+  const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
-  const siteData = await resolveSiteByHostname(params.hostname);
+  const siteData = await resolveSiteByHostname(hostname);
   if (!siteData) notFound();
 
   const logoUrl = siteData.profile.logo_path
