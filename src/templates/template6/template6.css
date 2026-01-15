@@ -233,6 +233,10 @@
   .t6-bento {
     grid-template-columns: 1fr;
   }
+  /* Prevent inline gridColumn spans from creating implicit columns on mobile */
+  .t6-bento > * {
+    grid-column: 1 / -1 !important;
+  }
 }
 
 .t6-section {

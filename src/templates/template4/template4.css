@@ -284,6 +284,10 @@
   .t4-bento {
     grid-template-columns: 1fr;
   }
+  /* Prevent inline gridColumn spans from creating implicit columns on mobile */
+  .t4-bento > * {
+    grid-column: 1 / -1 !important;
+  }
 }
 
 .t4-card {
