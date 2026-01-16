@@ -21,7 +21,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string; pageKey: string }>;
 }): Promise<Metadata> {
   const { slug, pageKey: rawPageKey } = await params;
-  const hostHeader = (await headers()).get("host") || "";
+  const h = await headers();
+  const hostHeader = h.get("x-forwarded-host") || h.get("host") || "";
+  const proto = (h.get("x-forwarded-proto") || "https").split(",")[0]!.trim() || "https";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
@@ -56,8 +58,13 @@ export async function generateMetadata({
   const canonical = canonicalHost
     ? `https://${canonicalHost}/${pageKey === "home" ? "" : pageKey}`.replace(/\/$/, "")
     : undefined;
+  const origin = canonicalHost ? `${proto}://${canonicalHost}` : undefined;
+  const ogImageUrl = origin
+    ? `${origin}/api/og/site?slug=${encodeURIComponent(slug)}&page=${encodeURIComponent(pageKey)}`
+    : undefined;
 
   return {
+    metadataBase: origin ? new URL(origin) : undefined,
     title: pageTitle,
     description: pageData.seo.description || `Learn about ${businessName}${pageKey === "about" ? " and our story" : pageKey === "contact" ? " and get in touch" : ""}.`,
     keywords: `${businessName}, ${pageKey}, services, business`,
@@ -67,16 +74,10 @@ export async function generateMetadata({
       description: pageData.seo.description || `Learn about ${businessName}${pageKey === "about" ? " and our story" : pageKey === "contact" ? " and get in touch" : ""}.`,
       url: canonical,
       siteName: businessName,
-      images: logoUrl
-        ? [
-            {
-              url: logoUrl,
-              width: 1200,
-              height: 630,
-              alt: businessName,
-            },
-          ]
-        : [],
+      images: [
+        ...(ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: businessName }] : []),
+        ...(logoUrl ? [{ url: logoUrl, alt: businessName }] : []),
+      ],
       locale: "en_US",
       type: "website",
     },
@@ -84,8 +85,9 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: pageTitle,
       description: pageData.seo.description || `Learn about ${businessName}${pageKey === "about" ? " and our story" : pageKey === "contact" ? " and get in touch" : ""}.`,
-      images: logoUrl ? [logoUrl] : [],
+      images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
     },
+    icons: logoUrl ? { icon: logoUrl } : undefined,
     robots: {
       index: true,
       follow: true,

@@ -19,7 +19,9 @@ export async function generateMetadata({
   params: Promise<{ hostname: string; key: string }>;
 }): Promise<Metadata> {
   const { hostname, key } = await params;
-  const hostHeader = (await headers()).get("host") || "";
+  const h = await headers();
+  const hostHeader = h.get("x-forwarded-host") || h.get("host") || "";
+  const proto = (h.get("x-forwarded-proto") || "https").split(",")[0]!.trim() || "https";
   const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
   const siteData = await resolveSiteByHostname(hostname);
@@ -36,21 +38,34 @@ export async function generateMetadata({
   const canonical = reqHost
     ? `https://${reqHost}/p/${key}`.replace(/\/$/, "")
     : undefined;
+  const origin = reqHost ? `${proto}://${reqHost}` : undefined;
+  const ogImageUrl = origin
+    ? `${origin}/api/og/site?hostname=${encodeURIComponent(hostname)}&page=home`
+    : undefined;
 
   return {
     title: pageData.seo.title || `${businessName} | ${key}`,
     description: pageData.seo.description || `Learn more about ${businessName}.`,
+    metadataBase: origin ? new URL(origin) : undefined,
     openGraph: {
       title: pageData.seo.title || `${businessName} | ${key}`,
       description: pageData.seo.description || `Learn more about ${businessName}.`,
       url: canonical,
       siteName: businessName,
-      images: logoUrl
-        ? [{ url: logoUrl, width: 1200, height: 630, alt: businessName }]
-        : [],
+      images: [
+        ...(ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: businessName }] : []),
+        ...(logoUrl ? [{ url: logoUrl, alt: businessName }] : []),
+      ],
       locale: "en_US",
       type: "website",
     },
+    twitter: {
+      card: "summary_large_image",
+      title: pageData.seo.title || `${businessName} | ${key}`,
+      description: pageData.seo.description || `Learn more about ${businessName}.`,
+      images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
+    },
+    icons: logoUrl ? { icon: logoUrl } : undefined,
     alternates: canonical ? { canonical } : undefined,
   };
 }

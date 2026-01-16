@@ -22,7 +22,9 @@ export async function generateMetadata({
   const { hostname, pageKey: rawPageKey } = await params;
   if (!isPageKey(rawPageKey)) return { title: "Page Not Found" };
 
-  const hostHeader = (await headers()).get("host") || "";
+  const h = await headers();
+  const hostHeader = h.get("x-forwarded-host") || h.get("host") || "";
+  const proto = (h.get("x-forwarded-proto") || "https").split(",")[0]!.trim() || "https";
   const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
   const pageKey = rawPageKey as PageKey;
@@ -38,6 +40,10 @@ export async function generateMetadata({
   const canonical = reqHost
     ? `https://${reqHost}${pageKey === "home" ? "" : `/${pageKey}`}`
     : undefined;
+  const origin = reqHost ? `${proto}://${reqHost}` : undefined;
+  const ogImageUrl = origin
+    ? `${origin}/api/og/site?hostname=${encodeURIComponent(hostname)}&page=${encodeURIComponent(pageKey)}`
+    : undefined;
 
   const pageTitle =
     pageData.seo.title ||
@@ -46,6 +52,7 @@ export async function generateMetadata({
     }`;
 
   return {
+    metadataBase: origin ? new URL(origin) : undefined,
     title: pageTitle,
     description:
       pageData.seo.description ||
@@ -69,12 +76,28 @@ export async function generateMetadata({
         }.`,
       url: canonical,
       siteName: businessName,
-      images: logoUrl
-        ? [{ url: logoUrl, width: 1200, height: 630, alt: businessName }]
-        : [],
+      images: [
+        ...(ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: businessName }] : []),
+        ...(logoUrl ? [{ url: logoUrl, alt: businessName }] : []),
+      ],
       locale: "en_US",
       type: "website",
     },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description:
+        pageData.seo.description ||
+        `Learn about ${businessName}${
+          pageKey === "about"
+            ? " and our story"
+            : pageKey === "contact"
+              ? " and get in touch"
+              : ""
+        }.`,
+      images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
+    },
+    icons: logoUrl ? { icon: logoUrl } : undefined,
     alternates: canonical ? { canonical } : undefined,
   };
 }

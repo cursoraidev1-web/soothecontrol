@@ -19,7 +19,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string; key: string }>;
 }): Promise<Metadata> {
   const { slug, key } = await params;
-  const hostHeader = (await headers()).get("host") || "";
+  const h = await headers();
+  const hostHeader = h.get("x-forwarded-host") || h.get("host") || "";
+  const proto = (h.get("x-forwarded-proto") || "https").split(",")[0]!.trim() || "https";
   const reqHost = normalizeHostname(hostHeader);
   const platformDomain =
     (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "soothecontrols.site").toLowerCase();
@@ -44,18 +46,24 @@ export async function generateMetadata({
   const canonical = canonicalHost
     ? `https://${canonicalHost}/p/${key}`.replace(/\/$/, "")
     : undefined;
+  const origin = canonicalHost ? `${proto}://${canonicalHost}` : undefined;
+  const ogImageUrl = origin
+    ? `${origin}/api/og/site?slug=${encodeURIComponent(slug)}&page=home`
+    : undefined;
 
   return {
     title: pageData.seo.title || `${businessName} | ${key}`,
     description: pageData.seo.description || `Learn more about ${businessName}.`,
+    metadataBase: origin ? new URL(origin) : undefined,
     openGraph: {
       title: pageData.seo.title || `${businessName} | ${key}`,
       description: pageData.seo.description || `Learn more about ${businessName}.`,
       url: canonical,
       siteName: businessName,
-      images: logoUrl
-        ? [{ url: logoUrl, width: 1200, height: 630, alt: businessName }]
-        : [],
+      images: [
+        ...(ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: businessName }] : []),
+        ...(logoUrl ? [{ url: logoUrl, alt: businessName }] : []),
+      ],
       locale: "en_US",
       type: "website",
     },
@@ -63,8 +71,9 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: pageData.seo.title || `${businessName} | ${key}`,
       description: pageData.seo.description || `Learn more about ${businessName}.`,
-      images: logoUrl ? [logoUrl] : [],
+      images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
     },
+    icons: logoUrl ? { icon: logoUrl } : undefined,
     alternates: canonical ? { canonical } : undefined,
   };
 }

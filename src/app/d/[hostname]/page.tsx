@@ -19,7 +19,9 @@ export async function generateMetadata({
   params: Promise<{ hostname: string }>;
 }): Promise<Metadata> {
   const { hostname } = await params;
-  const hostHeader = (await headers()).get("host") || "";
+  const h = await headers();
+  const hostHeader = h.get("x-forwarded-host") || h.get("host") || "";
+  const proto = (h.get("x-forwarded-proto") || "https").split(",")[0]!.trim() || "https";
   const reqHost = normalizeHostname(hostHeader) || normalizeHostname(hostname);
 
   const siteData = await resolveSiteByHostname(hostname);
@@ -32,8 +34,13 @@ export async function generateMetadata({
     : undefined;
 
   const canonical = reqHost ? `https://${reqHost}` : undefined;
+  const origin = reqHost ? `${proto}://${reqHost}` : undefined;
+  const ogImageUrl = origin
+    ? `${origin}/api/og/site?hostname=${encodeURIComponent(hostname)}&page=home`
+    : undefined;
 
   return {
+    metadataBase: origin ? new URL(origin) : undefined,
     title: pageData.seo.title || `${businessName} | Professional Services`,
     description:
       pageData.seo.description ||
@@ -45,12 +52,22 @@ export async function generateMetadata({
         `Learn about ${businessName} and our professional services.`,
       url: canonical,
       siteName: businessName,
-      images: logoUrl
-        ? [{ url: logoUrl, width: 1200, height: 630, alt: businessName }]
-        : [],
+      images: [
+        ...(ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: businessName }] : []),
+        ...(logoUrl ? [{ url: logoUrl, alt: businessName }] : []),
+      ],
       locale: "en_US",
       type: "website",
     },
+    twitter: {
+      card: "summary_large_image",
+      title: pageData.seo.title || `${businessName} | Professional Services`,
+      description:
+        pageData.seo.description ||
+        `Learn about ${businessName} and our professional services.`,
+      images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
+    },
+    icons: logoUrl ? { icon: logoUrl } : undefined,
     alternates: canonical ? { canonical } : undefined,
   };
 }
