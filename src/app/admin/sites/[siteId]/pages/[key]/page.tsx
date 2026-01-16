@@ -81,8 +81,9 @@ export default function PageEditorPage() {
     if (!siteId || !pageKey) return;
     let isMounted = true;
     const supabase = supabaseBrowser();
+    const pk = pageKey;
 
-    async function load() {
+    async function load(keyForLoad: PageKey) {
       setIsLoading(true);
       setLoadError(null);
       setSaveSuccess(false);
@@ -128,7 +129,7 @@ export default function PageEditorPage() {
         Object.keys(row.data as Record<string, unknown>).length === 0;
 
       if (!row.data || isEmptyObject) {
-        const seeded = defaultPageData(pageKey);
+        const seeded = defaultPageData(keyForLoad);
         setPageDraft(seeded);
         setRawText(JSON.stringify(seeded, null, 2));
         setSeedNotice(
@@ -139,7 +140,7 @@ export default function PageEditorPage() {
 
       const valid = validatePageData(row.data);
       if (!valid.ok) {
-        const seeded = defaultPageData(pageKey);
+        const seeded = defaultPageData(keyForLoad);
         setPageDraft(seeded);
         setRawText(JSON.stringify(seeded, null, 2));
         setSeedNotice(
@@ -152,7 +153,7 @@ export default function PageEditorPage() {
       setRawText(JSON.stringify(row.data, null, 2));
     }
 
-    load();
+    load(pk);
 
     return () => {
       isMounted = false;
