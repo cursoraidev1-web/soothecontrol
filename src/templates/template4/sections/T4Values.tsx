@@ -28,7 +28,6 @@ export default function T4Values({
       <div className="t4-container">
         <span className="t4-eyebrow">Values</span>
         <h2 className="t4-title">How we work</h2>
-        <p className="t4-sub">Modern design with standards: clarity, speed, and trust.</p>
 
         <div className="t4-bento" style={{ marginTop: 18 }}>
           {filled.map((v, idx) => (

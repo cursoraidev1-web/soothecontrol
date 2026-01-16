@@ -50,7 +50,6 @@ export default function T3Testimonials({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t3-section-sub">Short, specific, believable—proof that builds trust.</p>
 
         <div className="t3-two-col" style={{ marginTop: 18 }}>
           {filled.map((t, idx) => (

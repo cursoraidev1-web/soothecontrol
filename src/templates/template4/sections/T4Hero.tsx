@@ -81,57 +81,8 @@ export default function T4Hero({
               </a>
             </div>
 
-            <div style={{ marginTop: 14, color: "var(--t4-muted)", fontWeight: 700, fontSize: 13 }}>
-              Transparent pricing · Fast replies · Clean, modern design
-            </div>
           </div>
 
-          <div className="t4-card" style={{ padding: 16 }}>
-            <div
-              style={{
-                borderRadius: 16,
-                border: "1px solid rgba(255,255,255,0.10)",
-                background:
-                  "radial-gradient(540px 300px at 20% 20%, rgba(124,58,237,0.26), transparent 55%), radial-gradient(520px 320px at 80% 30%, rgba(6,182,212,0.20), transparent 60%), rgba(255,255,255,0.05)",
-                minHeight: 360,
-                overflow: "hidden",
-              }}
-            >
-              <div style={{ padding: 14 }} className="t4-bento">
-                <div className="t4-tile" style={{ gridColumn: "span 7" }}>
-                  <div style={{ fontWeight: 900, letterSpacing: "-0.02em" }}>Elegant sections</div>
-                  <div style={{ marginTop: 8, color: "var(--t4-muted)", lineHeight: 1.6 }}>
-                    Bento layout, glass cards, and premium motion.
-                  </div>
-                </div>
-                <div className="t4-tile" style={{ gridColumn: "span 5" }}>
-                  <div style={{ fontWeight: 900 }}>Trust</div>
-                  <div style={{ marginTop: 8, color: "var(--t4-muted)" }}>Testimonials + proof</div>
-                </div>
-                <div className="t4-tile" style={{ gridColumn: "span 6" }}>
-                  <div style={{ fontWeight: 900 }}>Speed</div>
-                  <div style={{ marginTop: 8, color: "var(--t4-muted)" }}>Lightweight & responsive</div>
-                </div>
-                <div className="t4-tile" style={{ gridColumn: "span 6" }}>
-                  <div style={{ fontWeight: 900 }}>Clarity</div>
-                  <div style={{ marginTop: 8, color: "var(--t4-muted)" }}>Clean hierarchy</div>
-                </div>
-                <div className="t4-tile" style={{ gridColumn: "span 12" }}>
-                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <span style={{ padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.12)", color: "var(--t4-muted)", fontWeight: 800, fontSize: 12 }}>
-                      Modern
-                    </span>
-                    <span style={{ padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.12)", color: "var(--t4-muted)", fontWeight: 800, fontSize: 12 }}>
-                      Elegant
-                    </span>
-                    <span style={{ padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.12)", color: "var(--t4-muted)", fontWeight: 800, fontSize: 12 }}>
-                      High-converting
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>

@@ -51,7 +51,6 @@ export default function T6Testimonials({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t6-sub">Short, specific, believable—proof that builds trust.</p>
 
         <div className="t6-bento" style={{ marginTop: 18 }}>
           {filled.map((t, idx) => (

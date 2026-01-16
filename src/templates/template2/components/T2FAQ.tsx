@@ -46,9 +46,6 @@ export default function T2FAQ({ section, sectionIndex }: T2FAQProps) {
               editor.updateSection(sectionIndex, { ...section, title: next });
             }}
           />
-          <p className="mt-4 text-lg text-gray-600">
-            Quick answers to common questions.
-          </p>
         </div>
 
         <div className="mx-auto mt-12 max-w-3xl space-y-3">

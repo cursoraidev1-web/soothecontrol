@@ -78,45 +78,6 @@ export default function T3Hero({
                 See services
               </a>
             </div>
-            <div style={{ marginTop: 18, color: "var(--t3-muted)", fontSize: 13, fontWeight: 600 }}>
-              Response time: typically under 1 business day
-            </div>
-          </div>
-
-          <div className="t3-card t3-hero-art">
-            <div className="t3-art-surface">
-              <div className="t3-stat-row">
-                <div className="t3-stat">
-                  <b>4.9</b>
-                  <span>Avg rating</span>
-                </div>
-                <div className="t3-stat">
-                  <b>24h</b>
-                  <span>Fast replies</span>
-                </div>
-                <div className="t3-stat">
-                  <b>100%</b>
-                  <span>Quality-first</span>
-                </div>
-              </div>
-              <div style={{ padding: 14 }}>
-                <div
-                  style={{
-                    borderRadius: 16,
-                    border: "1px solid rgba(18,18,18,0.10)",
-                    background: "rgba(255,255,255,0.65)",
-                    padding: 16,
-                  }}
-                >
-                  <div style={{ fontWeight: 900, letterSpacing: "-0.02em" }}>
-                    A site that feels expensive
-                  </div>
-                  <div className="t3-muted" style={{ marginTop: 6, lineHeight: 1.6 }}>
-                    Clear hierarchy, strong visuals, and sections that build trust.
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

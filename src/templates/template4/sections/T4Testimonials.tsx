@@ -51,7 +51,6 @@ export default function T4Testimonials({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t4-sub">Short, specific, believable—proof that builds trust.</p>
 
         <div className="t4-bento" style={{ marginTop: 18 }}>
           {filled.map((t, idx) => (

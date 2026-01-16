@@ -37,7 +37,6 @@ export default function T5Gallery({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t5-sub">Add real photos for instant credibility.</p>
 
         <div className="t5-bento" style={{ marginTop: 18 }}>
           {images.map((it, idx) => (

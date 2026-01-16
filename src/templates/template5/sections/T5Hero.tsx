@@ -79,10 +79,6 @@ export default function T5Hero({
                 View services
               </a>
             </div>
-
-            <div style={{ marginTop: 14, color: "var(--t5-muted)", fontWeight: 700, fontSize: 13 }}>
-              Clean layout · Strong typography · Great on mobile
-            </div>
         </div>
       </div>
     </section>

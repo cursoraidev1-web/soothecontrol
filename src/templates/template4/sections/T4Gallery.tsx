@@ -37,7 +37,6 @@ export default function T4Gallery({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t4-sub">Add real photos for instant credibility.</p>
 
         <div className="t4-bento" style={{ marginTop: 18 }}>
           {images.map((it, idx) => (

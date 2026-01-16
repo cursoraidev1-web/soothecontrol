@@ -62,7 +62,6 @@ export default function T6FAQ({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t6-sub">Quick answers to common questions.</p>
 
         <div className="t6-bento" style={{ marginTop: 18 }}>
           {filled.map((it, idx) => {

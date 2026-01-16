@@ -71,7 +71,6 @@ export default function T4FAQ({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t4-sub">Quick answers to common questions.</p>
 
         <div className="t4-bento" style={{ marginTop: 18 }}>
           {filled.map((it, idx) => {
