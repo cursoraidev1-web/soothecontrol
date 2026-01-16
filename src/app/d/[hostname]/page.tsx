@@ -54,8 +54,19 @@ export async function generateMetadata({
       url: canonical,
       siteName: businessName,
       images: [
-        ...(ogImageUrl ? [{ url: ogImageUrl, width: 1200, height: 630, alt: businessName }] : []),
-        ...(logoUrl ? [{ url: logoUrl, alt: businessName }] : []),
+        ...(ogImageUrl
+          ? [
+              {
+                url: ogImageUrl,
+                secureUrl: ogImageUrl,
+                type: "image/png",
+                width: 1200,
+                height: 630,
+                alt: businessName,
+              },
+            ]
+          : []),
+        ...(logoUrl ? [{ url: logoUrl, secureUrl: logoUrl, alt: businessName }] : []),
       ],
       locale: "en_US",
       type: "website",
