@@ -7,6 +7,10 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
 import { validatePageData, type PageData } from "@/lib/pageSchema";
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
 type Generated = {
   profile: {
     business_name?: string;
@@ -63,19 +67,28 @@ export default function AiSiteContentGenerator({ siteId }: { siteId: string }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ brief }),
       });
-      const json = (await res.json()) as any;
+      const json = (await res.json()) as unknown;
       if (!res.ok) {
-        throw new Error(json?.error || "AI generation failed.");
+        const msg =
+          isRecord(json) && typeof json.error === "string"
+            ? json.error
+            : "AI generation failed.";
+        throw new Error(msg);
       }
 
-      const homeOk = validatePageData(json.pages?.home);
-      const aboutOk = validatePageData(json.pages?.about);
-      const contactOk = validatePageData(json.pages?.contact);
+      if (!isRecord(json) || !isRecord(json.pages)) {
+        throw new Error("Invalid AI response.");
+      }
+
+      const pages = json.pages as Record<string, unknown>;
+      const homeOk = validatePageData(pages.home);
+      const aboutOk = validatePageData(pages.about);
+      const contactOk = validatePageData(pages.contact);
       if (!homeOk.ok) throw new Error(homeOk.error || "Invalid home page output.");
       if (!aboutOk.ok) throw new Error(aboutOk.error || "Invalid about page output.");
       if (!contactOk.ok) throw new Error(contactOk.error || "Invalid contact page output.");
 
-      setGenerated(json as Generated);
+      setGenerated(json as unknown as Generated);
       setSuccess("Generated. Review and click Apply to save drafts.");
     } catch (e) {
       setError(formatSupabaseError(e));

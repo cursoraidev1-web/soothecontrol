@@ -54,15 +54,9 @@ const sectionOptions: Array<Section["type"]> = [
 
 export default function PageEditorPage() {
   const params = useParams();
-  const siteId = params?.siteId as string;
-  const key = params?.key as string;
-
-  if (!siteId || !key) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isPageKey(key)) notFound();
-  const pageKey = key;
+  const siteId = typeof params?.siteId === "string" ? params.siteId : "";
+  const key = typeof params?.key === "string" ? params.key : "";
+  const pageKey: PageKey | null = isPageKey(key) ? key : null;
 
   const [pageRow, setPageRow] = useState<PagesRow | null>(null);
   const [pageDraft, setPageDraft] = useState<PageData | null>(null);
@@ -84,6 +78,7 @@ export default function PageEditorPage() {
   const [seedNotice, setSeedNotice] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!siteId || !pageKey) return;
     let isMounted = true;
     const supabase = supabaseBrowser();
 
@@ -366,6 +361,7 @@ export default function PageEditorPage() {
   }
 
   function onResetDefaults() {
+    if (!pageKey) return;
     if (!window.confirm("Reset this page to default sections?")) return;
     const next = defaultPageData(pageKey);
     setPageDraft(next);
@@ -376,6 +372,12 @@ export default function PageEditorPage() {
     setSaveError(null);
     setSeedNotice("Defaults loaded. Click Save Draft to persist.");
   }
+
+  if (!siteId || !key) {
+    return <div>Loading...</div>;
+  }
+
+  if (!pageKey) notFound();
 
   return (
     <div className="space-y-6">

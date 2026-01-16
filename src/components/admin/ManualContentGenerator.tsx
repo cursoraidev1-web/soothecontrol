@@ -54,11 +54,15 @@ export default function ManualContentGenerator({ siteId }: { siteId: string }) {
           setPhone(profile.phone || "");
           setEmail(profile.email || "");
           setWhatsapp(profile.whatsapp || "");
-          const socials = (profile.socials as any) || {};
-          setInstagram(socials.instagram || "");
-          setFacebook(socials.facebook || "");
-          setTwitter(socials.twitter || "");
-          setTiktok(socials.tiktok || "");
+          const socialsRaw = profile.socials;
+          const socials =
+            socialsRaw && typeof socialsRaw === "object" && !Array.isArray(socialsRaw)
+              ? (socialsRaw as Record<string, unknown>)
+              : {};
+          setInstagram(typeof socials.instagram === "string" ? socials.instagram : "");
+          setFacebook(typeof socials.facebook === "string" ? socials.facebook : "");
+          setTwitter(typeof socials.twitter === "string" ? socials.twitter : "");
+          setTiktok(typeof socials.tiktok === "string" ? socials.tiktok : "");
         }
 
         // Load pages

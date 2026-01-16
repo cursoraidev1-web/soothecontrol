@@ -2,6 +2,20 @@ import { NextResponse } from "next/server";
 
 import { validatePageData } from "@/lib/pageSchema";
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+type GeminiResponse = {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+      }>;
+    };
+  }>;
+};
+
 function parseRetryAfterSeconds(detail: string): number | null {
   const m = detail.match(/retry in\s+([0-9.]+)s/i);
   if (!m) return null;
@@ -129,7 +143,7 @@ ${brief}
 
     let lastErrStatus: number | null = null;
     let lastErrDetail: string | null = null;
-    let data: any = null;
+    let data: GeminiResponse | null = null;
 
     // Try each API version with each model
     for (const apiVersion of apiVersions) {
@@ -183,7 +197,7 @@ ${brief}
             continue;
           }
 
-          data = (await res.json()) as any;
+          data = (await res.json()) as unknown as GeminiResponse;
           break; // Success - exit both loops
         } catch (fetchErr) {
           // Network error - try next
@@ -226,18 +240,30 @@ Note: Free tier quotas are limited. Enabling billing (even with $0 spend limit) 
     }
 
     const text =
-      data?.candidates?.[0]?.content?.parts?.map((p: any) => p?.text).filter(Boolean).join("\n") ??
-      "";
+      (data?.candidates?.[0]?.content?.parts ?? [])
+        .map((p) => p?.text)
+        .filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+        .join("\n") ?? "";
 
-    const parsed = extractJson(text) as any;
+    const parsed = extractJson(text);
+    if (!isRecord(parsed)) {
+      return NextResponse.json({ error: "Invalid AI output: expected JSON object." }, { status: 422 });
+    }
 
-    const pages = parsed?.pages;
-    if (!pages?.home || !pages?.about || !pages?.contact) {
+    const pages = parsed.pages;
+    if (!isRecord(pages)) {
+      return NextResponse.json({ error: "Invalid AI output: missing pages." }, { status: 422 });
+    }
+
+    const home = (pages as Record<string, unknown>).home;
+    const about = (pages as Record<string, unknown>).about;
+    const contact = (pages as Record<string, unknown>).contact;
+    if (!home || !about || !contact) {
       return NextResponse.json({ error: "Invalid AI output: missing pages." }, { status: 422 });
     }
 
     for (const k of ["home", "about", "contact"] as const) {
-      const v = validatePageData(pages[k]);
+      const v = validatePageData((pages as Record<string, unknown>)[k]);
       if (!v.ok) {
         return NextResponse.json(
           { error: `Invalid AI output for page '${k}': ${v.error ?? "Invalid."}` },
@@ -248,11 +274,11 @@ Note: Free tier quotas are limited. Enabling billing (even with $0 spend limit) 
 
     return NextResponse.json(
       {
-        profile: parsed.profile ?? null,
+        profile: (parsed as Record<string, unknown>).profile ?? null,
         pages: {
-          home: pages.home,
-          about: pages.about,
-          contact: pages.contact,
+          home,
+          about,
+          contact,
         },
       },
       { status: 200 },
