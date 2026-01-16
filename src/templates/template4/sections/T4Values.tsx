@@ -33,7 +33,13 @@ export default function T4Values({
         <div className="t4-bento" style={{ marginTop: 18 }}>
           {filled.map((v, idx) => (
             <div key={idx} className="t4-card t4-item" style={{ gridColumn: "span 4", padding: 18 }}>
-              <div className="t4-chip" style={{ background: "rgba(6,182,212,0.14)", borderColor: "rgba(6,182,212,0.26)" }}>
+              <div
+                className="t4-chip"
+                style={{
+                  background: "rgb(var(--t4-accent2-rgb) / 0.14)",
+                  borderColor: "rgb(var(--t4-accent2-rgb) / 0.26)",
+                }}
+              >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                   <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>

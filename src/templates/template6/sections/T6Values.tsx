@@ -50,7 +50,14 @@ export default function T6Values({
         <div className="t6-bento" style={{ marginTop: 18 }}>
           {filled.map((v, idx) => (
             <div key={idx} className="t6-card t6-item" style={{ gridColumn: "span 4", padding: 18 }}>
-              <div className="t6-chip" style={{ background: "rgba(96,165,250,0.10)", borderColor: "rgba(96,165,250,0.22)", color: "var(--t6-accent2)" }}>
+              <div
+                className="t6-chip"
+                style={{
+                  background: "rgb(var(--t6-accent2-rgb) / 0.10)",
+                  borderColor: "rgb(var(--t6-accent2-rgb) / 0.22)",
+                  color: "var(--t6-accent2)",
+                }}
+              >
                 <Icon i={idx} />
               </div>
               <EditableText

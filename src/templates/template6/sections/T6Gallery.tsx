@@ -46,7 +46,7 @@ export default function T6Gallery({
                   height: 260,
                   background:
                     it.url ||
-                    "linear-gradient(135deg, rgba(34,197,94,0.18), rgba(96,165,250,0.14))",
+                    "linear-gradient(135deg, rgb(var(--t6-accent-rgb) / 0.18), rgb(var(--t6-accent2-rgb) / 0.14))",
                   borderBottom: "1px solid rgba(255,255,255,0.10)",
                 }}
               >

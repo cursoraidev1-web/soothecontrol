@@ -34,7 +34,11 @@ export default function T5Values({
             <div key={idx} className="t5-card t5-item" style={{ gridColumn: "span 4", padding: 18 }}>
               <div
                 className="t5-chip"
-                style={{ background: "rgba(219,39,119,0.08)", borderColor: "rgba(219,39,119,0.18)", color: "var(--t5-accent2)" }}
+                style={{
+                  background: "rgb(var(--t5-accent2-rgb) / 0.08)",
+                  borderColor: "rgb(var(--t5-accent2-rgb) / 0.18)",
+                  color: "var(--t5-accent2)",
+                }}
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                   <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />

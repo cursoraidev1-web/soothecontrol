@@ -174,6 +174,16 @@ export default function ColorPaletteSidebar({
     }
   });
 
+  const maybeSetRgb = (cssVar: string, hex: string) => {
+    const m = hex.trim().replace("#", "");
+    if (!/^[0-9a-fA-F]{6}$/.test(m)) return;
+    const r = parseInt(m.slice(0, 2), 16);
+    const g = parseInt(m.slice(2, 4), 16);
+    const b = parseInt(m.slice(4, 6), 16);
+    // CSS Color 4 space-separated RGB for rgb(var(--x) / a)
+    document.documentElement.style.setProperty(cssVar, `${r} ${g} ${b}`);
+  };
+
   const applyColors = (newColors: typeof config.defaults) => {
     // Apply CSS variables to :root (document.documentElement) since all templates define variables there
     const root = document.documentElement;
@@ -184,6 +194,24 @@ export default function ColorPaletteSidebar({
         root.style.setProperty(cssVar, value);
       }
     });
+
+    // Also set derived RGB vars so template gradients/glows follow the palette.
+    if (templateKey === "t3") {
+      maybeSetRgb("--t3-accent-rgb", newColors.accent);
+      maybeSetRgb("--t3-accent2-rgb", newColors.accent2);
+    }
+    if (templateKey === "t4") {
+      maybeSetRgb("--t4-accent-rgb", newColors.accent);
+      maybeSetRgb("--t4-accent2-rgb", newColors.accent2);
+    }
+    if (templateKey === "t5") {
+      maybeSetRgb("--t5-accent-rgb", newColors.accent);
+      maybeSetRgb("--t5-accent2-rgb", newColors.accent2);
+    }
+    if (templateKey === "t6") {
+      maybeSetRgb("--t6-accent-rgb", newColors.accent);
+      maybeSetRgb("--t6-accent2-rgb", newColors.accent2);
+    }
   };
 
   useEffect(() => {

@@ -7,8 +7,10 @@
   --t3-muted: #5a615b;
   --t3-border: rgba(18, 18, 18, 0.12);
   --t3-accent: #0f766e; /* teal */
+  --t3-accent-rgb: 15 118 110;
   --t3-accent2: #b45309; /* amber */
-  --t3-ring: rgba(15, 118, 110, 0.18);
+  --t3-accent2-rgb: 180 83 9;
+  --t3-ring: rgb(var(--t3-accent-rgb) / 0.18);
   --t3-radius: 18px;
   --t3-shadow: 0 18px 40px rgba(18, 18, 18, 0.10);
   --t3-shadow-sm: 0 8px 18px rgba(18, 18, 18, 0.08);
@@ -17,8 +19,8 @@
 }
 
 .template3 {
-  background: radial-gradient(900px 500px at 20% 0%, rgba(15, 118, 110, 0.10), transparent 55%),
-    radial-gradient(900px 500px at 80% 10%, rgba(180, 83, 9, 0.10), transparent 60%),
+  background: radial-gradient(900px 500px at 20% 0%, rgb(var(--t3-accent-rgb) / 0.10), transparent 55%),
+    radial-gradient(900px 500px at 80% 10%, rgb(var(--t3-accent2-rgb) / 0.10), transparent 60%),
     var(--t3-bg);
   color: var(--t3-ink);
   font-family: var(--t3-sans);
@@ -178,8 +180,8 @@
 .t3-art-surface {
   border-radius: 16px;
   background:
-    radial-gradient(500px 280px at 20% 20%, rgba(15, 118, 110, 0.22), transparent 55%),
-    radial-gradient(520px 300px at 80% 30%, rgba(180, 83, 9, 0.18), transparent 60%),
+    radial-gradient(500px 280px at 20% 20%, rgb(var(--t3-accent-rgb) / 0.22), transparent 55%),
+    radial-gradient(520px 300px at 80% 30%, rgb(var(--t3-accent2-rgb) / 0.18), transparent 60%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.75));
   border: 1px solid rgba(18, 18, 18, 0.08);
   min-height: 360px;
@@ -265,9 +267,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 118, 110, 0.12);
+  background: rgb(var(--t3-accent-rgb) / 0.12);
   color: var(--t3-accent);
-  border: 1px solid rgba(15, 118, 110, 0.18);
+  border: 1px solid rgb(var(--t3-accent-rgb) / 0.18);
 }
 
 .t3-footer {
@@ -319,7 +321,7 @@
 
 .t3-input:focus {
   box-shadow: 0 0 0 4px var(--t3-ring);
-  border-color: rgba(15, 118, 110, 0.35);
+  border-color: rgb(var(--t3-accent-rgb) / 0.35);
 }
 
 .t3-two-col {

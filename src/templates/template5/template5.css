@@ -7,8 +7,10 @@
   --t5-muted: rgba(11, 18, 32, 0.62);
   --t5-border: rgba(11, 18, 32, 0.12);
   --t5-accent: #2563eb; /* blue */
+  --t5-accent-rgb: 37 99 235;
   --t5-accent2: #db2777; /* pink */
-  --t5-ring: rgba(37, 99, 235, 0.18);
+  --t5-accent2-rgb: 219 39 119;
+  --t5-ring: rgb(var(--t5-accent-rgb) / 0.18);
   --t5-radius: 18px;
   --t5-shadow: 0 18px 44px rgba(11, 18, 32, 0.10);
   --t5-shadow-sm: 0 8px 18px rgba(11, 18, 32, 0.08);
@@ -21,8 +23,8 @@
   color: var(--t5-ink);
   font-family: var(--t5-sans);
   background:
-    radial-gradient(900px 520px at 15% 0%, rgba(37, 99, 235, 0.14), transparent 55%),
-    radial-gradient(900px 520px at 85% 10%, rgba(219, 39, 119, 0.12), transparent 60%),
+    radial-gradient(900px 520px at 15% 0%, rgb(var(--t5-accent-rgb) / 0.14), transparent 55%),
+    radial-gradient(900px 520px at 85% 10%, rgb(var(--t5-accent2-rgb) / 0.12), transparent 60%),
     linear-gradient(180deg, #ffffff, var(--t5-bg));
 }
 
@@ -100,7 +102,7 @@
   color: white;
   font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 16px 36px rgb(var(--t5-accent-rgb) / 0.18);
 }
 
 .t5-cta:hover {

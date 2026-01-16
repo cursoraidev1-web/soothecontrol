@@ -110,6 +110,8 @@ function applyBrandColors(
   if (templateKey === "t3") {
     root.style.setProperty("--t3-accent", dominant);
     root.style.setProperty("--t3-accent2", accent);
+    root.style.setProperty("--t3-accent-rgb", `${hexToRgb(dominant).r} ${hexToRgb(dominant).g} ${hexToRgb(dominant).b}`);
+    root.style.setProperty("--t3-accent2-rgb", `${hexToRgb(accent).r} ${hexToRgb(accent).g} ${hexToRgb(accent).b}`);
     root.style.setProperty("--t3-ring", hexToRgba(dominant, 0.18));
     
     // Derive text colors
@@ -132,6 +134,8 @@ function applyBrandColors(
   if (templateKey === "t4") {
     root.style.setProperty("--t4-accent", dominant);
     root.style.setProperty("--t4-accent2", accent);
+    root.style.setProperty("--t4-accent-rgb", `${hexToRgb(dominant).r} ${hexToRgb(dominant).g} ${hexToRgb(dominant).b}`);
+    root.style.setProperty("--t4-accent2-rgb", `${hexToRgb(accent).r} ${hexToRgb(accent).g} ${hexToRgb(accent).b}`);
     root.style.setProperty("--t4-ring", hexToRgba(dominant, 0.22));
     
     // Template4 is dark theme - keep light text
@@ -148,6 +152,8 @@ function applyBrandColors(
   if (templateKey === "t5") {
     root.style.setProperty("--t5-accent", dominant);
     root.style.setProperty("--t5-accent2", accent);
+    root.style.setProperty("--t5-accent-rgb", `${hexToRgb(dominant).r} ${hexToRgb(dominant).g} ${hexToRgb(dominant).b}`);
+    root.style.setProperty("--t5-accent2-rgb", `${hexToRgb(accent).r} ${hexToRgb(accent).g} ${hexToRgb(accent).b}`);
     root.style.setProperty("--t5-ring", hexToRgba(dominant, 0.18));
     
     // Derive text colors
@@ -170,6 +176,8 @@ function applyBrandColors(
   if (templateKey === "t6") {
     root.style.setProperty("--t6-accent", dominant);
     root.style.setProperty("--t6-accent2", accent);
+    root.style.setProperty("--t6-accent-rgb", `${hexToRgb(dominant).r} ${hexToRgb(dominant).g} ${hexToRgb(dominant).b}`);
+    root.style.setProperty("--t6-accent2-rgb", `${hexToRgb(accent).r} ${hexToRgb(accent).g} ${hexToRgb(accent).b}`);
     root.style.setProperty("--t6-ring", hexToRgba(dominant, 0.22));
 
     // Template6 is dark theme - keep light text

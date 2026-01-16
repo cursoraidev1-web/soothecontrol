@@ -92,7 +92,7 @@ export default function T4Hero({
                 borderRadius: 16,
                 border: "1px solid rgba(255,255,255,0.10)",
                 background:
-                  "radial-gradient(540px 300px at 20% 20%, rgba(124,58,237,0.26), transparent 55%), radial-gradient(520px 320px at 80% 30%, rgba(6,182,212,0.20), transparent 60%), rgba(255,255,255,0.05)",
+                  "radial-gradient(540px 300px at 20% 20%, rgb(var(--t4-accent-rgb) / 0.26), transparent 55%), radial-gradient(520px 320px at 80% 30%, rgb(var(--t4-accent2-rgb) / 0.20), transparent 60%), rgba(255,255,255,0.05)",
                 minHeight: 360,
                 overflow: "hidden",
               }}

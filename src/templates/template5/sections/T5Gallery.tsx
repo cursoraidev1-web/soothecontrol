@@ -47,7 +47,7 @@ export default function T5Gallery({
                   height: 260,
                   background:
                     it.url ||
-                    "linear-gradient(135deg, rgba(37,99,235,0.16), rgba(219,39,119,0.12))",
+                    "linear-gradient(135deg, rgb(var(--t5-accent-rgb) / 0.16), rgb(var(--t5-accent2-rgb) / 0.12))",
                   borderBottom: "1px solid rgba(11,18,32,0.10)",
                 }}
               >

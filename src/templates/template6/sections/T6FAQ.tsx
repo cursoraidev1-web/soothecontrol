@@ -108,8 +108,8 @@ export default function T6FAQ({
                       height: 36,
                       borderRadius: 999,
                       flexShrink: 0,
-                      background: "rgba(34,197,94,0.10)",
-                      borderColor: "rgba(34,197,94,0.22)",
+                      background: "rgb(var(--t6-accent-rgb) / 0.10)",
+                      borderColor: "rgb(var(--t6-accent-rgb) / 0.22)",
                       color: "var(--t6-accent)",
                     }}
                   >
