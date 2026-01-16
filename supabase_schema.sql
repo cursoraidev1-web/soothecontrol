@@ -44,7 +44,7 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, auth
 as $$
   select exists (
     select 1
@@ -250,6 +250,11 @@ end
 $$;
 
 -- Admin-only full access on all tables
+create policy admin_users_self_read on public.admin_users
+for select
+to authenticated
+using (user_id = auth.uid());
+
 create policy admin_full_access on public.admin_users
 for all
 to authenticated
