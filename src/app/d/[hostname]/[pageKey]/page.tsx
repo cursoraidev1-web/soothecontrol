@@ -44,6 +44,7 @@ export async function generateMetadata({
   const ogImageUrl = origin
     ? `${origin}/api/og/site?hostname=${encodeURIComponent(hostname)}&page=${encodeURIComponent(pageKey)}`
     : undefined;
+  const iconUrl = origin ? `${origin}/api/icon/site?hostname=${encodeURIComponent(hostname)}` : undefined;
 
   const pageTitle =
     pageData.seo.title ||
@@ -97,7 +98,7 @@ export async function generateMetadata({
         }.`,
       images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
     },
-    icons: logoUrl ? { icon: logoUrl } : undefined,
+    icons: iconUrl ? { icon: iconUrl, apple: iconUrl } : (logoUrl ? { icon: logoUrl } : undefined),
     alternates: canonical ? { canonical } : undefined,
   };
 }

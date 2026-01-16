@@ -48,6 +48,7 @@ export async function generateMetadata({
   const canonical = canonicalHost ? `https://${canonicalHost}` : undefined;
   const origin = canonicalHost ? `${proto}://${canonicalHost}` : undefined;
   const ogImageUrl = origin ? `${origin}/api/og/site?slug=${encodeURIComponent(slug)}&page=home` : undefined;
+  const iconUrl = origin ? `${origin}/api/icon/site?slug=${encodeURIComponent(slug)}` : undefined;
 
   return {
     metadataBase: origin ? new URL(origin) : undefined,
@@ -73,7 +74,7 @@ export async function generateMetadata({
       description: pageData.seo.description || `Learn about ${businessName} and our professional services.`,
       images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
     },
-    icons: logoUrl ? { icon: logoUrl } : undefined,
+    icons: iconUrl ? { icon: iconUrl, apple: iconUrl } : (logoUrl ? { icon: logoUrl } : undefined),
     robots: {
       index: true,
       follow: true,

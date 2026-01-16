@@ -50,6 +50,7 @@ export async function generateMetadata({
   const ogImageUrl = origin
     ? `${origin}/api/og/site?slug=${encodeURIComponent(slug)}&page=home`
     : undefined;
+  const iconUrl = origin ? `${origin}/api/icon/site?slug=${encodeURIComponent(slug)}` : undefined;
 
   return {
     title: pageData.seo.title || `${businessName} | ${key}`,
@@ -73,7 +74,7 @@ export async function generateMetadata({
       description: pageData.seo.description || `Learn more about ${businessName}.`,
       images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
     },
-    icons: logoUrl ? { icon: logoUrl } : undefined,
+    icons: iconUrl ? { icon: iconUrl, apple: iconUrl } : (logoUrl ? { icon: logoUrl } : undefined),
     alternates: canonical ? { canonical } : undefined,
   };
 }

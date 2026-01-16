@@ -62,6 +62,7 @@ export async function generateMetadata({
   const ogImageUrl = origin
     ? `${origin}/api/og/site?slug=${encodeURIComponent(slug)}&page=${encodeURIComponent(pageKey)}`
     : undefined;
+  const iconUrl = origin ? `${origin}/api/icon/site?slug=${encodeURIComponent(slug)}` : undefined;
 
   return {
     metadataBase: origin ? new URL(origin) : undefined,
@@ -87,7 +88,7 @@ export async function generateMetadata({
       description: pageData.seo.description || `Learn about ${businessName}${pageKey === "about" ? " and our story" : pageKey === "contact" ? " and get in touch" : ""}.`,
       images: ogImageUrl ? [ogImageUrl] : (logoUrl ? [logoUrl] : []),
     },
-    icons: logoUrl ? { icon: logoUrl } : undefined,
+    icons: iconUrl ? { icon: iconUrl, apple: iconUrl } : (logoUrl ? { icon: logoUrl } : undefined),
     robots: {
       index: true,
       follow: true,
