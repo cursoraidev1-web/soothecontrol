@@ -1,8 +1,10 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import type { PageData, PageKey } from "@/lib/pageSchema";
 import { getPublicAssetUrl } from "@/lib/assets";
 import "./template3.css";
+import { toCssVarMap } from "@/lib/templateTheme";
 import T3Header from "./components/T3Header";
 import T3Footer from "./components/T3Footer";
 import T3HomePage from "./pages/T3HomePage";
@@ -26,6 +28,7 @@ interface Template3Props {
     socials: Record<string, unknown> | null;
     logo_asset_id: string | null;
     logo_path?: string | null;
+    theme_colors?: Record<string, unknown> | null;
   };
   pages: {
     home: PageData;
@@ -51,8 +54,22 @@ export default function Template3({
   const navPage: PageKey | null = pageOverride ? null : (currentPage ?? "home");
   const currentPageData = pageOverride ?? pages[effectivePage];
 
+  const themeStyle = (() => {
+    const raw = profile.theme_colors;
+    if (!raw || typeof raw !== "object") return undefined;
+    const per = (raw as Record<string, unknown>)[site.template_key];
+    if (!per || typeof per !== "object") return undefined;
+    const colors: Record<string, string> = {};
+    for (const [k, v] of Object.entries(per as Record<string, unknown>)) {
+      if (typeof v === "string") colors[k] = v;
+    }
+    const cssVars = toCssVarMap(site.template_key, colors);
+    if (Object.keys(cssVars).length === 0) return undefined;
+    return cssVars as unknown as CSSProperties;
+  })();
+
   return (
-    <div className="template3">
+    <div className="template3" style={themeStyle}>
       <T3Header
         businessName={profile.business_name}
         logoUrl={logoUrl}

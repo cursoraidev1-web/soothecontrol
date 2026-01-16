@@ -1,189 +1,60 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { applyThemeColors, getTemplateThemeConfig, type ThemeSemanticColors } from "@/lib/templateTheme";
 
 interface ColorPaletteSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   templateKey?: string;
+  initialColors?: ThemeSemanticColors | null;
+  getTargetRoot?: () => HTMLElement | null;
+  onSaveColors?: (colors: ThemeSemanticColors) => Promise<void>;
 }
-
-// Template-specific color configurations
-const TEMPLATE_CONFIGS: Record<string, {
-  defaults: Record<string, string>;
-  variables: Record<string, string>;
-  labels: Record<string, string>;
-}> = {
-  t1: {
-    defaults: {
-      primary: "#6B46C1",
-      accent: "#8B5CF6",
-      dark: "#4C1D95",
-      textPrimary: "#1F2937",
-      textSecondary: "#6B7280",
-      bgMain: "#FFFFFF",
-      bgLight: "#F9FAFB",
-    },
-    variables: {
-      primary: "--color-primary",
-      accent: "--color-accent",
-      dark: "--color-dark",
-      textPrimary: "--color-text-primary",
-      textSecondary: "--color-text-secondary",
-      bgMain: "--color-bg-main",
-      bgLight: "--color-bg-light",
-    },
-    labels: {
-      primary: "Primary Color",
-      accent: "Accent Color",
-      dark: "Dark Accent",
-      textPrimary: "Primary Text",
-      textSecondary: "Secondary Text",
-      bgMain: "Main Background",
-      bgLight: "Light Background",
-    },
-  },
-  t3: {
-    defaults: {
-      accent: "#0f766e",
-      accent2: "#b45309",
-      ink: "#121212",
-      muted: "#5a615b",
-      bg: "#fbfaf7",
-      surface: "#ffffff",
-    },
-    variables: {
-      accent: "--t3-accent",
-      accent2: "--t3-accent2",
-      ink: "--t3-ink",
-      muted: "--t3-muted",
-      bg: "--t3-bg",
-      surface: "--t3-surface",
-    },
-    labels: {
-      accent: "Primary Accent",
-      accent2: "Secondary Accent",
-      ink: "Text Color",
-      muted: "Muted Text",
-      bg: "Background",
-      surface: "Surface",
-    },
-  },
-  t4: {
-    defaults: {
-      accent: "#7c3aed",
-      accent2: "#06b6d4",
-      ink: "rgba(255, 255, 255, 0.92)",
-      muted: "rgba(255, 255, 255, 0.66)",
-      bg: "#0b0f19",
-      surface: "rgba(255, 255, 255, 0.06)",
-    },
-    variables: {
-      accent: "--t4-accent",
-      accent2: "--t4-accent2",
-      ink: "--t4-ink",
-      muted: "--t4-muted",
-      bg: "--t4-bg",
-      surface: "--t4-surface",
-    },
-    labels: {
-      accent: "Primary Accent",
-      accent2: "Secondary Accent",
-      ink: "Text Color",
-      muted: "Muted Text",
-      bg: "Background",
-      surface: "Surface",
-    },
-  },
-  t5: {
-    defaults: {
-      accent: "#2563eb",
-      accent2: "#db2777",
-      ink: "#0b1220",
-      muted: "rgba(11, 18, 32, 0.62)",
-      bg: "#f7f8fb",
-      surface: "#ffffff",
-    },
-    variables: {
-      accent: "--t5-accent",
-      accent2: "--t5-accent2",
-      ink: "--t5-ink",
-      muted: "--t5-muted",
-      bg: "--t5-bg",
-      surface: "--t5-surface",
-    },
-    labels: {
-      accent: "Primary Accent",
-      accent2: "Secondary Accent",
-      ink: "Text Color",
-      muted: "Muted Text",
-      bg: "Background",
-      surface: "Surface",
-    },
-  },
-  t6: {
-    defaults: {
-      accent: "#22c55e",
-      accent2: "#60a5fa",
-      ink: "rgba(255, 255, 255, 0.92)",
-      muted: "rgba(255, 255, 255, 0.66)",
-      bg: "#070a12",
-      surface: "rgba(255, 255, 255, 0.06)",
-    },
-    variables: {
-      accent: "--t6-accent",
-      accent2: "--t6-accent2",
-      ink: "--t6-ink",
-      muted: "--t6-muted",
-      bg: "--t6-bg",
-      surface: "--t6-surface",
-    },
-    labels: {
-      accent: "Primary Accent",
-      accent2: "Secondary Accent",
-      ink: "Text Color",
-      muted: "Muted Text",
-      bg: "Background",
-      surface: "Surface",
-    },
-  },
-};
 
 export default function ColorPaletteSidebar({
   isOpen,
   onClose,
   templateKey = "t1",
+  initialColors,
+  getTargetRoot,
+  onSaveColors,
 }: ColorPaletteSidebarProps) {
-  const config = TEMPLATE_CONFIGS[templateKey] || TEMPLATE_CONFIGS.t1;
+  const config = getTemplateThemeConfig(templateKey) ?? getTemplateThemeConfig("t1")!;
   const storageKey = `template-${templateKey}-colors`;
 
-  const [colors, setColors] = useState(() => {
+  const [colors, setColors] = useState<ThemeSemanticColors>(() => {
     // Load once on first render (client-only component).
     const saved = localStorage.getItem(storageKey);
-    if (!saved) return config.defaults;
-    try {
-      const parsed = JSON.parse(saved) as Partial<typeof config.defaults>;
-      // Prevent undefined values from widening the state type.
-      const next: Record<string, string> = { ...config.defaults };
-      for (const [k, v] of Object.entries(parsed)) {
-        if (typeof v === "string") next[k] = v;
+    const base: ThemeSemanticColors = { ...config.defaults };
+
+    if (initialColors && typeof initialColors === "object") {
+      for (const [k, v] of Object.entries(initialColors)) {
+        if (typeof v === "string") base[k] = v;
       }
-      return next;
+    }
+
+    if (!saved) return base;
+    try {
+      const parsed = JSON.parse(saved) as ThemeSemanticColors;
+      for (const [k, v] of Object.entries(parsed ?? {})) {
+        if (typeof v === "string") base[k] = v;
+      }
+      return base;
     } catch {
-      return config.defaults;
+      return base;
     }
   });
 
-  const applyColors = (newColors: typeof config.defaults) => {
-    // Apply CSS variables to :root (document.documentElement) since all templates define variables there
-    const root = document.documentElement;
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveNote, setSaveNote] = useState<string | null>(null);
 
-    Object.entries(newColors).forEach(([key, value]) => {
-      const cssVar = config.variables[key];
-      if (cssVar) {
-        root.style.setProperty(cssVar, value);
-      }
-    });
+  const applyColors = (newColors: ThemeSemanticColors) => {
+    // Apply to preview template root if available (fixes "not working" cases),
+    // else fall back to :root.
+    const target = getTargetRoot?.() ?? null;
+    const root = target ?? document.documentElement;
+    applyThemeColors(root, templateKey, newColors);
   };
 
   useEffect(() => {
@@ -192,17 +63,57 @@ export default function ColorPaletteSidebar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!initialColors || typeof initialColors !== "object") return;
+    // If DB-loaded colors arrive after mount, sync them into the UI state.
+    setColors((prev) => {
+      const next: ThemeSemanticColors = { ...prev };
+      for (const [k, v] of Object.entries(initialColors)) {
+        if (typeof v === "string") next[k] = v;
+      }
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      applyColors(next);
+      return next;
+    });
+    setSaveNote(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialColors, templateKey]);
+
   const handleColorChange = (key: string, value: string) => {
     const newColors = { ...colors, [key]: value };
     setColors(newColors);
     applyColors(newColors);
     localStorage.setItem(storageKey, JSON.stringify(newColors));
+    setSaveNote(null);
   };
 
   const handleReset = () => {
     setColors(config.defaults);
     applyColors(config.defaults);
     localStorage.removeItem(storageKey);
+    setSaveNote(null);
+  };
+
+  const handleSave = async () => {
+    if (!onSaveColors) {
+      setSaveNote("Saved locally.");
+      return;
+    }
+    setIsSaving(true);
+    setSaveNote(null);
+    try {
+      await onSaveColors(colors);
+      setSaveNote("Saved.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save.";
+      setSaveNote(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Get button gradient color based on template
@@ -286,30 +197,54 @@ export default function ColorPaletteSidebar({
             </div>
           ))}
 
-          {/* Reset Button */}
-          <button
-            onClick={handleReset}
-            style={{
-              marginTop: "16px",
-              padding: "12px 24px",
-              background: getButtonGradient(),
-              color: "#FFFFFF",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "14px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "transform 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
-          >
-            Reset to Defaults
-          </button>
+          {/* Save + Reset */}
+          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              style={{
+                flex: 1,
+                padding: "12px 16px",
+                background: getButtonGradient(),
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "700",
+                cursor: "pointer",
+                opacity: isSaving ? 0.7 : 1,
+              }}
+            >
+              {isSaving ? "Saving…" : "Save colors"}
+            </button>
+            <button
+              onClick={handleReset}
+              style={{
+                flex: 1,
+                padding: "12px 16px",
+                background: "#F3F4F6",
+                color: "#111827",
+                border: "1px solid #E5E7EB",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "700",
+                cursor: "pointer",
+              }}
+            >
+              Reset
+            </button>
+          </div>
+          {saveNote ? (
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 12,
+                color: saveNote === "Saved." || saveNote === "Saved locally." ? "#065F46" : "#B91C1C",
+              }}
+            >
+              {saveNote}
+            </div>
+          ) : null}
         </div>
       </div>
 

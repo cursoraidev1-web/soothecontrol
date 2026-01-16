@@ -16,9 +16,10 @@ import { resolveSiteById } from "@/lib/siteResolver";
 import type { SiteData } from "@/lib/siteResolver";
 import { validatePageData, type PageKey, type Section } from "@/lib/pageSchema";
 import { formatSupabaseError } from "@/lib/supabase/formatError";
-import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser";
+import { getAuthenticatedClient } from "@/lib/supabase/browser";
 import { getPublicAssetUrl } from "@/lib/assets";
 import { extractLogoColors, type ExtractedLogoColors } from "@/lib/logoColors";
+import { applyThemeColors, type ThemeSemanticColors } from "@/lib/templateTheme";
 
 function hexToRgba(hex: string, alpha: number) {
   const m = hex.trim().replace("#", "");
@@ -251,12 +252,86 @@ export default function SitePreviewPage() {
   const [isApplyingBrand, setIsApplyingBrand] = useState(false);
   const [brandError, setBrandError] = useState<string | null>(null);
   const [brandColors, setBrandColors] = useState<ExtractedLogoColors | null>(null);
+  const [initialPaletteColors, setInitialPaletteColors] = useState<ThemeSemanticColors | null>(null);
   const previewWrapRef = useRef<HTMLDivElement | null>(null);
+
+  const getPreviewRoot = () => {
+    const wrap = previewWrapRef.current;
+    const tk = siteData?.site?.template_key;
+    if (!wrap || !tk) return wrap;
+
+    const root = (
+      (tk === "t1"
+        ? wrap.querySelector(".template1-container")
+        : tk === "t3"
+          ? wrap.querySelector(".template3")
+          : tk === "t4"
+            ? wrap.querySelector(".template4")
+            : tk === "t5"
+              ? wrap.querySelector(".template5")
+              : tk === "t6"
+                ? wrap.querySelector(".template6")
+                : null) ?? wrap
+    ) as HTMLElement | null;
+
+    return root;
+  };
 
   const logoUrl = useMemo(() => {
     const path = siteData?.profile?.logo_path;
     return path ? getPublicAssetUrl(path) : null;
   }, [siteData?.profile?.logo_path]);
+
+  // Load saved theme palette colors (manual color palette) from database
+  useEffect(() => {
+    const currentSiteData = siteData;
+    if (!currentSiteData || !siteId) return;
+    const tk = currentSiteData.site.template_key;
+    if (!["t1", "t3", "t4", "t5", "t6"].includes(tk)) return;
+
+    async function loadThemeColors() {
+      try {
+        const supabase = await getAuthenticatedClient();
+        const { data, error } = await supabase
+          .from("business_profiles")
+          .select("theme_colors")
+          .eq("site_id", siteId)
+          .single();
+
+        if (error) return;
+        const raw = (data as { theme_colors?: unknown } | null)?.theme_colors;
+        if (!raw || typeof raw !== "object") return;
+
+        const perTemplate = (raw as Record<string, unknown>)[tk];
+        if (!perTemplate || typeof perTemplate !== "object") return;
+
+        const next: ThemeSemanticColors = {};
+        for (const [k, v] of Object.entries(perTemplate as Record<string, unknown>)) {
+          if (typeof v === "string") next[k] = v;
+        }
+
+        if (Object.keys(next).length === 0) return;
+        setInitialPaletteColors(next);
+
+        // Keep local storage in sync so sidebar UI reflects DB state immediately.
+        try {
+          localStorage.setItem(`template-${tk}-colors`, JSON.stringify(next));
+        } catch {
+          // ignore
+        }
+
+        setTimeout(() => {
+          const root = getPreviewRoot();
+          if (root) applyThemeColors(root, tk, next);
+        }, 100);
+      } catch {
+        // ignore
+      }
+    }
+
+    loadThemeColors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [siteData, siteId]);
 
   // Load saved brand colors from database on mount and when siteData changes
   useEffect(() => {
@@ -285,20 +360,7 @@ export default function SitePreviewPage() {
 
             // Apply colors after a short delay to ensure DOM is ready
             setTimeout(() => {
-              const wrap = previewWrapRef.current;
-              const root = (
-                (templateKey === "t1"
-                  ? wrap?.querySelector(".template1-container")
-                  : templateKey === "t3"
-                    ? wrap?.querySelector(".template3")
-                    : templateKey === "t4"
-                      ? wrap?.querySelector(".template4")
-                      : templateKey === "t5"
-                        ? wrap?.querySelector(".template5")
-                        : templateKey === "t6"
-                          ? wrap?.querySelector(".template6")
-                      : null) ?? wrap
-              ) as HTMLElement | null;
+              const root = getPreviewRoot();
 
               if (root) {
                 applyBrandColors(root, templateKey, colors);
@@ -797,6 +859,35 @@ export default function SitePreviewPage() {
                 isOpen={colorPaletteOpen}
                 onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
                 templateKey="t1"
+                initialColors={initialPaletteColors}
+                getTargetRoot={getPreviewRoot}
+                onSaveColors={async (colors) => {
+                  const supabase = await getAuthenticatedClient();
+                  const { data } = await supabase
+                    .from("business_profiles")
+                    .select("theme_colors")
+                    .eq("site_id", siteId)
+                    .single();
+
+                  const existing = (data as { theme_colors?: unknown } | null)?.theme_colors;
+                  const nextTheme: Record<string, unknown> =
+                    existing && typeof existing === "object" ? { ...(existing as Record<string, unknown>) } : {};
+
+                  nextTheme["t1"] = colors;
+
+                  const { error: upErr } = await supabase
+                    .from("business_profiles")
+                    .update({ theme_colors: nextTheme })
+                    .eq("site_id", siteId);
+
+                  if (upErr) {
+                    const msg = formatSupabaseError(upErr) ?? "";
+                    if (msg.toLowerCase().includes("theme_colors") && msg.toLowerCase().includes("does not exist")) {
+                      throw new Error('Missing DB column "business_profiles.theme_colors". Run ADD_THEME_COLORS_COLUMN.sql in Supabase.');
+                    }
+                    throw new Error(msg || "Failed to save colors.");
+                  }
+                }}
               />
             </>
           )}
@@ -825,6 +916,35 @@ export default function SitePreviewPage() {
                 isOpen={colorPaletteOpen}
                 onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
                 templateKey="t3"
+                initialColors={initialPaletteColors}
+                getTargetRoot={getPreviewRoot}
+                onSaveColors={async (colors) => {
+                  const supabase = await getAuthenticatedClient();
+                  const { data } = await supabase
+                    .from("business_profiles")
+                    .select("theme_colors")
+                    .eq("site_id", siteId)
+                    .single();
+
+                  const existing = (data as { theme_colors?: unknown } | null)?.theme_colors;
+                  const nextTheme: Record<string, unknown> =
+                    existing && typeof existing === "object" ? { ...(existing as Record<string, unknown>) } : {};
+
+                  nextTheme["t3"] = colors;
+
+                  const { error: upErr } = await supabase
+                    .from("business_profiles")
+                    .update({ theme_colors: nextTheme })
+                    .eq("site_id", siteId);
+
+                  if (upErr) {
+                    const msg = formatSupabaseError(upErr) ?? "";
+                    if (msg.toLowerCase().includes("theme_colors") && msg.toLowerCase().includes("does not exist")) {
+                      throw new Error('Missing DB column "business_profiles.theme_colors". Run ADD_THEME_COLORS_COLUMN.sql in Supabase.');
+                    }
+                    throw new Error(msg || "Failed to save colors.");
+                  }
+                }}
               />
             </>
           )}
@@ -841,6 +961,35 @@ export default function SitePreviewPage() {
                 isOpen={colorPaletteOpen}
                 onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
                 templateKey="t4"
+                initialColors={initialPaletteColors}
+                getTargetRoot={getPreviewRoot}
+                onSaveColors={async (colors) => {
+                  const supabase = await getAuthenticatedClient();
+                  const { data } = await supabase
+                    .from("business_profiles")
+                    .select("theme_colors")
+                    .eq("site_id", siteId)
+                    .single();
+
+                  const existing = (data as { theme_colors?: unknown } | null)?.theme_colors;
+                  const nextTheme: Record<string, unknown> =
+                    existing && typeof existing === "object" ? { ...(existing as Record<string, unknown>) } : {};
+
+                  nextTheme["t4"] = colors;
+
+                  const { error: upErr } = await supabase
+                    .from("business_profiles")
+                    .update({ theme_colors: nextTheme })
+                    .eq("site_id", siteId);
+
+                  if (upErr) {
+                    const msg = formatSupabaseError(upErr) ?? "";
+                    if (msg.toLowerCase().includes("theme_colors") && msg.toLowerCase().includes("does not exist")) {
+                      throw new Error('Missing DB column "business_profiles.theme_colors". Run ADD_THEME_COLORS_COLUMN.sql in Supabase.');
+                    }
+                    throw new Error(msg || "Failed to save colors.");
+                  }
+                }}
               />
             </>
           )}
@@ -857,6 +1006,35 @@ export default function SitePreviewPage() {
                 isOpen={colorPaletteOpen}
                 onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
                 templateKey="t5"
+                initialColors={initialPaletteColors}
+                getTargetRoot={getPreviewRoot}
+                onSaveColors={async (colors) => {
+                  const supabase = await getAuthenticatedClient();
+                  const { data } = await supabase
+                    .from("business_profiles")
+                    .select("theme_colors")
+                    .eq("site_id", siteId)
+                    .single();
+
+                  const existing = (data as { theme_colors?: unknown } | null)?.theme_colors;
+                  const nextTheme: Record<string, unknown> =
+                    existing && typeof existing === "object" ? { ...(existing as Record<string, unknown>) } : {};
+
+                  nextTheme["t5"] = colors;
+
+                  const { error: upErr } = await supabase
+                    .from("business_profiles")
+                    .update({ theme_colors: nextTheme })
+                    .eq("site_id", siteId);
+
+                  if (upErr) {
+                    const msg = formatSupabaseError(upErr) ?? "";
+                    if (msg.toLowerCase().includes("theme_colors") && msg.toLowerCase().includes("does not exist")) {
+                      throw new Error('Missing DB column "business_profiles.theme_colors". Run ADD_THEME_COLORS_COLUMN.sql in Supabase.');
+                    }
+                    throw new Error(msg || "Failed to save colors.");
+                  }
+                }}
               />
             </>
           )}
@@ -873,6 +1051,35 @@ export default function SitePreviewPage() {
                 isOpen={colorPaletteOpen}
                 onClose={() => setColorPaletteOpen(!colorPaletteOpen)}
                 templateKey="t6"
+                initialColors={initialPaletteColors}
+                getTargetRoot={getPreviewRoot}
+                onSaveColors={async (colors) => {
+                  const supabase = await getAuthenticatedClient();
+                  const { data } = await supabase
+                    .from("business_profiles")
+                    .select("theme_colors")
+                    .eq("site_id", siteId)
+                    .single();
+
+                  const existing = (data as { theme_colors?: unknown } | null)?.theme_colors;
+                  const nextTheme: Record<string, unknown> =
+                    existing && typeof existing === "object" ? { ...(existing as Record<string, unknown>) } : {};
+
+                  nextTheme["t6"] = colors;
+
+                  const { error: upErr } = await supabase
+                    .from("business_profiles")
+                    .update({ theme_colors: nextTheme })
+                    .eq("site_id", siteId);
+
+                  if (upErr) {
+                    const msg = formatSupabaseError(upErr) ?? "";
+                    if (msg.toLowerCase().includes("theme_colors") && msg.toLowerCase().includes("does not exist")) {
+                      throw new Error('Missing DB column "business_profiles.theme_colors". Run ADD_THEME_COLORS_COLUMN.sql in Supabase.');
+                    }
+                    throw new Error(msg || "Failed to save colors.");
+                  }
+                }}
               />
             </>
           )}
