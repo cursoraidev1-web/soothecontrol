@@ -2,6 +2,10 @@ import { supabaseBrowser, getAuthenticatedClient } from "@/lib/supabase/browser"
 import type { PageData } from "@/lib/pageSchema";
 import { validatePageData } from "@/lib/pageSchema";
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
 export type ExtraPageRow = {
   id: string;
   site_id: string;
@@ -36,8 +40,10 @@ export async function getExtraPageByKey(
     .single();
   if (error) {
     // PostgREST "No rows found"
-    const msg = (error as any)?.message ?? "";
-    if ((error as any)?.code === "PGRST116" || msg.toLowerCase().includes("0 rows")) return null;
+    const errObj = isRecord(error) ? error : {};
+    const msg = typeof errObj.message === "string" ? errObj.message : "";
+    const code = typeof errObj.code === "string" ? errObj.code : "";
+    if (code === "PGRST116" || msg.toLowerCase().includes("0 rows")) return null;
     throw error;
   }
   return data as unknown as ExtraPageRow;
@@ -111,7 +117,7 @@ export async function getPublishedExtraPageBySiteSlug(
     .eq("status", "published")
     .single();
   if (error) return null;
-  const pageData = (data as any)?.data as unknown;
+  const pageData = isRecord(data) ? data.data : null;
   const v = validatePageData(pageData);
   if (!v.ok) return null;
   return pageData as PageData;

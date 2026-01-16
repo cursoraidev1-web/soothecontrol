@@ -29,6 +29,18 @@ export interface SiteData {
   };
 }
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+function getNullableString(obj: Record<string, unknown>, key: string): string | null {
+  const v = obj[key];
+  if (v == null) return null;
+  if (typeof v !== "string") return null;
+  const t = v.trim();
+  return t.length > 0 ? t : null;
+}
+
 function toPageDataMap(rows: Array<{ key: string; data: unknown }>) {
   const pagesMap = new Map<PageKey, PageData>();
   for (const row of rows) {
@@ -119,18 +131,20 @@ export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> 
   const aboutPage = pagesMap.get("about") || defaultPageData("about");
   const contactPage = pagesMap.get("contact") || defaultPageData("contact");
 
+  const profileObj = isRecord(profile) ? profile : {};
+
   return {
     site: site as SiteData["site"],
     profile: {
-      business_name: (profile as any).business_name ?? "Business",
-      tagline: (profile as any).tagline ?? null,
-      description: (profile as any).description ?? null,
-      address: (profile as any).address ?? null,
-      phone: (profile as any).phone ?? null,
-      email: (profile as any).email ?? null,
-      whatsapp: (profile as any).whatsapp ?? null,
-      socials: (profile as any).socials ?? null,
-      logo_asset_id: (profile as any).logo_asset_id ?? null,
+      business_name: getNullableString(profileObj, "business_name") ?? "Business",
+      tagline: getNullableString(profileObj, "tagline"),
+      description: getNullableString(profileObj, "description"),
+      address: getNullableString(profileObj, "address"),
+      phone: getNullableString(profileObj, "phone"),
+      email: getNullableString(profileObj, "email"),
+      whatsapp: getNullableString(profileObj, "whatsapp"),
+      socials: isRecord(profileObj["socials"]) ? (profileObj["socials"] as Record<string, unknown>) : null,
+      logo_asset_id: getNullableString(profileObj, "logo_asset_id"),
       logo_path: logoPath,
     },
     pages: { home: homePage, about: aboutPage, contact: contactPage },
@@ -207,18 +221,20 @@ export async function resolveSiteByHostname(hostname: string): Promise<SiteData 
   const aboutPage = pagesMap.get("about") || defaultPageData("about");
   const contactPage = pagesMap.get("contact") || defaultPageData("contact");
 
+  const profileObj = isRecord(profile) ? profile : {};
+
   return {
     site: site as SiteData["site"],
     profile: {
-      business_name: (profile as any).business_name ?? "Business",
-      tagline: (profile as any).tagline ?? null,
-      description: (profile as any).description ?? null,
-      address: (profile as any).address ?? null,
-      phone: (profile as any).phone ?? null,
-      email: (profile as any).email ?? null,
-      whatsapp: (profile as any).whatsapp ?? null,
-      socials: (profile as any).socials ?? null,
-      logo_asset_id: (profile as any).logo_asset_id ?? null,
+      business_name: getNullableString(profileObj, "business_name") ?? "Business",
+      tagline: getNullableString(profileObj, "tagline"),
+      description: getNullableString(profileObj, "description"),
+      address: getNullableString(profileObj, "address"),
+      phone: getNullableString(profileObj, "phone"),
+      email: getNullableString(profileObj, "email"),
+      whatsapp: getNullableString(profileObj, "whatsapp"),
+      socials: isRecord(profileObj["socials"]) ? (profileObj["socials"] as Record<string, unknown>) : null,
+      logo_asset_id: getNullableString(profileObj, "logo_asset_id"),
       logo_path: logoPath,
     },
     pages: { home: homePage, about: aboutPage, contact: contactPage },

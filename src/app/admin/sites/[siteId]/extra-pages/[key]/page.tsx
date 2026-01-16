@@ -106,10 +106,6 @@ export default function ExtraPageEditor() {
     };
   }, [siteId, key]);
 
-  if (!siteId || !key) {
-    return <div>Loading...</div>;
-  }
-
   const sections = pageDraft?.sections ?? [];
 
   const isPublished = pageRow?.status === "published";
@@ -119,6 +115,10 @@ export default function ExtraPageEditor() {
     const valid = validatePageData(pageDraft);
     return valid.ok;
   }, [pageDraft]);
+
+  if (!siteId || !key) {
+    return <div>Loading...</div>;
+  }
 
   function updateSection(index: number, next: Section) {
     setPageDraft((prev) => {
