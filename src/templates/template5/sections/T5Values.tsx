@@ -38,7 +38,8 @@ export default function T5Values({
                 style={{ background: "rgba(219,39,119,0.08)", borderColor: "rgba(219,39,119,0.18)", color: "var(--t5-accent2)" }}
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* bolt (t5) */}
+                  <path d="M13 2L3 14h7l-1 8 12-14h-7l-1-6z" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <EditableText

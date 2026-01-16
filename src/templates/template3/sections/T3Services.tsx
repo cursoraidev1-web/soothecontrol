@@ -6,10 +6,16 @@ import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext"
 import EditableText from "@/components/inline-editor/EditableText";
 
 function Icon({ i }: { i: number }) {
+  // Template3: warm editorial line icons (distinct from t4/t5).
   const paths = [
-    "M12 3l7.5 4.5V12c0 5.25-3.75 9.75-7.5 9.75S4.5 17.25 4.5 12V7.5L12 3z",
-    "M3 12h18M12 3v18",
-    "M4.5 19.5L19.5 4.5M6.75 4.5h12.75v12.75",
+    // leaf
+    "M5 19c7-1 12-6 14-14C11 7 6 12 5 19z",
+    // compass
+    "M12 2l3.2 7.8L23 12l-7.8 3.2L12 22l-3.2-6.8L1 12l7.8-2.2L12 2z",
+    // spark
+    "M12 3l1.6 4.7L18 9.3l-4.4 1.6L12 16l-1.6-5.1L6 9.3l4.4-1.6L12 3z",
+    // hand/heart-ish
+    "M12 21s-7-4.4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.6-7 10-7 10z",
   ];
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">

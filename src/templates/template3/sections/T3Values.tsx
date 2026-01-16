@@ -37,7 +37,12 @@ export default function T3Values({
             <div key={idx} className="t3-card t3-item">
               <div className="t3-badge" style={{ background: "rgba(180,83,9,0.10)", color: "var(--t3-accent2)", borderColor: "rgba(180,83,9,0.18)" }}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* sparkle star (t3) */}
+                  <path
+                    d="M12 2l2.2 6.6H21l-5.6 4.1 2.2 6.6L12 15.9 6.4 19.3l2.2-6.6L3 8.6h6.8L12 2z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
               <EditableText

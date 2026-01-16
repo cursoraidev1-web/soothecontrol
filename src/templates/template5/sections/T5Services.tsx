@@ -6,14 +6,40 @@ import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext"
 import EditableText from "@/components/inline-editor/EditableText";
 
 function Icon({ i }: { i: number }) {
-  const paths = [
-    "M12 3l7.5 4.5V12c0 5.25-3.75 9.75-7.5 9.75S4.5 17.25 4.5 12V7.5L12 3z",
-    "M4 7h16M7 4v16M17 4v16",
-    "M4.5 19.5L19.5 4.5M6.75 4.5h12.75v12.75",
-  ];
+  // Template5: crisp “product” icons (distinct from t3/t4).
+  const idx = i % 4;
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d={paths[i % paths.length]} strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      {idx === 0 ? (
+        <>
+          <path d="M4 8h16" strokeLinecap="round" />
+          <path d="M6 8l2 12h8l2-12" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9 8V6a3 3 0 0 1 6 0v2" strokeLinecap="round" />
+        </>
+      ) : null}
+      {idx === 1 ? (
+        <>
+          <path d="M12 3v6" strokeLinecap="round" />
+          <path d="M12 15v6" strokeLinecap="round" />
+          <path d="M3 12h6" strokeLinecap="round" />
+          <path d="M15 12h6" strokeLinecap="round" />
+          <path d="M12 12l3-3" strokeLinecap="round" />
+          <path d="M12 12l-3 3" strokeLinecap="round" />
+        </>
+      ) : null}
+      {idx === 2 ? (
+        <>
+          <path d="M7 4h10" strokeLinecap="round" />
+          <path d="M6 8h12" strokeLinecap="round" />
+          <path d="M8 8v12h8V8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M10 12h4" strokeLinecap="round" />
+        </>
+      ) : null}
+      {idx === 3 ? (
+        <>
+          <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" strokeLinejoin="round" />
+        </>
+      ) : null}
     </svg>
   );
 }
