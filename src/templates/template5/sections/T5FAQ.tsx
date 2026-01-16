@@ -19,9 +19,7 @@ function loremQuestion() {
 
 function loremAnswer() {
   const as = [
-    "Yes—everything is responsive, clean, and designed to convert.",
-    "You can edit text directly in preview mode, then save your draft.",
-    "Custom domains and subdomains are supported with automatic routing.",
+    getLoremShortText(),
     getLoremShortText(),
     getLoremShortText(),
   ];

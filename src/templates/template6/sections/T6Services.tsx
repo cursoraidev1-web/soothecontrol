@@ -6,10 +6,16 @@ import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext"
 import EditableText from "@/components/inline-editor/EditableText";
 
 function Icon({ i }: { i: number }) {
+  // Template6: “motion” icon set (pairs well with the slider hero).
   const paths = [
-    "M12 3l7.5 4.5V12c0 5.25-3.75 9.75-7.5 9.75S4.5 17.25 4.5 12V7.5L12 3z",
-    "M4 7h16M7 4v16M17 4v16",
-    "M4.5 19.5L19.5 4.5M6.75 4.5h12.75v12.75",
+    // aperture
+    "M12 2l3 5-2 3h-2L9 7l3-5zM6 7l3 5-1 3-4 1-2-3 4-6zM18 7l4 6-2 3-4-1-1-3 3-5zM8 15h8l2 3-3 4H9l-3-4 2-3z",
+    // layers
+    "M12 3l9 6-9 6-9-6 9-6zM3 13l9 6 9-6",
+    // rocket-ish
+    "M14 3c4 1 7 4 7 8-4 2-7 2-10 0-2-3-2-6 0-8 1-1 2-1 3 0zM9 11l-4 4m0 4l4-4",
+    // wand
+    "M4 20l10-10m2-2l4-4M14 4l6 6",
   ];
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -18,7 +24,7 @@ function Icon({ i }: { i: number }) {
   );
 }
 
-export default function T5Services({
+export default function T6Services({
   section,
   sectionIndex,
 }: {
@@ -37,19 +43,19 @@ export default function T5Services({
   }));
 
   return (
-    <section id="services" className="t5-section">
-      <div className="t5-container">
-        <span className="t5-eyebrow">Services</span>
-        <h2 className="t5-title">What we deliver</h2>
+    <section id="services" className="t6-section">
+      <div className="t6-container">
+        <span className="t6-eyebrow">Services</span>
+        <h2 className="t6-title">What we build</h2>
 
-        <div className="t5-bento" style={{ marginTop: 18 }}>
+        <div className="t6-bento" style={{ marginTop: 18 }}>
           {filled.map((s, idx) => (
             <div
               key={idx}
-              className="t5-card t5-item"
+              className="t6-card t6-item"
               style={{ gridColumn: "span 4", padding: 18 }}
             >
-              <div className="t5-chip">
+              <div className="t6-chip">
                 <Icon i={idx} />
               </div>
               <EditableText
@@ -62,6 +68,7 @@ export default function T5Services({
                   nextItems[idx] = { ...nextItems[idx], title: next };
                   editor.updateSection(sectionIndex, { ...section, items: nextItems });
                 }}
+                style={{ fontWeight: 900, fontFamily: "var(--t6-serif)", letterSpacing: "-0.02em" }}
               />
               <EditableText
                 as="p"
@@ -74,6 +81,7 @@ export default function T5Services({
                   nextItems[idx] = { ...nextItems[idx], desc: next };
                   editor.updateSection(sectionIndex, { ...section, items: nextItems });
                 }}
+                style={{ marginTop: 10, color: "var(--t6-muted)", lineHeight: 1.75 }}
               />
             </div>
           ))}

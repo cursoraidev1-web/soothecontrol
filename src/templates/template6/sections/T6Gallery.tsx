@@ -4,7 +4,7 @@ import type { GallerySection as GallerySectionType } from "@/lib/pageSchema";
 import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
 import EditableText from "@/components/inline-editor/EditableText";
 
-export default function T5Gallery({
+export default function T6Gallery({
   section,
   sectionIndex,
 }: {
@@ -24,12 +24,12 @@ export default function T5Gallery({
         ];
 
   return (
-    <section className="t5-section">
-      <div className="t5-container">
-        <span className="t5-eyebrow">Gallery</span>
+    <section className="t6-section">
+      <div className="t6-container">
+        <span className="t6-eyebrow">Gallery</span>
         <EditableText
           as="h2"
-          className="t5-title"
+          className="t6-title"
           value={title}
           placeholder="Gallery title"
           onCommit={(next) => {
@@ -37,18 +37,17 @@ export default function T5Gallery({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t5-sub">Add real photos for instant credibility.</p>
 
-        <div className="t5-bento" style={{ marginTop: 18 }}>
+        <div className="t6-bento" style={{ marginTop: 18 }}>
           {images.map((it, idx) => (
-            <div key={idx} className="t5-card" style={{ gridColumn: "span 6", overflow: "hidden" }}>
+            <div key={idx} className="t6-card" style={{ gridColumn: "span 6", overflow: "hidden" }}>
               <div
                 style={{
                   height: 260,
                   background:
                     it.url ||
-                    "linear-gradient(135deg, rgba(37,99,235,0.16), rgba(219,39,119,0.12))",
-                  borderBottom: "1px solid rgba(11,18,32,0.10)",
+                    "linear-gradient(135deg, rgba(34,197,94,0.18), rgba(96,165,250,0.14))",
+                  borderBottom: "1px solid rgba(255,255,255,0.10)",
                 }}
               >
                 {it.url ? (
@@ -71,7 +70,7 @@ export default function T5Gallery({
                     nextImages[idx] = { ...nextImages[idx], alt: next };
                     editor.updateSection(sectionIndex, { ...section, images: nextImages });
                   }}
-                  style={{ color: "var(--t5-muted)", fontWeight: 800 }}
+                  style={{ color: "var(--t6-muted)", fontWeight: 800 }}
                 />
               </div>
             </div>

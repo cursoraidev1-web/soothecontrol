@@ -8,11 +8,11 @@ import EditableText from "@/components/inline-editor/EditableText";
 
 function loremQuestion() {
   const qs = [
-    "How fast can we launch?",
-    "Can I edit the content myself?",
-    "Do you support custom domains?",
-    "What if I need changes later?",
-    "Is this mobile-friendly?",
+    "How quickly can we get this live?",
+    "Can I edit content myself?",
+    "Do you support subdomains and custom domains?",
+    "Is it mobile-friendly?",
+    "Can we add extra pages later?",
   ];
   return qs[Math.floor(Math.random() * qs.length)];
 }
@@ -26,7 +26,7 @@ function loremAnswer() {
   return as[Math.floor(Math.random() * as.length)];
 }
 
-export default function T4FAQ({
+export default function T6FAQ({
   section,
   sectionIndex,
 }: {
@@ -39,29 +39,20 @@ export default function T4FAQ({
   const items =
     section.items && section.items.length > 0
       ? section.items
-      : [
-          { question: "", answer: "" },
-          { question: "", answer: "" },
-          { question: "", answer: "" },
-          { question: "", answer: "" },
-        ];
+      : [{ question: "", answer: "" }, { question: "", answer: "" }, { question: "", answer: "" }, { question: "", answer: "" }];
 
   const filled = items.map((it) => ({
     question: it.question || loremQuestion(),
     answer: it.answer || loremAnswer(),
   }));
 
-  const toggleFAQ = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
-
   return (
-    <section className="t4-section">
-      <div className="t4-container">
-        <span className="t4-eyebrow">FAQ</span>
+    <section className="t6-section">
+      <div className="t6-container">
+        <span className="t6-eyebrow">FAQ</span>
         <EditableText
           as="h2"
-          className="t4-title"
+          className="t6-title"
           value={title}
           placeholder="FAQ title"
           onCommit={(next) => {
@@ -69,16 +60,15 @@ export default function T4FAQ({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t4-sub">Quick answers to common questions.</p>
 
-        <div className="t4-bento" style={{ marginTop: 18 }}>
+        <div className="t6-bento" style={{ marginTop: 18 }}>
           {filled.map((it, idx) => {
             const isOpen = openIndex === idx;
             return (
-              <div key={idx} className="t4-card" style={{ gridColumn: "span 6", padding: 18 }}>
+              <div key={idx} className="t6-card" style={{ gridColumn: "span 6", padding: 18 }}>
                 <button
                   type="button"
-                  onClick={() => toggleFAQ(idx)}
+                  onClick={() => setOpenIndex(isOpen ? null : idx)}
                   style={{
                     width: "100%",
                     display: "flex",
@@ -102,24 +92,33 @@ export default function T4FAQ({
                       nextItems[idx] = { ...nextItems[idx], question: next };
                       editor.updateSection(sectionIndex, { ...section, items: nextItems });
                     }}
-                    style={{ fontFamily: "var(--t4-serif)", fontWeight: 800, letterSpacing: "-0.02em", margin: 0, flex: 1 }}
-                  />
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
                     style={{
-                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.3s ease",
+                      fontFamily: "var(--t6-serif)",
+                      fontWeight: 900,
+                      letterSpacing: "-0.02em",
+                      margin: 0,
+                      flex: 1,
+                    }}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="t6-chip"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 999,
                       flexShrink: 0,
+                      background: "rgba(34,197,94,0.10)",
+                      borderColor: "rgba(34,197,94,0.22)",
+                      color: "var(--t6-accent)",
                     }}
                   >
-                    <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                    <span style={{ fontWeight: 950, fontSize: 18, lineHeight: 1 }}>
+                      {isOpen ? "–" : "+"}
+                    </span>
+                  </span>
                 </button>
+
                 <div
                   style={{
                     maxHeight: isOpen ? "1000px" : "0",
@@ -139,7 +138,7 @@ export default function T4FAQ({
                       nextItems[idx] = { ...nextItems[idx], answer: next };
                       editor.updateSection(sectionIndex, { ...section, items: nextItems });
                     }}
-                    style={{ color: "var(--t4-muted)", lineHeight: 1.7 }}
+                    style={{ color: "var(--t6-muted)", lineHeight: 1.75 }}
                   />
                 </div>
               </div>

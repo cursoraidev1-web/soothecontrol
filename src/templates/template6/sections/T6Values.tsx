@@ -5,7 +5,25 @@ import { getLoremValueDesc, getLoremValueTitle } from "@/lib/loremIpsum";
 import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
 import EditableText from "@/components/inline-editor/EditableText";
 
-export default function T5Values({
+function Icon({ i }: { i: number }) {
+  const paths = [
+    // compass
+    "M12 2l3 7-3 3-3-3 3-7zM6 18l6-3 6 3",
+    // target
+    "M12 2a10 10 0 1 0 10 10M12 6a6 6 0 1 0 6 6M12 10a2 2 0 1 0 2 2",
+    // shield-check
+    "M12 2l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V6l7-4zM9 12l2 2 4-5",
+    // spark
+    "M12 3l1.6 4.7L18 9.3l-4.4 1.6L12 16l-1.6-5.1L6 9.3l4.4-1.6L12 3z",
+  ];
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d={paths[i % paths.length]} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export default function T6Values({
   section,
   sectionIndex,
 }: {
@@ -24,21 +42,16 @@ export default function T5Values({
   }));
 
   return (
-    <section className="t5-section">
-      <div className="t5-container">
-        <span className="t5-eyebrow">Values</span>
-        <h2 className="t5-title">How we work</h2>
+    <section className="t6-section">
+      <div className="t6-container">
+        <span className="t6-eyebrow">Values</span>
+        <h2 className="t6-title">How we work</h2>
 
-        <div className="t5-bento" style={{ marginTop: 18 }}>
+        <div className="t6-bento" style={{ marginTop: 18 }}>
           {filled.map((v, idx) => (
-            <div key={idx} className="t5-card t5-item" style={{ gridColumn: "span 4", padding: 18 }}>
-              <div
-                className="t5-chip"
-                style={{ background: "rgba(219,39,119,0.08)", borderColor: "rgba(219,39,119,0.18)", color: "var(--t5-accent2)" }}
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+            <div key={idx} className="t6-card t6-item" style={{ gridColumn: "span 4", padding: 18 }}>
+              <div className="t6-chip" style={{ background: "rgba(96,165,250,0.10)", borderColor: "rgba(96,165,250,0.22)", color: "var(--t6-accent2)" }}>
+                <Icon i={idx} />
               </div>
               <EditableText
                 as="h3"
@@ -50,6 +63,7 @@ export default function T5Values({
                   nextItems[idx] = { ...nextItems[idx], title: next };
                   editor.updateSection(sectionIndex, { ...section, items: nextItems });
                 }}
+                style={{ fontWeight: 900, fontFamily: "var(--t6-serif)", letterSpacing: "-0.02em" }}
               />
               <EditableText
                 as="p"
@@ -62,6 +76,7 @@ export default function T5Values({
                   nextItems[idx] = { ...nextItems[idx], desc: next };
                   editor.updateSection(sectionIndex, { ...section, items: nextItems });
                 }}
+                style={{ marginTop: 10, color: "var(--t6-muted)", lineHeight: 1.75 }}
               />
             </div>
           ))}

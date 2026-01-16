@@ -3,7 +3,7 @@
 import type { ContactCardSection as ContactCardSectionType } from "@/lib/pageSchema";
 import { useInlineEditor } from "@/components/inline-editor/InlineEditorContext";
 
-export default function T5ContactCard({
+export default function T6ContactCard({
   section,
   sectionIndex,
   profile,
@@ -28,38 +28,38 @@ export default function T5ContactCard({
   })();
 
   return (
-    <section id="contact" className="t5-section">
-      <div className="t5-container">
-        <span className="t5-eyebrow">Contact</span>
-        <div className="t5-bento" style={{ marginTop: 16 }}>
-          <div className="t5-card" style={{ gridColumn: "span 6", padding: 18 }}>
-            <h2 className="t5-title" style={{ marginTop: 12 }}>
+    <section id="contact" className="t6-section">
+      <div className="t6-container">
+        <span className="t6-eyebrow">Contact</span>
+        <div className="t6-bento" style={{ marginTop: 16 }}>
+          <div className="t6-card" style={{ gridColumn: "span 6", padding: 18 }}>
+            <h2 className="t6-title" style={{ marginTop: 12 }}>
               Let’s talk
             </h2>
 
             <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
               {profile.address ? (
-                <div style={{ color: "var(--t5-muted)", fontWeight: 800 }}>{profile.address}</div>
+                <div style={{ color: "var(--t6-muted)", fontWeight: 800 }}>{profile.address}</div>
               ) : null}
               {profile.phone ? (
-                <div style={{ color: "var(--t5-muted)", fontWeight: 800 }}>{profile.phone}</div>
+                <div style={{ color: "var(--t6-muted)", fontWeight: 800 }}>{profile.phone}</div>
               ) : null}
               {profile.email ? (
-                <div style={{ color: "var(--t5-muted)", fontWeight: 800 }}>{profile.email}</div>
+                <div style={{ color: "var(--t6-muted)", fontWeight: 800 }}>{profile.email}</div>
               ) : null}
               {profile.whatsapp ? (
-                <div style={{ color: "var(--t5-muted)", fontWeight: 800 }}>{profile.whatsapp}</div>
+                <div style={{ color: "var(--t6-muted)", fontWeight: 800 }}>{profile.whatsapp}</div>
               ) : null}
             </div>
 
             <div style={{ marginTop: 16 }}>
-              <a className="t5-cta" href={profile.email ? `mailto:${profile.email}` : "#"}>
+              <a className="t6-cta" href={profile.email ? `mailto:${profile.email}` : "#"}>
                 Request a quote
               </a>
             </div>
           </div>
 
-          <div className="t5-card" style={{ gridColumn: "span 6", overflow: "hidden" }}>
+          <div className="t6-card" style={{ gridColumn: "span 6", overflow: "hidden" }}>
             <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 12" }}>
               <iframe
                 title="Map"
@@ -70,12 +70,12 @@ export default function T5ContactCard({
               />
             </div>
             {editor?.enabled && sectionIndex != null ? (
-              <div style={{ padding: 12, borderTop: "1px solid rgba(11,18,32,0.10)" }}>
-                <div style={{ color: "var(--t5-muted)", fontWeight: 900, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              <div style={{ padding: 12, borderTop: "1px solid rgba(255,255,255,0.10)" }}>
+                <div style={{ color: "var(--t6-muted)", fontWeight: 900, fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" }}>
                   Map embed (optional)
                 </div>
                 <input
-                  className="t5-input"
+                  className="t6-input"
                   value={section.mapLink || ""}
                   onChange={(e) => {
                     if (!editor || sectionIndex == null) return;

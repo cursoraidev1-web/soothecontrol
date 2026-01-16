@@ -28,9 +28,6 @@ export default function T3Values({
       <div className="t3-container">
         <span className="t3-eyebrow">Values</span>
         <h2 className="t3-section-title">The way we work</h2>
-        <p className="t3-section-sub">
-          Premium isn’t a color — it’s decisions, consistency, and the small details.
-        </p>
 
         <div className="t3-grid-3" style={{ marginTop: 18 }}>
           {filled.map((v, idx) => (

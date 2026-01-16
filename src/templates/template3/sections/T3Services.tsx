@@ -41,9 +41,6 @@ export default function T3Services({
       <div className="t3-container">
         <span className="t3-eyebrow">Services</span>
         <h2 className="t3-section-title">What we do — with taste</h2>
-        <p className="t3-section-sub">
-          Not just “a website”. A complete presence: clarity, credibility, and conversion.
-        </p>
 
         <div className="t3-grid-3" style={{ marginTop: 18 }}>
           {filled.map((s, idx) => (
