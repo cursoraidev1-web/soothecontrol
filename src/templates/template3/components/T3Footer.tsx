@@ -114,7 +114,11 @@ export default function T3Footer({
               onCommit={(next) => editor?.updateProfileField?.("business_name", next)}
               style={{ display: "inline" }}
             />
-            . All rights reserved.
+            . All rights reserved. Developed by{" "}
+            <a href="https://soothetechnologies.com" target="_blank" rel="noreferrer">
+              soothetechnologies
+            </a>
+            .
           </div>
         </div>
       </div>

@@ -239,7 +239,16 @@ export default function T2Footer({
               onCommit={(next) => editor?.updateProfileField?.("business_name", next)}
               style={{ display: "inline" }}
             />
-            . All rights reserved.
+            . All rights reserved. Developed by{" "}
+            <a
+              href="https://soothetechnologies.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-gray-600 hover:text-gray-900 underline underline-offset-2"
+            >
+              soothetechnologies
+            </a>
+            .
           </p>
         </div>
       </div>

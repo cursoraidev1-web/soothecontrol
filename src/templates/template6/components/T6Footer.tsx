@@ -60,7 +60,11 @@ export default function T6Footer({
 
         <div style={{ marginTop: 28, borderTop: "1px solid rgba(255,255,255,0.10)", paddingTop: 16 }}>
           <div style={{ color: "var(--t6-muted)", fontSize: 12 }}>
-            © {new Date().getFullYear()} {businessName}. All rights reserved.
+            © {new Date().getFullYear()} {businessName}. All rights reserved. Developed by{" "}
+            <a href="https://soothetechnologies.com" target="_blank" rel="noreferrer">
+              soothetechnologies
+            </a>
+            .
           </div>
         </div>
       </div>
