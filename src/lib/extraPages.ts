@@ -40,9 +40,9 @@ export async function getExtraPageByKey(
     .single();
   if (error) {
     // PostgREST "No rows found"
-    const errObj = isRecord(error) ? error : {};
-    const msg = typeof errObj.message === "string" ? errObj.message : "";
-    const code = typeof errObj.code === "string" ? errObj.code : "";
+    const errObj: Record<string, unknown> = isRecord(error) ? error : {};
+    const msg = typeof errObj["message"] === "string" ? (errObj["message"] as string) : "";
+    const code = typeof errObj["code"] === "string" ? (errObj["code"] as string) : "";
     if (code === "PGRST116" || msg.toLowerCase().includes("0 rows")) return null;
     throw error;
   }
