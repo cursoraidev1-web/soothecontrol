@@ -131,10 +131,6 @@ export default function T6HeroSlider({
                 View services
               </a>
             </div>
-
-            <div style={{ marginTop: 12, color: "var(--t6-muted)", fontWeight: 800, fontSize: 13 }}>
-              Tip: add images in the Gallery section to power this slider.
-            </div>
           </div>
 
           <div className="t6-card" style={{ padding: 16 }}>

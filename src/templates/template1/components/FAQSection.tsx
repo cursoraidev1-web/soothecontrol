@@ -20,11 +20,11 @@ export default function FAQSection({ section, sectionIndex }: FAQSectionProps) {
   const faqs = section.items && section.items.length > 0
     ? section.items
     : Array.from({ length: 5 }, (_, i) => ({
-        question: `Question ${i + 1}: ${getLoremSentence()}`,
+        question: getLoremSentence(),
         answer: getLoremParagraph(),
       }));
 
-  // Fill empty FAQs with lorem ipsum
+  // Fill empty FAQs with placeholder content
   const filledFAQs = faqs.map((faq) => ({
     question: faq.question || getLoremSentence(),
     answer: faq.answer || getLoremParagraph(),

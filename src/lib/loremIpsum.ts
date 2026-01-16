@@ -1,5 +1,5 @@
 /**
- * Lorem Ipsum helper functions for placeholder content
+ * Helper functions for placeholder content
  */
 
 export function getLoremHeadline(): string {
@@ -14,15 +14,15 @@ export function getLoremHeadline(): string {
 }
 
 export function getLoremParagraph(): string {
-  return "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
+  return "Write a clear, benefit-focused description of what you do, who you help, and what outcomes people can expect.";
 }
 
 export function getLoremSentence(): string {
-  return "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+  return "Add a short, specific line that reinforces the main benefit.";
 }
 
 export function getLoremShortText(): string {
-  return "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+  return "Keep this short and concrete—one sentence that explains the value.";
 }
 
 export function getLoremServiceTitle(): string {

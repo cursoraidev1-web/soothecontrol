@@ -641,10 +641,6 @@ export default function SiteOverviewPage({
                 In your DNS provider, point both the base and wildcard records to your host (Vercel/Netlify) so all subdomains resolve.
               </li>
             </ul>
-            <div className="mt-3 text-xs text-gray-500">
-              Tip: for local testing with subdomains, set <span className="font-mono">NEXT_PUBLIC_PLATFORM_DOMAIN=lvh.me</span>{" "}
-              and use <span className="font-mono">http://{site.slug}.lvh.me:3000</span>.
-            </div>
           </div>
 
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">

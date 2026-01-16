@@ -19,31 +19,31 @@ export default function TestimonialsSection({ section, sectionIndex }: Testimoni
     ? section.items
     : [
         {
-          name: "John Doe",
-          role: "CEO",
+          name: "Customer",
+          role: "",
           quote: getLoremParagraph(),
-          company: "Company Inc.",
+          company: "",
         },
         {
-          name: "Jane Smith",
-          role: "Director",
+          name: "Customer",
+          role: "",
           quote: getLoremParagraph(),
-          company: "Business Corp.",
+          company: "",
         },
         {
-          name: "Mike Johnson",
-          role: "Founder",
+          name: "Customer",
+          role: "",
           quote: getLoremParagraph(),
-          company: "Startup Ltd.",
+          company: "",
         },
       ];
 
-  // Fill empty testimonials with lorem ipsum
+  // Fill empty testimonials with placeholder content
   const filledTestimonials = testimonials.map((testimonial) => ({
-    name: testimonial.name || "Customer Name",
-    role: testimonial.role || "Role",
+    name: testimonial.name || "Customer",
+    role: testimonial.role || "",
     quote: testimonial.quote || getLoremSentence(),
-    company: testimonial.company || "Company",
+    company: testimonial.company || "",
   }));
 
   return (

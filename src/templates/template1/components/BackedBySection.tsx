@@ -17,14 +17,14 @@ export default function BackedBySection({ section, sectionIndex }: BackedBySecti
   const logos = section.logos && section.logos.length > 0
     ? section.logos
     : [
-        { name: "Company One", url: null },
-        { name: "Company Two", url: null },
-        { name: "Company Three", url: null },
+        { name: "Partner One", url: null },
+        { name: "Partner Two", url: null },
+        { name: "Partner Three", url: null },
       ];
 
-  // Fill empty logos with lorem ipsum
+  // Fill empty logos with placeholder content
   const filledLogos = logos.map((logo) => ({
-    name: logo.name || "Partner Company",
+    name: logo.name || "Partner",
     url: logo.url,
   }));
 

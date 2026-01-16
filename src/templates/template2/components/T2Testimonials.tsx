@@ -26,8 +26,8 @@ export default function T2Testimonials({ section, sectionIndex }: T2Testimonials
       ? section.items
       : [
           { name: "Alex Morgan", role: "Homeowner", quote: getLoremParagraph(), company: "" },
-          { name: "Sam Lee", role: "Operations Lead", quote: getLoremParagraph(), company: "Northwind" },
-          { name: "Jordan Patel", role: "Founder", quote: getLoremParagraph(), company: "Acme Co." },
+          { name: "Sam Lee", role: "Operations Lead", quote: getLoremParagraph(), company: "" },
+          { name: "Jordan Patel", role: "Founder", quote: getLoremParagraph(), company: "" },
         ];
 
   const filled = items.map((t) => ({

@@ -24,7 +24,7 @@ export default function ServicesSection({ section, sectionIndex }: ServicesSecti
         { title: "", desc: "" },
       ];
 
-  // Fill empty services with lorem ipsum
+  // Fill empty services with placeholder content
   const filledServices = services.map((service) => ({
     title: service.title || getLoremServiceTitle(),
     desc: service.desc || getLoremServiceDesc(),

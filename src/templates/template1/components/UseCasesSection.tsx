@@ -31,7 +31,7 @@ export default function UseCasesSection({ section, sectionIndex }: UseCasesSecti
         },
       ];
 
-  // Fill empty items with lorem ipsum
+  // Fill empty items with placeholder content
   const filledItems = items.map((item) => ({
     title: item.title || getLoremHeadline(),
     description: item.description || getLoremShortText(),

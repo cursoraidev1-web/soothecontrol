@@ -18,12 +18,12 @@ export default function T4BackedBy({
     section.logos && section.logos.length > 0
       ? section.logos
       : [
-          { name: "Northwind", url: null },
-          { name: "Acme Co.", url: null },
-          { name: "Globex", url: null },
-          { name: "Umbrella", url: null },
-          { name: "Initech", url: null },
-          { name: "Soylent", url: null },
+          { name: "Partner One", url: null },
+          { name: "Partner Two", url: null },
+          { name: "Partner Three", url: null },
+          { name: "Partner Four", url: null },
+          { name: "Partner Five", url: null },
+          { name: "Partner Six", url: null },
         ];
 
   return (

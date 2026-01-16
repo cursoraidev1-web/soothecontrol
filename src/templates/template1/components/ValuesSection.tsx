@@ -24,7 +24,7 @@ export default function ValuesSection({ section, sectionIndex }: ValuesSectionPr
         { title: "", desc: "" },
       ];
 
-  // Fill empty values with lorem ipsum
+  // Fill empty values with placeholder content
   const filledValues = values.map((value) => ({
     title: value.title || getLoremValueTitle(),
     desc: value.desc || getLoremValueDesc(),

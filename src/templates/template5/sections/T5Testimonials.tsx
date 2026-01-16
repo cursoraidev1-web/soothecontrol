@@ -26,8 +26,8 @@ export default function T5Testimonials({
       ? section.items
       : [
           { name: "Alex Morgan", role: "Client", quote: getLoremParagraph(), company: "" },
-          { name: "Sam Lee", role: "Operations", quote: getLoremParagraph(), company: "Northwind" },
-          { name: "Jordan Patel", role: "Founder", quote: getLoremParagraph(), company: "Acme Co." },
+          { name: "Sam Lee", role: "Operations", quote: getLoremParagraph(), company: "" },
+          { name: "Jordan Patel", role: "Founder", quote: getLoremParagraph(), company: "" },
         ];
 
   const filled = items.map((t) => ({

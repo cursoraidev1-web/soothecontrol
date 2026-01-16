@@ -26,7 +26,7 @@ export default function T3Testimonials({
       ? section.items
       : [
           { name: "Alex Morgan", role: "Client", quote: getLoremParagraph(), company: "" },
-          { name: "Sam Lee", role: "Operations", quote: getLoremParagraph(), company: "Northwind" },
+          { name: "Sam Lee", role: "Operations", quote: getLoremParagraph(), company: "" },
         ];
 
   const filled = items.map((t) => ({
