@@ -299,6 +299,60 @@
   box-shadow: var(--t6-shadow);
 }
 
+.t6-item h3 {
+  margin: 12px 0 0;
+}
+
+.t6-item p {
+  margin: 0;
+}
+
+.t6-chip {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.t6-tile {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background:
+    radial-gradient(220px 120px at 20% 20%, rgba(34, 197, 94, 0.12), transparent 60%),
+    radial-gradient(220px 120px at 80% 20%, rgba(96, 165, 250, 0.10), transparent 60%),
+    rgba(255, 255, 255, 0.03);
+  padding: 14px;
+  font-weight: 900;
+}
+
+.t6-input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 10px 12px;
+  outline: none;
+}
+
+.t6-input:focus {
+  box-shadow: 0 0 0 4px var(--t6-ring);
+}
+
+.t6-prose :is(p, ul, ol) {
+  color: var(--t6-muted);
+  line-height: 1.75;
+}
+
+.t6-prose a {
+  color: rgba(255, 255, 255, 0.92);
+}
+
 .t6-slider {
   position: relative;
   border-radius: 18px;

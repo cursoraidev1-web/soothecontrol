@@ -2,16 +2,16 @@
 
 import type { GallerySection, PageData } from "@/lib/pageSchema";
 import T6HeroSlider from "../sections/T6HeroSlider";
-import T4Services from "@/templates/template4/sections/T4Services";
-import T4Values from "@/templates/template4/sections/T4Values";
-import T4BackedBy from "@/templates/template4/sections/T4BackedBy";
-import T4UseCases from "@/templates/template4/sections/T4UseCases";
-import T4Testimonials from "@/templates/template4/sections/T4Testimonials";
-import T4FAQ from "@/templates/template4/sections/T4FAQ";
-import T4Team from "@/templates/template4/sections/T4Team";
-import T4Gallery from "@/templates/template4/sections/T4Gallery";
-import T4RichText from "@/templates/template4/sections/T4RichText";
-import T4ContactCard from "@/templates/template4/sections/T4ContactCard";
+import T6Services from "../sections/T6Services";
+import T6Values from "../sections/T6Values";
+import T6BackedBy from "../sections/T6BackedBy";
+import T6UseCases from "../sections/T6UseCases";
+import T6Testimonials from "../sections/T6Testimonials";
+import T6FAQ from "../sections/T6FAQ";
+import T6Team from "../sections/T6Team";
+import T6Gallery from "../sections/T6Gallery";
+import T6RichText from "../sections/T6RichText";
+import T6ContactCard from "../sections/T6ContactCard";
 
 export default function T6HomePage({
   pageData,
@@ -48,10 +48,10 @@ export default function T6HomePage({
               />
             );
           case "services":
-            return <T4Services key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6Services key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           case "richtext":
             return (
-              <T4RichText
+              <T6RichText
                 key={`${section.type}-${index}`}
                 section={section}
                 sectionIndex={index}
@@ -59,22 +59,22 @@ export default function T6HomePage({
               />
             );
           case "values":
-            return <T4Values key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6Values key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           case "backed_by":
-            return <T4BackedBy key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6BackedBy key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           case "use_cases":
-            return <T4UseCases key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6UseCases key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           case "testimonials":
-            return <T4Testimonials key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6Testimonials key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           case "faq":
-            return <T4FAQ key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6FAQ key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           case "team":
-            return <T4Team key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6Team key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           case "gallery":
-            return <T4Gallery key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6Gallery key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           case "contact_card":
             return (
-              <T4ContactCard
+              <T6ContactCard
                 key={`${section.type}-${index}`}
                 section={section}
                 sectionIndex={index}

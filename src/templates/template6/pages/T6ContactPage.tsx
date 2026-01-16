@@ -2,9 +2,9 @@
 
 import type { GallerySection, PageData } from "@/lib/pageSchema";
 import T6HeroSlider from "../sections/T6HeroSlider";
-import T4RichText from "@/templates/template4/sections/T4RichText";
-import T4ContactCard from "@/templates/template4/sections/T4ContactCard";
-import T4FAQ from "@/templates/template4/sections/T4FAQ";
+import T6RichText from "../sections/T6RichText";
+import T6ContactCard from "../sections/T6ContactCard";
+import T6FAQ from "../sections/T6FAQ";
 
 export default function T6ContactPage({
   pageData,
@@ -41,10 +41,10 @@ export default function T6ContactPage({
               />
             );
           case "richtext":
-            return <T4RichText key={`${section.type}-${index}`} section={section} sectionIndex={index} label="Contact" />;
+            return <T6RichText key={`${section.type}-${index}`} section={section} sectionIndex={index} label="Contact" />;
           case "contact_card":
             return (
-              <T4ContactCard
+              <T6ContactCard
                 key={`${section.type}-${index}`}
                 section={section}
                 sectionIndex={index}
@@ -52,7 +52,7 @@ export default function T6ContactPage({
               />
             );
           case "faq":
-            return <T4FAQ key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
+            return <T6FAQ key={`${section.type}-${index}`} section={section} sectionIndex={index} />;
           default:
             return null;
         }
