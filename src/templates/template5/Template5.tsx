@@ -1,8 +1,10 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import type { PageData, PageKey } from "@/lib/pageSchema";
 import { getPublicAssetUrl } from "@/lib/assets";
 import "./template5.css";
+import { buildTemplateThemeStyle } from "@/lib/themeVars";
 
 import T5Header from "./components/T5Header";
 import T5Footer from "./components/T5Footer";
@@ -25,6 +27,8 @@ interface Template5Props {
     email: string | null;
     whatsapp: string | null;
     socials: Record<string, unknown> | null;
+    brand_colors?: Record<string, unknown> | null;
+    theme_colors?: Record<string, unknown> | null;
     logo_asset_id: string | null;
     logo_path?: string | null;
   };
@@ -51,9 +55,10 @@ export default function Template5({
   const effectivePage: PageKey = (pageOverride ? "home" : (currentPage ?? "home"));
   const navPage: PageKey | null = pageOverride ? null : (currentPage ?? "home");
   const currentPageData = pageOverride ?? pages[effectivePage];
+  const themeStyle = buildTemplateThemeStyle(site.template_key, profile) as CSSProperties | undefined;
 
   return (
-    <div className="template5" data-site-slug={site.slug} data-template-key={site.template_key}>
+    <div className="template5" data-site-slug={site.slug} data-template-key={site.template_key} style={themeStyle}>
       <T5Header
         businessName={profile.business_name}
         logoUrl={logoUrl}

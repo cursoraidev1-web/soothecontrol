@@ -19,6 +19,8 @@ export interface SiteData {
     email: string | null;
     whatsapp: string | null;
     socials: Record<string, unknown> | null;
+    brand_colors?: Record<string, unknown> | null;
+    theme_colors?: Record<string, unknown> | null;
     logo_asset_id: string | null;
     logo_path?: string | null;
   };
@@ -144,6 +146,8 @@ export async function resolveSiteBySlug(slug: string): Promise<SiteData | null> 
       email: getNullableString(profileObj, "email"),
       whatsapp: getNullableString(profileObj, "whatsapp"),
       socials: isRecord(profileObj["socials"]) ? (profileObj["socials"] as Record<string, unknown>) : null,
+      brand_colors: isRecord(profileObj["brand_colors"]) ? (profileObj["brand_colors"] as Record<string, unknown>) : null,
+      theme_colors: isRecord(profileObj["theme_colors"]) ? (profileObj["theme_colors"] as Record<string, unknown>) : null,
       logo_asset_id: getNullableString(profileObj, "logo_asset_id"),
       logo_path: logoPath,
     },
@@ -234,6 +238,8 @@ export async function resolveSiteByHostname(hostname: string): Promise<SiteData 
       email: getNullableString(profileObj, "email"),
       whatsapp: getNullableString(profileObj, "whatsapp"),
       socials: isRecord(profileObj["socials"]) ? (profileObj["socials"] as Record<string, unknown>) : null,
+      brand_colors: isRecord(profileObj["brand_colors"]) ? (profileObj["brand_colors"] as Record<string, unknown>) : null,
+      theme_colors: isRecord(profileObj["theme_colors"]) ? (profileObj["theme_colors"] as Record<string, unknown>) : null,
       logo_asset_id: getNullableString(profileObj, "logo_asset_id"),
       logo_path: logoPath,
     },
