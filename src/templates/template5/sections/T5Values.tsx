@@ -28,14 +28,17 @@ export default function T5Values({
       <div className="t5-container">
         <span className="t5-eyebrow">Values</span>
         <h2 className="t5-title">How we work</h2>
-        <p className="t5-sub">Modern standards: clarity, speed, and trust.</p>
 
         <div className="t5-bento" style={{ marginTop: 18 }}>
           {filled.map((v, idx) => (
             <div key={idx} className="t5-card t5-item" style={{ gridColumn: "span 4", padding: 18 }}>
               <div
                 className="t5-chip"
-                style={{ background: "rgba(219,39,119,0.08)", borderColor: "rgba(219,39,119,0.18)", color: "var(--t5-accent2)" }}
+                style={{
+                  background: "rgb(var(--t5-accent2-rgb) / 0.08)",
+                  borderColor: "rgb(var(--t5-accent2-rgb) / 0.18)",
+                  color: "var(--t5-accent2)",
+                }}
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                   {/* bolt (t5) */}

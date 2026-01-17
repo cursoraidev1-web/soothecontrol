@@ -40,9 +40,25 @@ export default function T5Footer({
             <div style={{ fontFamily: "var(--t5-serif)", fontWeight: 800, letterSpacing: "-0.02em" }}>
               {businessName}
             </div>
-            <div style={{ marginTop: 10, color: "var(--t5-muted)", lineHeight: 1.75 }}>
-              {tagline || "Modern, clean, and designed to feel premium."}
-            </div>
+            {tagline ? (
+              <div style={{ marginTop: 10, color: "var(--t5-muted)", lineHeight: 1.75 }}>
+                <EditableText
+                  value={tagline}
+                  placeholder="Tagline (optional)"
+                  multiline
+                  onCommit={(next) => editor?.updateProfileField?.("tagline", next)}
+                />
+              </div>
+            ) : editor?.enabled ? (
+              <div style={{ marginTop: 10, color: "var(--t5-muted)", lineHeight: 1.75 }}>
+                <EditableText
+                  value=""
+                  placeholder="Tagline (optional)"
+                  multiline
+                  onCommit={(next) => editor?.updateProfileField?.("tagline", next)}
+                />
+              </div>
+            ) : null}
           </div>
           <div>
             <div style={{ fontFamily: "var(--t5-serif)", fontWeight: 800 }}>Pages</div>

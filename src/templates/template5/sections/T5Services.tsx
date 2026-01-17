@@ -67,7 +67,6 @@ export default function T5Services({
       <div className="t5-container">
         <span className="t5-eyebrow">Services</span>
         <h2 className="t5-title">What we deliver</h2>
-        <p className="t5-sub">Clean design, strong structure, and sections that build trust.</p>
 
         <div className="t5-bento" style={{ marginTop: 18 }}>
           {filled.map((s, idx) => (

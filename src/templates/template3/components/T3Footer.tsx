@@ -38,9 +38,25 @@ export default function T3Footer({
         <div className="t3-footer-grid">
           <div>
             <h4>{businessName}</h4>
-            <p className="t3-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
-              {tagline || "A premium, modern website — designed to convert."}
-            </p>
+            {tagline ? (
+              <p className="t3-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
+                <EditableText
+                  value={tagline}
+                  placeholder="Tagline (optional)"
+                  multiline
+                  onCommit={(next) => editor?.updateProfileField?.("tagline", next)}
+                />
+              </p>
+            ) : editor?.enabled ? (
+              <p className="t3-muted" style={{ marginTop: 10, lineHeight: 1.7 }}>
+                <EditableText
+                  value=""
+                  placeholder="Tagline (optional)"
+                  multiline
+                  onCommit={(next) => editor?.updateProfileField?.("tagline", next)}
+                />
+              </p>
+            ) : null}
           </div>
           <div>
             <h4>Pages</h4>

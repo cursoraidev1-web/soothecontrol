@@ -47,9 +47,6 @@ export default function T4Services({
       <div className="t4-container">
         <span className="t4-eyebrow">Services</span>
         <h2 className="t4-title">What we deliver</h2>
-        <p className="t4-sub">
-          Clean design, strong structure, and sections that build trust—without feeling generic.
-        </p>
 
         <div className="t4-bento" style={{ marginTop: 18 }}>
           {filled.map((s, idx) => (

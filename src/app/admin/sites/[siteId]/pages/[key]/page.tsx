@@ -54,15 +54,9 @@ const sectionOptions: Array<Section["type"]> = [
 
 export default function PageEditorPage() {
   const params = useParams();
-  const siteId = params?.siteId as string;
-  const key = params?.key as string;
-
-  if (!siteId || !key) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isPageKey(key)) notFound();
-  const pageKey = key;
+  const siteId = typeof params?.siteId === "string" ? params.siteId : "";
+  const key = typeof params?.key === "string" ? params.key : "";
+  const pageKey: PageKey | null = isPageKey(key) ? key : null;
 
   const [pageRow, setPageRow] = useState<PagesRow | null>(null);
   const [pageDraft, setPageDraft] = useState<PageData | null>(null);
@@ -84,10 +78,12 @@ export default function PageEditorPage() {
   const [seedNotice, setSeedNotice] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!siteId || !pageKey) return;
     let isMounted = true;
     const supabase = supabaseBrowser();
+    const pk = pageKey;
 
-    async function load() {
+    async function load(keyForLoad: PageKey) {
       setIsLoading(true);
       setLoadError(null);
       setSaveSuccess(false);
@@ -133,7 +129,7 @@ export default function PageEditorPage() {
         Object.keys(row.data as Record<string, unknown>).length === 0;
 
       if (!row.data || isEmptyObject) {
-        const seeded = defaultPageData(pageKey);
+        const seeded = defaultPageData(keyForLoad);
         setPageDraft(seeded);
         setRawText(JSON.stringify(seeded, null, 2));
         setSeedNotice(
@@ -144,7 +140,7 @@ export default function PageEditorPage() {
 
       const valid = validatePageData(row.data);
       if (!valid.ok) {
-        const seeded = defaultPageData(pageKey);
+        const seeded = defaultPageData(keyForLoad);
         setPageDraft(seeded);
         setRawText(JSON.stringify(seeded, null, 2));
         setSeedNotice(
@@ -157,7 +153,7 @@ export default function PageEditorPage() {
       setRawText(JSON.stringify(row.data, null, 2));
     }
 
-    load();
+    load(pk);
 
     return () => {
       isMounted = false;
@@ -366,6 +362,7 @@ export default function PageEditorPage() {
   }
 
   function onResetDefaults() {
+    if (!pageKey) return;
     if (!window.confirm("Reset this page to default sections?")) return;
     const next = defaultPageData(pageKey);
     setPageDraft(next);
@@ -376,6 +373,12 @@ export default function PageEditorPage() {
     setSaveError(null);
     setSeedNotice("Defaults loaded. Click Save Draft to persist.");
   }
+
+  if (!siteId || !key) {
+    return <div>Loading...</div>;
+  }
+
+  if (!pageKey) notFound();
 
   return (
     <div className="space-y-6">

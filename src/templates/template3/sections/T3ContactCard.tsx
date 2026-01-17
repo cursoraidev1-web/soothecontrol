@@ -29,7 +29,6 @@ export default function T3ContactCard({
       <div className="t3-container">
         <span className="t3-eyebrow">Contact</span>
         <h2 className="t3-section-title">Get in touch</h2>
-        <p className="t3-section-sub">The fastest way to get an accurate quote is a short message.</p>
 
         <div className="t3-two-col" style={{ marginTop: 18 }}>
           <div className="t3-card" style={{ padding: 18, background: "rgba(255,255,255,0.78)" }}>

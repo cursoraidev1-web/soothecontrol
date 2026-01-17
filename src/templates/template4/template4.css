@@ -8,8 +8,10 @@
   --t4-ink: rgba(255, 255, 255, 0.92);
   --t4-muted: rgba(255, 255, 255, 0.66);
   --t4-accent: #7c3aed; /* purple */
+  --t4-accent-rgb: 124 58 237;
   --t4-accent2: #06b6d4; /* cyan */
-  --t4-ring: rgba(124, 58, 237, 0.22);
+  --t4-accent2-rgb: 6 182 212;
+  --t4-ring: rgb(var(--t4-accent-rgb) / 0.22);
   --t4-radius: 18px;
   --t4-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
   --t4-shadow-sm: 0 10px 28px rgba(0, 0, 0, 0.35);
@@ -20,9 +22,9 @@
 .template4 {
   min-height: 100vh;
   background:
-    radial-gradient(1000px 520px at 15% 0%, rgba(124, 58, 237, 0.30), transparent 55%),
-    radial-gradient(900px 520px at 85% 10%, rgba(6, 182, 212, 0.22), transparent 60%),
-    radial-gradient(900px 560px at 50% 100%, rgba(124, 58, 237, 0.12), transparent 60%),
+    radial-gradient(1000px 520px at 15% 0%, rgb(var(--t4-accent-rgb) / 0.30), transparent 55%),
+    radial-gradient(900px 520px at 85% 10%, rgb(var(--t4-accent2-rgb) / 0.22), transparent 60%),
+    radial-gradient(900px 560px at 50% 100%, rgb(var(--t4-accent-rgb) / 0.12), transparent 60%),
     var(--t4-bg);
   color: var(--t4-ink);
   font-family: var(--t4-sans);
@@ -102,7 +104,7 @@
   color: rgba(255, 255, 255, 0.96);
   font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 16px 40px rgba(124, 58, 237, 0.22);
+  box-shadow: 0 16px 40px rgb(var(--t4-accent-rgb) / 0.22);
 }
 
 .t4-cta:hover {

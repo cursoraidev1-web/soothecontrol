@@ -19,27 +19,34 @@ function initials(name: string) {
 
 export default function TeamSection({ section, sectionIndex }: TeamSectionProps) {
   const editor = useInlineEditor();
-  const title = section.title || "Meet the team";
-  const subtitle =
-    section.subtitle ||
-    "A small team obsessed with details, responsiveness, and a premium experience.";
+  const isEditing = !!editor?.enabled;
+  const title = section.title || "";
+  const subtitle = section.subtitle || "";
 
   const members =
     section.members && section.members.length > 0
       ? section.members
-      : [
-          { name: "Alex Morgan", role: "Founder", bio: getLoremParagraph(), photoUrl: "", linkedinUrl: "" },
-          { name: "Sam Lee", role: "Operations", bio: getLoremParagraph(), photoUrl: "", linkedinUrl: "" },
-          { name: "Jordan Patel", role: "Customer Success", bio: getLoremParagraph(), photoUrl: "", linkedinUrl: "" },
-        ];
+      : isEditing
+        ? [
+            { name: "", role: "", bio: "", photoUrl: "", linkedinUrl: "" },
+            { name: "", role: "", bio: "", photoUrl: "", linkedinUrl: "" },
+            { name: "", role: "", bio: "", photoUrl: "", linkedinUrl: "" },
+          ]
+        : [];
 
-  const filled = members.map((m) => ({
-    name: m.name || "Team Member",
-    role: m.role || "Role",
-    bio: m.bio || getLoremParagraph(),
+  const filledRaw = members.map((m) => ({
+    name: m.name || "",
+    role: m.role || "",
+    bio: m.bio || "",
     photoUrl: m.photoUrl || "",
     linkedinUrl: m.linkedinUrl || "",
   }));
+
+  const filled = isEditing
+    ? filledRaw
+    : filledRaw.filter((m) => (m.name || m.role || m.bio || m.photoUrl || m.linkedinUrl).trim?.() !== "");
+
+  if (!isEditing && filled.length === 0) return null;
 
   return (
     <section className="t1-section t1-bg-light">
@@ -58,26 +65,28 @@ export default function TeamSection({ section, sectionIndex }: TeamSectionProps)
           }}
           style={{ textAlign: "center", marginBottom: "var(--spacing-md)" }}
         />
-        <EditableText
-          as="p"
-          value={subtitle}
-          placeholder="Team subtitle"
-          multiline
-          onCommit={(next) => {
-            if (!editor || sectionIndex == null) return;
-            editor.updateSection(sectionIndex, { ...section, subtitle: next });
-          }}
-          className=""
-          style={{
-            maxWidth: 760,
-            margin: "0 auto",
-            textAlign: "center",
-            color: "var(--color-text-secondary)",
-            fontSize: "var(--font-size-lg)",
-            lineHeight: 1.7,
-            marginBottom: "var(--spacing-3xl)",
-          }}
-        />
+        {subtitle || isEditing ? (
+          <EditableText
+            as="p"
+            value={subtitle}
+            placeholder="Team subtitle"
+            multiline
+            onCommit={(next) => {
+              if (!editor || sectionIndex == null) return;
+              editor.updateSection(sectionIndex, { ...section, subtitle: next });
+            }}
+            className=""
+            style={{
+              maxWidth: 760,
+              margin: "0 auto",
+              textAlign: "center",
+              color: "var(--color-text-secondary)",
+              fontSize: "var(--font-size-lg)",
+              lineHeight: 1.7,
+              marginBottom: "var(--spacing-3xl)",
+            }}
+          />
+        ) : null}
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "var(--spacing-2xl)" }}>
           {filled.map((m, idx) => (
@@ -120,7 +129,7 @@ export default function TeamSection({ section, sectionIndex }: TeamSectionProps)
                       border: "1px solid var(--color-border)",
                     }}
                   >
-                    {initials(m.name)}
+                    {initials(m.name || "Team Member")}
                   </div>
                 )}
                 <div>

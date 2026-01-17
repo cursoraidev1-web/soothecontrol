@@ -47,9 +47,6 @@ export default function T6Services({
       <div className="t6-container">
         <span className="t6-eyebrow">Services</span>
         <h2 className="t6-title">What we build</h2>
-        <p className="t6-sub">
-          A modern, fast site that looks premium on day one—and stays easy to update.
-        </p>
 
         <div className="t6-bento" style={{ marginTop: 18 }}>
           {filled.map((s, idx) => (

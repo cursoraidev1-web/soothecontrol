@@ -39,7 +39,6 @@ export default function T3FAQ({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t3-section-sub">The questions people actually ask—answered clearly.</p>
 
         <div className="t3-card" style={{ marginTop: 16, padding: 10, background: "rgba(255,255,255,0.75)" }}>
           {items.map((it, idx) => {

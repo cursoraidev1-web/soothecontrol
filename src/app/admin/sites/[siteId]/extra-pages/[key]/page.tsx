@@ -46,12 +46,8 @@ const sectionOptions: Array<Section["type"]> = [
 
 export default function ExtraPageEditor() {
   const params = useParams();
-  const siteId = params?.siteId as string;
-  const key = params?.key as string;
-
-  if (!siteId || !key) {
-    return <div>Loading...</div>;
-  }
+  const siteId = typeof params?.siteId === "string" ? params.siteId : "";
+  const key = typeof params?.key === "string" ? params.key : "";
 
   const [pageRow, setPageRow] = useState<ExtraPageRow | null>(null);
   const [pageDraft, setPageDraft] = useState<PageData | null>(null);
@@ -70,6 +66,7 @@ export default function ExtraPageEditor() {
   const [unpublishSuccess, setUnpublishSuccess] = useState(false);
 
   useEffect(() => {
+    if (!siteId || !key) return;
     let isMounted = true;
 
     async function load() {
@@ -118,6 +115,10 @@ export default function ExtraPageEditor() {
     const valid = validatePageData(pageDraft);
     return valid.ok;
   }, [pageDraft]);
+
+  if (!siteId || !key) {
+    return <div>Loading...</div>;
+  }
 
   function updateSection(index: number, next: Section) {
     setPageDraft((prev) => {

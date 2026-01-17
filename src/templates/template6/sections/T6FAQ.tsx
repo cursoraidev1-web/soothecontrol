@@ -19,9 +19,7 @@ function loremQuestion() {
 
 function loremAnswer() {
   const as = [
-    "Yes—everything is responsive, clean, and designed to convert.",
-    "You can edit text directly in preview mode, then save your draft.",
-    "Custom domains and subdomains are supported with automatic routing.",
+    getLoremShortText(),
     getLoremShortText(),
     getLoremShortText(),
   ];
@@ -110,8 +108,8 @@ export default function T6FAQ({
                       height: 36,
                       borderRadius: 999,
                       flexShrink: 0,
-                      background: "rgba(34,197,94,0.10)",
-                      borderColor: "rgba(34,197,94,0.22)",
+                      background: "rgb(var(--t6-accent-rgb) / 0.10)",
+                      borderColor: "rgb(var(--t6-accent-rgb) / 0.22)",
                       color: "var(--t6-accent)",
                     }}
                   >

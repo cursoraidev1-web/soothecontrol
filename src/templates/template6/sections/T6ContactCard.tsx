@@ -36,9 +36,6 @@ export default function T6ContactCard({
             <h2 className="t6-title" style={{ marginTop: 12 }}>
               Let’s talk
             </h2>
-            <p className="t6-sub">
-              Tell us what you need. We’ll respond quickly with a clear plan and timeline.
-            </p>
 
             <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
               {profile.address ? (

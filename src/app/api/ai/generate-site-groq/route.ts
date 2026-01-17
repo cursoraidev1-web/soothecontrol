@@ -2,6 +2,18 @@ import { NextResponse } from "next/server";
 
 import { validatePageData } from "@/lib/pageSchema";
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+type GroqChatCompletion = {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+};
+
 function extractJson(text: string) {
   const cleaned = text
     .trim()
@@ -146,22 +158,32 @@ ${brief}
         );
       }
 
-      const data = (await res.json()) as any;
+      const data = (await res.json()) as unknown as GroqChatCompletion;
       const text = data?.choices?.[0]?.message?.content ?? "";
 
       if (!text) {
         return NextResponse.json({ error: "Empty response from Groq." }, { status: 422 });
       }
 
-      const parsed = extractJson(text) as any;
+      const parsed = extractJson(text);
+      if (!isRecord(parsed)) {
+        return NextResponse.json({ error: "Invalid AI output: expected JSON object." }, { status: 422 });
+      }
 
-      const pages = parsed?.pages;
-      if (!pages?.home || !pages?.about || !pages?.contact) {
+      const pages = (parsed as Record<string, unknown>).pages;
+      if (!isRecord(pages)) {
+        return NextResponse.json({ error: "Invalid AI output: missing pages." }, { status: 422 });
+      }
+
+      const home = (pages as Record<string, unknown>).home;
+      const about = (pages as Record<string, unknown>).about;
+      const contact = (pages as Record<string, unknown>).contact;
+      if (!home || !about || !contact) {
         return NextResponse.json({ error: "Invalid AI output: missing pages." }, { status: 422 });
       }
 
       for (const k of ["home", "about", "contact"] as const) {
-        const v = validatePageData(pages[k]);
+        const v = validatePageData((pages as Record<string, unknown>)[k]);
         if (!v.ok) {
           return NextResponse.json(
             { error: `Invalid AI output for page '${k}': ${v.error ?? "Invalid."}` },
@@ -172,11 +194,11 @@ ${brief}
 
       return NextResponse.json(
         {
-          profile: parsed.profile ?? null,
+          profile: (parsed as Record<string, unknown>).profile ?? null,
           pages: {
-            home: pages.home,
-            about: pages.about,
-            contact: pages.contact,
+            home,
+            about,
+            contact,
           },
         },
         { status: 200 },

@@ -25,19 +25,3 @@ export function buildWhatsAppLink(whatsapp: string | null | undefined): string {
   const cleaned = whatsapp.replace(/\D/g, "");
   return `https://wa.me/${cleaned}`;
 }
-
-export function getDefaultStats() {
-  return [
-    { label: "Years Experience", value: "10+" },
-    { label: "Happy Clients", value: "500+" },
-    { label: "Projects Completed", value: "1000+" },
-  ];
-}
-
-export function getDefaultTrustHighlights() {
-  return [
-    { text: "Fast Service", icon: "⚡" },
-    { text: "Trusted", icon: "✓" },
-    { text: "Local Experts", icon: "📍" },
-  ];
-}

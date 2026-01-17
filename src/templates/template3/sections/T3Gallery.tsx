@@ -37,7 +37,6 @@ export default function T3Gallery({
             editor.updateSection(sectionIndex, { ...section, title: next });
           }}
         />
-        <p className="t3-section-sub">Real work beats words. Show outcomes and details.</p>
 
         <div
           style={{

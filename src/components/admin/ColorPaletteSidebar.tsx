@@ -49,12 +49,39 @@ export default function ColorPaletteSidebar({
   const [isSaving, setIsSaving] = useState(false);
   const [saveNote, setSaveNote] = useState<string | null>(null);
 
+  const setRgbVarFromHex = (root: HTMLElement, cssVar: string, hex: string) => {
+    const m = hex.trim().replace("#", "");
+    if (!/^[0-9a-fA-F]{6}$/.test(m)) return;
+    const r = parseInt(m.slice(0, 2), 16);
+    const g = parseInt(m.slice(2, 4), 16);
+    const b = parseInt(m.slice(4, 6), 16);
+    root.style.setProperty(cssVar, `${r} ${g} ${b}`);
+  };
+
   const applyColors = (newColors: ThemeSemanticColors) => {
     // Apply to preview template root if available (fixes "not working" cases),
     // else fall back to :root.
     const target = getTargetRoot?.() ?? null;
     const root = target ?? document.documentElement;
     applyThemeColors(root, templateKey, newColors);
+
+    // Also set derived RGB vars so template gradients/glows follow the palette/brand colors.
+    if (templateKey === "t3") {
+      if (typeof newColors.accent === "string") setRgbVarFromHex(root, "--t3-accent-rgb", newColors.accent);
+      if (typeof newColors.accent2 === "string") setRgbVarFromHex(root, "--t3-accent2-rgb", newColors.accent2);
+    }
+    if (templateKey === "t4") {
+      if (typeof newColors.accent === "string") setRgbVarFromHex(root, "--t4-accent-rgb", newColors.accent);
+      if (typeof newColors.accent2 === "string") setRgbVarFromHex(root, "--t4-accent2-rgb", newColors.accent2);
+    }
+    if (templateKey === "t5") {
+      if (typeof newColors.accent === "string") setRgbVarFromHex(root, "--t5-accent-rgb", newColors.accent);
+      if (typeof newColors.accent2 === "string") setRgbVarFromHex(root, "--t5-accent2-rgb", newColors.accent2);
+    }
+    if (templateKey === "t6") {
+      if (typeof newColors.accent === "string") setRgbVarFromHex(root, "--t6-accent-rgb", newColors.accent);
+      if (typeof newColors.accent2 === "string") setRgbVarFromHex(root, "--t6-accent2-rgb", newColors.accent2);
+    }
   };
 
   useEffect(() => {

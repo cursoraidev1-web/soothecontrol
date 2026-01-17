@@ -62,8 +62,8 @@ export default function T5Testimonials({
                     width: 44,
                     height: 44,
                     borderRadius: 16,
-                    background: "rgba(37,99,235,0.10)",
-                    borderColor: "rgba(37,99,235,0.20)",
+                    background: "rgb(var(--t5-accent-rgb) / 0.10)",
+                    borderColor: "rgb(var(--t5-accent-rgb) / 0.20)",
                     color: "var(--t5-accent)",
                   }}
                 >

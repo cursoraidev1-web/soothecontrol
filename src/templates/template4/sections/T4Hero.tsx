@@ -82,7 +82,6 @@ export default function T4Hero({
             </div>
 
           </div>
-
         </div>
       </div>
     </section>

@@ -17,10 +17,10 @@ export default function T4Gallery({
     section.images && section.images.length > 0
       ? section.images
       : [
-          { url: "", alt: "A polished detail shot" },
-          { url: "", alt: "Clean spacing and hierarchy" },
-          { url: "", alt: "Modern bento layout" },
-          { url: "", alt: "Elegant cards and type" },
+          { url: "", alt: "" },
+          { url: "", alt: "" },
+          { url: "", alt: "" },
+          { url: "", alt: "" },
         ];
 
   return (
