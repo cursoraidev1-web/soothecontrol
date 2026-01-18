@@ -191,6 +191,37 @@ function applyBrandColors(
   }
 }
 
+function applyThemePalette(root: HTMLElement, templateKey: string, colors: ThemeSemanticColors) {
+  applyThemeColors(root, templateKey, colors);
+
+  // Keep derived RGB vars in sync for gradients/glows.
+  const setRgb = (cssVar: string, hex: string) => {
+    const m = hex.trim().replace("#", "");
+    if (!/^[0-9a-fA-F]{6}$/.test(m)) return;
+    const r = parseInt(m.slice(0, 2), 16);
+    const g = parseInt(m.slice(2, 4), 16);
+    const b = parseInt(m.slice(4, 6), 16);
+    root.style.setProperty(cssVar, `${r} ${g} ${b}`);
+  };
+
+  if (templateKey === "t3") {
+    if (typeof colors.accent === "string") setRgb("--t3-accent-rgb", colors.accent);
+    if (typeof colors.accent2 === "string") setRgb("--t3-accent2-rgb", colors.accent2);
+  }
+  if (templateKey === "t4") {
+    if (typeof colors.accent === "string") setRgb("--t4-accent-rgb", colors.accent);
+    if (typeof colors.accent2 === "string") setRgb("--t4-accent2-rgb", colors.accent2);
+  }
+  if (templateKey === "t5") {
+    if (typeof colors.accent === "string") setRgb("--t5-accent-rgb", colors.accent);
+    if (typeof colors.accent2 === "string") setRgb("--t5-accent2-rgb", colors.accent2);
+  }
+  if (templateKey === "t6") {
+    if (typeof colors.accent === "string") setRgb("--t6-accent-rgb", colors.accent);
+    if (typeof colors.accent2 === "string") setRgb("--t6-accent2-rgb", colors.accent2);
+  }
+}
+
 function resetBrandColors(root: HTMLElement, templateKey: string) {
   if (templateKey === "t1") {
     root.style.removeProperty("--color-primary");
@@ -328,10 +359,7 @@ export default function SitePreviewPage() {
           // ignore
         }
 
-        setTimeout(() => {
-          const root = getPreviewRoot();
-          if (root) applyThemeColors(root, tk, next);
-        }, 100);
+        // Actual DOM application is handled by the unified "apply" effect below.
       } catch {
         // ignore
       }
@@ -365,15 +393,6 @@ export default function SitePreviewPage() {
           const colors = data.brand_colors as ExtractedLogoColors;
           if (colors.dominant && colors.accent) {
             setBrandColors(colors);
-
-            // Apply colors after a short delay to ensure DOM is ready
-            setTimeout(() => {
-              const root = getPreviewRoot();
-
-              if (root) {
-                applyBrandColors(root, templateKey, colors);
-              }
-            }, 100);
           }
         }
       } catch {
@@ -383,6 +402,20 @@ export default function SitePreviewPage() {
 
     loadBrandColors();
   }, [siteData, siteId]);
+
+  // Apply theme in a deterministic order on reload:
+  // 1) brand colors (from logo)
+  // 2) palette overrides (saved theme colors)
+  useEffect(() => {
+    const tk = siteData?.site?.template_key;
+    if (!siteData || !tk) return;
+    const root = getPreviewRoot();
+    if (!root) return;
+
+    if (brandColors) applyBrandColors(root, tk, brandColors);
+    if (initialPaletteColors) applyThemePalette(root, tk, initialPaletteColors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [siteData, brandColors, initialPaletteColors]);
 
   useEffect(() => {
     if (!siteId) {

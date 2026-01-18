@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { toCssVarMap } from "@/lib/templateTheme";
 
 type BrandColors = {
   dominant: string;
@@ -7,6 +8,13 @@ type BrandColors = {
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === "object" && !Array.isArray(v);
+}
+
+function normalizeCssColor(input: unknown): string | null {
+  if (typeof input !== "string") return null;
+  const s = input.trim();
+  if (!s) return null;
+  return s;
 }
 
 function normalizeHexColor(input: unknown): string | null {
@@ -39,7 +47,8 @@ function getThemeOverride(rawThemeColors: unknown, templateKey: string): Record<
 
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(perTemplate)) {
-    const c = normalizeHexColor(v);
+    // Allow any CSS color strings (hex/rgb/rgba/hsl/var(...)).
+    const c = normalizeCssColor(v);
     if (c) out[k] = c;
   }
   return Object.keys(out).length > 0 ? out : null;
@@ -100,57 +109,43 @@ export function buildTemplateThemeStyle(
   }
 
   // Apply overrides (if any).
-  // We only support overriding known template vars; ignore unknown keys.
+  // Apply via the template variable map so we can support full palettes.
   if (overrides) {
-    if (templateKey === "t1") {
-      if (overrides.primary) style["--color-primary"] = overrides.primary;
-      if (overrides.accent) style["--color-accent"] = overrides.accent;
-      if (style["--color-primary"] && style["--color-accent"]) {
-        style["--color-bg-gradient"] = `linear-gradient(135deg, ${style["--color-primary"]} 0%, ${style["--color-accent"]} 100%)`;
-      }
-    }
+    const cssVars = toCssVarMap(templateKey, overrides);
+    for (const [k, v] of Object.entries(cssVars)) style[k] = v;
 
+    // Keep derived rgb vars in sync when accents are hex.
     if (templateKey === "t3") {
-      if (overrides.accent) {
-        style["--t3-accent"] = overrides.accent;
-        style["--t3-accent-rgb"] = hexToRgbTriplet(overrides.accent);
-      }
-      if (overrides.accent2) {
-        style["--t3-accent2"] = overrides.accent2;
-        style["--t3-accent2-rgb"] = hexToRgbTriplet(overrides.accent2);
-      }
+      const a = normalizeHexColor(overrides.accent);
+      const b = normalizeHexColor(overrides.accent2);
+      if (a) style["--t3-accent-rgb"] = hexToRgbTriplet(a);
+      if (b) style["--t3-accent2-rgb"] = hexToRgbTriplet(b);
     }
-
     if (templateKey === "t4") {
-      if (overrides.accent) {
-        style["--t4-accent"] = overrides.accent;
-        style["--t4-accent-rgb"] = hexToRgbTriplet(overrides.accent);
-      }
-      if (overrides.accent2) {
-        style["--t4-accent2"] = overrides.accent2;
-        style["--t4-accent2-rgb"] = hexToRgbTriplet(overrides.accent2);
-      }
+      const a = normalizeHexColor(overrides.accent);
+      const b = normalizeHexColor(overrides.accent2);
+      if (a) style["--t4-accent-rgb"] = hexToRgbTriplet(a);
+      if (b) style["--t4-accent2-rgb"] = hexToRgbTriplet(b);
     }
-
     if (templateKey === "t5") {
-      if (overrides.accent) {
-        style["--t5-accent"] = overrides.accent;
-        style["--t5-accent-rgb"] = hexToRgbTriplet(overrides.accent);
-      }
-      if (overrides.accent2) {
-        style["--t5-accent2"] = overrides.accent2;
-        style["--t5-accent2-rgb"] = hexToRgbTriplet(overrides.accent2);
-      }
+      const a = normalizeHexColor(overrides.accent);
+      const b = normalizeHexColor(overrides.accent2);
+      if (a) style["--t5-accent-rgb"] = hexToRgbTriplet(a);
+      if (b) style["--t5-accent2-rgb"] = hexToRgbTriplet(b);
+    }
+    if (templateKey === "t6") {
+      const a = normalizeHexColor(overrides.accent);
+      const b = normalizeHexColor(overrides.accent2);
+      if (a) style["--t6-accent-rgb"] = hexToRgbTriplet(a);
+      if (b) style["--t6-accent2-rgb"] = hexToRgbTriplet(b);
     }
 
-    if (templateKey === "t6") {
-      if (overrides.accent) {
-        style["--t6-accent"] = overrides.accent;
-        style["--t6-accent-rgb"] = hexToRgbTriplet(overrides.accent);
-      }
-      if (overrides.accent2) {
-        style["--t6-accent2"] = overrides.accent2;
-        style["--t6-accent2-rgb"] = hexToRgbTriplet(overrides.accent2);
+    // Template1 gradient needs to stay in sync if palette overrides are applied.
+    if (templateKey === "t1") {
+      const primary = style["--color-primary"];
+      const accent = style["--color-accent"];
+      if (primary && accent) {
+        style["--color-bg-gradient"] = `linear-gradient(135deg, ${primary} 0%, ${accent} 100%)`;
       }
     }
   }
