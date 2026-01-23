@@ -63,7 +63,7 @@
   height: 34px;
   border-radius: 12px;
   background: linear-gradient(135deg, var(--t3-accent), var(--t3-accent2));
-  box-shadow: var(--t3-shadow-sm);
+  /* box-shadow: var(--t3-shadow-sm); */
 }
 
 .t3-brand-name {
@@ -102,7 +102,7 @@
   text-decoration: none;
   font-weight: 700;
   font-size: 14px;
-  box-shadow: var(--t3-shadow-sm);
+  /* box-shadow: var(--t3-shadow-sm); */
 }
 
 .t3-cta:hover {
@@ -124,7 +124,7 @@
   border: 1px solid var(--t3-border);
   background: rgba(255, 255, 255, 0.75);
   cursor: pointer;
-  box-shadow: var(--t3-shadow-sm);
+  /* box-shadow: var(--t3-shadow-sm); */
 }
 
 .t3-menu-ico {
@@ -172,7 +172,7 @@
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--t3-border);
-  box-shadow: var(--t3-shadow);
+  /* box-shadow: var(--t3-shadow); */
   padding: 14px;
 }
 .t3-mobile-top {
@@ -285,7 +285,7 @@
   background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--t3-border);
   border-radius: var(--t3-radius);
-  box-shadow: var(--t3-shadow);
+  /* box-shadow: var(--t3-shadow); */
 }
 
 .t3-hero-art {
@@ -441,7 +441,7 @@
 }
 
 .t3-input:focus {
-  box-shadow: 0 0 0 4px var(--t3-ring);
+  /* box-shadow: 0 0 0 4px var(--t3-ring); */
   border-color: rgb(var(--t3-accent-rgb) / 0.35);
 }
 
@@ -461,7 +461,7 @@
   border-radius: var(--t3-radius);
   overflow: hidden;
   border: 1px solid var(--t3-border);
-  box-shadow: var(--t3-shadow-sm);
+  /* box-shadow: var(--t3-shadow-sm); */
 }
 
 .t3-map iframe {

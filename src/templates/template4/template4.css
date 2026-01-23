@@ -66,7 +66,7 @@
   height: 36px;
   border-radius: 14px;
   background: linear-gradient(135deg, var(--t4-accent), var(--t4-accent2));
-  box-shadow: var(--t4-shadow-sm);
+  /* box-shadow: var(--t4-shadow-sm); */
 }
 
 .t4-name {
@@ -104,7 +104,7 @@
   color: rgba(255, 255, 255, 0.96);
   font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 16px 40px rgb(var(--t4-accent-rgb) / 0.22);
+  /* box-shadow: 0 16px 40px rgb(var(--t4-accent-rgb) / 0.22); */
 }
 
 .t4-cta:hover {
@@ -174,7 +174,7 @@
   border-radius: 18px;
   background: rgba(11, 15, 25, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: var(--t4-shadow);
+  /* box-shadow: var(--t4-shadow); */
   padding: 14px;
   backdrop-filter: blur(16px);
 }
@@ -296,7 +296,7 @@
   border-radius: var(--t4-radius);
   border: 1px solid var(--t4-border);
   background: var(--t4-surface);
-  box-shadow: var(--t4-shadow);
+  /* box-shadow: var(--t4-shadow); */
 }
 
 .t4-bento {
@@ -364,7 +364,7 @@
 
 .t4-input:focus {
   border-color: rgba(124, 58, 237, 0.55);
-  box-shadow: 0 0 0 4px var(--t4-ring);
+  /* box-shadow: 0 0 0 4px var(--t4-ring); */
 }
 
 .t4-footer {

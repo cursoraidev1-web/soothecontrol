@@ -64,7 +64,7 @@
   height: 36px;
   border-radius: 14px;
   background: linear-gradient(135deg, var(--t5-accent), var(--t5-accent2));
-  box-shadow: var(--t5-shadow-sm);
+  /* box-shadow: var(--t5-shadow-sm); */
 }
 
 .t5-name {
@@ -102,7 +102,7 @@
   color: white;
   font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 16px 36px rgb(var(--t5-accent-rgb) / 0.18);
+  /* box-shadow: 0 16px 36px rgb(var(--t5-accent-rgb) / 0.18); */
 }
 
 .t5-cta:hover {
@@ -124,7 +124,7 @@
   border: 1px solid var(--t5-border);
   background: rgba(255, 255, 255, 0.75);
   cursor: pointer;
-  box-shadow: var(--t5-shadow-sm);
+  /* box-shadow: var(--t5-shadow-sm); */
 }
 
 .t5-menu-ico {
@@ -172,7 +172,7 @@
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--t5-border);
-  box-shadow: var(--t5-shadow);
+  /* box-shadow: var(--t5-shadow); */
   padding: 14px;
 }
 .t5-mobile-top {
@@ -292,7 +292,7 @@
   border-radius: var(--t5-radius);
   border: 1px solid var(--t5-border);
   background: var(--t5-surface);
-  box-shadow: var(--t5-shadow);
+  /* box-shadow: var(--t5-shadow); */
 }
 
 .t5-bento {
@@ -360,7 +360,7 @@
 
 .t5-input:focus {
   border-color: rgba(37, 99, 235, 0.55);
-  box-shadow: 0 0 0 4px var(--t5-ring);
+  /* box-shadow: 0 0 0 4px var(--t5-ring); */
 }
 
 .t5-footer {
