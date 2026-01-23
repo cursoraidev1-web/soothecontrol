@@ -43,7 +43,7 @@ img, svg, video, canvas, audio, iframe, embed, object{
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(7, 10, 18, 0.58);
+  background: var(--t6-bg);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.10);
@@ -490,7 +490,7 @@ img, svg, video, canvas, audio, iframe, embed, object{
 .t6-footer {
   padding: 56px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(7, 10, 18, 0.55);
+  background: var(--t6-bg);
 }
 
 .t6-footer-grid {
