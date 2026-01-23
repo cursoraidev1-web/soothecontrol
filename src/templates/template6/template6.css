@@ -18,6 +18,10 @@
   --t6-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
+img, svg, video, canvas, audio, iframe, embed, object{
+  color: var(--t6-muted);
+}
+
 .template6 {
   min-height: 100vh;
   background:
