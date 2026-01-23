@@ -39,7 +39,7 @@
   z-index: 50;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  background: rgba(251, 250, 247, 0.75);
+  background: var(--t3-bg);
   border-bottom: 1px solid var(--t3-border);
 }
 
@@ -396,7 +396,7 @@
 .t3-footer {
   padding: 56px 0;
   border-top: 1px solid var(--t3-border);
-  background: rgba(251, 250, 247, 0.65);
+  background: var(--t3-bg);
 }
 
 .t3-footer-grid {

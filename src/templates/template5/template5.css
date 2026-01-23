@@ -38,7 +38,7 @@
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(255, 255, 255, 0.74);
+  background: var(--t5-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--t5-border);
@@ -366,7 +366,7 @@
 .t5-footer {
   padding: 56px 0;
   border-top: 1px solid var(--t5-border);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--t5-bg);
 }
 
 .t5-footer-grid {

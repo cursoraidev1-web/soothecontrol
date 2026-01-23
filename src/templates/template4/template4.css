@@ -40,7 +40,7 @@
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(11, 15, 25, 0.55);
+  background: var(--t4-bg);
   backdrop-filter: blur(16px) saturate(130%);
   -webkit-backdrop-filter: blur(16px) saturate(130%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.10);
@@ -370,7 +370,7 @@
 .t4-footer {
   padding: 56px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(11, 15, 25, 0.55);
+  background: var(--t4-bg);
 }
 
 .t4-footer-grid {
